@@ -1,0 +1,57 @@
+{{set . "title" "Test Design"}}
+{{template "header.html" .}}
+<div id="page-wrapper">
+  <form method="POST" action="{{url "TestDesign.UpdateSuite" .project .id}}">
+    <div class="row">
+      {{with $field := field "suite.ID" .}}
+      <input type="hidden" name="{{$field.Name}}" value="{{$field.Value}}">
+      {{end}}
+      <div class="col-lg-12" style="margin-top:20px">
+        <div class="row vertical-align bottom10">
+          <div class="col-lg-1"><strong>Title</strong></div>
+          <div class="col-lg-8">
+            {{with $field := field "suite.Title" .}}
+            <input class="form-control" name="{{$field.Name}}" value="{{if $field.Flash}}{{$field.Flash}}{{else}}{{$field.Value}}{{end}}">
+            {{end}}
+          </div>
+
+        </div>
+        <div class="row vertical-align bottom10">
+          <div class="col-lg-1"><strong>Prefix</strong></div>
+          <div class="col-lg-3">
+            {{with $field := field "suite.Prefix" .}}
+            <input class="form-control" name="{{$field.Name}}" value="{{if $field.Flash}}{{$field.Flash}}{{else}}{{$field.Value}}{{end}}">
+            {{end}}
+          </div>
+        </div>
+        <div class="row form-group bottom10 left5">
+          <label>{{msg . "description"}}</label>
+          {{with $field := field "suite.Description" .}}
+          <textarea class="form-control" rows="4" name="{{$field.Name}}">{{if $field.Flash}}{{$field.Flash}}{{else}}{{$field.Value}}{{end}}</textarea>
+          {{end}}
+        </div>
+        <div class="row vertical-align bottom10">
+          <div class="col-lg-1"><strong>Status</strong></div>
+          <div class="col-lg-3">
+            {{with $field := field "suite.Status" .}}
+            <select class="form-control" name="{{$field.Name}}">
+              {{option $field "1" "Draft"}}
+              {{option $field "2" "In Progress"}}
+              {{option $field "3" "In Review"}}
+              {{option $field "4" "Release"}}
+            </select>
+            {{end}}
+          </div>
+        </div>
+        <div class="row">
+          <button type="submit" class="btn btn-primary">Update</button>
+        </div>
+    </form>
+        <!-- end of row -->
+      </div>
+    <!-- /#page-wrapper -->
+  </div>
+  <!-- /#wrapper -->  
+
+
+  {{template "footer.html" .}}

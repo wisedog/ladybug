@@ -1,0 +1,236 @@
+{{set . "title" "Test Plan"}}
+{{set . "showsidebar" "true"}}
+{{append . "moreStyle" "jstree/themes/default/style.min.css"}}
+{{template "header.html" .}}
+<div id="page-wrapper">
+  <form id="plan_form" method="POST" action="{{url "TestPlans.Save" .project }}">
+    {{with $field := field "execs" .}}
+    <input type="hidden" id="plan_exec" name="{{$field.Name}}" value="{{$field.Value}}">
+    {{end}}
+    <div class="row vertical-align padtop10 bottom10">
+      <div class="col-lg-1">
+        <strong>{{msg . "title"}}</strong>
+      </div>
+      {{with $field := field "testplan.Title" .}}
+      <div class="col-lg-8 {{if $field.Error}}has-error{{end}}">
+        <input class="form-control" name="{{$field.Name}}" value="{{$field.Flash}}">
+      </div>
+      {{end}}
+    </div>
+    <div class="row vertical-align bottom10 padtop10">
+      <label class="col-lg-1">Tester</label>
+      <div class="col-lg-2">
+        <select class="form-control" name="testplan.ExecutorId">
+          {{range .prj.Users}}
+          <option value="{{.ID}}">{{.Name}}</option>
+          {{end}}
+        </select>
+      </div>
+
+      <div class="col-lg-1">
+        <label >Build</label>
+      </div>
+      <div class="col-lg-2">
+        <select class="form-control" name="testplan.TargetBuildId">
+          {{range .builds}}
+          <option value="{{.ID}}">{{.Name}}</option>
+          {{end}}
+        </select>
+      </div>
+    </div> <!-- .row -->
+
+
+    <div class="row form-group bottom10 left5">
+      <label>{{msg . "description"}}</label>
+      {{with $field := field "testplan.Description" .}}
+      <textarea class="form-control" rows="4" name="{{$field.Name}}">{{$field.Flash}}</textarea>
+      {{end}}
+    </div><!-- end of row -->
+
+    <div class="row padleft15">
+      <label>Test cases to execute</label>
+    </div>
+     <div class="row">
+       <div class="col-lg-3" style="margin-left:-10px;">
+         <div id="testtree" class="top10" style="overflow:auto; border:1px solid silver; min-height:300px;">
+         </div>
+       </div>
+       <div class="col-lg-9 top10" style="margin-left:-10px;">
+         <div id="tc_list">
+           Please select a section to show test cases.
+         </div>
+       </div>
+     </div><!-- .row -->
+
+     <div class="row top17">
+       <div class="col-lg-12" style="margin-left:-10px;">
+         <div class="panel panel-default">
+           <div class="panel-heading">
+             <label>
+               Selected test case
+             </label>
+           </div> <!-- .panel-heading -->
+           <div class="panel-body">
+             <div class='table-responsive'>
+               <table class='table table-striped'>
+                 <thead><tr><th>#</th><th>ID</th><th>Title</th><th>Priority</th><th>Category</th></tr></thead>
+                 <tbody id='selected-target'></tbody>
+               </table>
+             </div>
+           </div><!-- .panel-body -->
+         </div> <!-- .panel-default -->       
+       </div>  <!-- .col-lg-12 -->
+     </div><!-- .row -->
+
+
+     <div class="row">
+      <button id="savebtn" class="btn btn-primary">Create</button>
+      <button id="temp" class="btn btn-secondary">Temp</button>
+    </div> <!-- .row -->
+  </form>
+  <!-- /#page-wrapper -->
+</div>
+<!-- /#wrapper -->
+
+{{template "footer.html" .}}
+
+<script src="/public/jstree/jstree.min.js"></script>
+
+<script>
+// selected TC ID
+var selected_item = [];
+
+$(document).ready(function() {
+    $('#testtree').jstree({
+      "core" : {
+      "multiple": true,
+      "animation" : 0,
+      "check_callback" : true,
+      "themes" : { "stripes" : true },
+      'data' : function(obj, cb){
+        cb.call(this, JSON.parse("{{.treedata}}"));
+      }// end of data
+      }, // end of core
+      "types" : {
+      "#" : {
+      "max_children" : 100, 
+      "max_depth" : 3, 
+      "valid_children" : ["root"]},
+      "root" : { "valid_children" : ["default"] },
+      "default" : {"valid_children" : ["default","file"] },
+      }, // end of type
+      "plugins" : ["types"]
+    }); // end of initialization of jstree
+
+    //handle click(select) action on node
+    $("#testtree").bind("select_node.jstree", function(event, data){
+        node_id = data.node.id;
+        parent_id = data.node.parent;
+        var level = data.node.parents.length;
+        console.log("level : ", level);
+        console.log("parent_id : ", parent_id);
+
+        // run AJAX and render
+        $.getJSON('/project/{{.project}}/section/'+ node_id, function(data){
+          $('#tc_list').html('');
+          var items = [];
+
+          if(data.length == 0){
+            items.push("<div>No test cases in the section</div>");
+            $('#tc_list').html(items.join(""));
+          }
+          else{
+            items.push("<button type='button' class='btn btn-primary btn-xs right10' id='move-selected-btn'>" + 
+            "<i class='fa fa-check right7'></i>Move to Selected</button>");
+            items.push("<div class='table-responsive'><table class='table table-striped'>");
+            items.push("<thead><tr><th><input type='checkbox' id='select-all'></input></th><th>#</th><th>Title</th><th>Priority</th><th>Category</th></tr></thead>");
+            items.push("<tbody>");
+            $.each(data, function(key, val){
+              var alter = "";
+
+              // Render span element when already selected testcase is met
+              if(selected_item.indexOf('cb'+ val.ID) == -1){
+                alter = "<input type='checkbox' class='tc-cb' id='cb" + val.ID + "'></input>";
+              }
+              else{
+                alter = "<span class='fa fa-check'></span>";
+              }
+                items.push("<tr>"+ 
+                  "<td>" + alter + "</td>" + 
+                  "<td>"+ val.ID + "</td>" + 
+                  "<td><a href='/project/{{.project}}/case/"+ val.ID + "'>" + 
+                     val.Title + "</a></td>" + 
+                  "<td>" + val.Important + "</td>" +
+                  "<td>" + val.Category + "</td>" +
+                  "</tr>");
+            $('#tc_list').html(items.join(""));
+            });
+            items.push("</tbody></table></div>");
+          }
+        }); // end of getJSON
+    }); // end of testtree click event binding
+
+
+    $(document).on('change', '#select-all', function(){
+        if($('#select-all').is(':checked')){
+            $('.tc-cb').prop('checked', true);
+        }
+        else{
+            $('.tc-cb').prop('checked', false);
+        }
+        });
+
+    $(document).on('click', '#move-selected-btn', function(){
+        $('#select-all').prop('checked', false);
+        add_to_selected();
+        });
+    $(document).on('change', '.selected-cb', function(){
+        remove_selected($(this));
+        });
+}); // end of $(document).ready
+
+
+function add_to_selected(){
+  $('.tc-cb').each(function(index){
+      if($(this).is(':checked')){
+      // move '.tc-cb' to selected
+      // $(this).closest('tr').detach().appendTo('#selected-target');
+      // To lock item is better than moving selected item to selected list I think
+      var id = $(this).attr('id');
+      $(this).removeClass('tc-cb').addClass('selected-cb');
+      $(this).closest('tr').clone().appendTo('#selected-target');
+      $(this).replaceWith("<span class='fa fa-check' id='"+ id + "-s'" + "></span>");
+
+      $('.selected-cb').prop('checked', false);
+
+      // unckecked checkbox
+      selected_item.push(id);
+      }
+  });
+  console.log("ll : ", selected_item);
+}
+
+function remove_selected(v){
+  if($(v).is(':checked')){
+    var id = $(v).attr('id');
+    var alter = "<input type='checkbox' class='tc-cb' id='" + id + "'></input>";
+    $(v).closest('tr').remove();
+    $("#" + id + "-s").replaceWith(alter);
+    console.log("checked!", $(v).attr('id'));
+  }
+  else{
+    console.log("unchecked!");
+  }
+}
+
+$('#savebtn').click(function(){
+    var items = selected_item.toString();
+    $('#plan_exec').attr('value', items);
+    $('#plan_form').submit();
+    });
+
+$('#testtree').bind("loaded.jstree", function(event, data) {
+    $(this).jstree("open_all");
+    });
+
+</script>

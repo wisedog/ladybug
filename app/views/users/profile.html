@@ -1,0 +1,41 @@
+{{set . "title" "Profile"}}
+{{template "header.html" .}}
+<div id="page-wrapper">
+  <div class="row bottom17">
+  </div>
+  <div class="row bottom17">
+    <div class="col-lg-12">
+      <div class="well">
+        <h1>{{.usr.Name}}</h1>
+        <span>Member since {{.usr.CreatedAt.Format "2006-01-01"}}</span>
+      </div>
+    </div>
+  </div>
+  <!-- /.row -->
+  <div class="row bottom10 vertical-align">
+    <div class="col-lg-1" style="top:50%;"> 
+      <span class="glyphicon glyphicon-map-marker font25"></span>
+    </div>
+    <div class="col-lg-4">
+      <div>
+        <span class="font20">I.Seouled.U {{.usr.Location}}</span>
+      </div>
+    </div>
+  </div>
+  <!-- end of row -->
+  <div class="row bottom30 vertical-align">
+    <div class="col-lg-1"> 
+      <span class="glyphicon glyphicon-comment font25"></span>
+    </div>
+    <div class="col-lg-8">
+      <span style="word-wrap:break-word;" class="font17 ">adslkfslkdflskflskdfjliwjliefjwlkdlwifjwleijflwdklwifjelwdwlfiewleifjwliefjwkdlwiejlwiefjlwfjdklwifjewlijfkdlwfijewklfiwjfkwdlfiwejfliwjefkdlwijdfwliefjliwefjlwekdwlfiej</span>
+    </div>
+  </div>
+  <!-- end of row -->
+</div>
+<!-- /#page-wrapper -->
+</div>
+<!-- /#wrapper -->  
+
+
+{{template "footer.html" .}}

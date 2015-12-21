@@ -1,0 +1,21 @@
+{{set . "title" "Test Design"}}
+{{template "header.html" .}}
+<div id="page-wrapper" style="margin-left:10px;">
+  <div class="row bottom17 padtop20">
+    <div class="col-lg-12">
+      <div class="well">
+        <h1>Hello! {{.user.Name}}</h1>
+        <span>Your last login is at {{.user.LastLoginAt.Format "2006-01-01"}}</span>
+      </div>
+    </div>
+  </div> <!-- .row -->
+  <div>
+    <span>Your job : 20</span>
+    <span>Activity timeline</span>
+  </div>
+</div>
+<!-- /#page-wrapper -->
+</div>
+<!-- /#wrapper -->
+
+{{template "footer.html" .}}

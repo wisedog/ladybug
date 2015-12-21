@@ -1,0 +1,76 @@
+{{set . "title" "Test Design"}}
+{{set . "showsidebar" "true"}}
+
+{{template "header.html" .}}
+<div id="page-wrapper">
+  <div class="row vertical-align padtop10 bottom10">
+    <a href='{{url "TestPlans.Add" .project }}' class="right15">
+        <button class="btn btn-primary">Create</button>
+    </a>
+  </div>
+
+  <div class="row">
+    {{if .plans}}
+    {{else}}
+        <span> There is no test plan! Create first test plan.</span>
+    {{end}}
+  </div><!-- .row -->
+  {{if .plans}}
+  <div class="row">
+    <table class="table table-striped table-bordered table-hover" id="datatable_ex">
+      <thead>
+        <tr>
+          <th>{{msg . "title"}}</th>
+          <th class="min">TestCases</th>
+          <th class="min">Active</th>
+          <th class="min">Public</th>
+          <th class="min12 no-sort">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+      {{range $index, $node := .plans}}
+        <tr class="odd">
+          <td>{{$node.Title}}</td>
+          <td>2</td>
+          <td>True</td>
+          <td>OK</td>
+          <td>
+            <a href='{{url "TestPlans.View" $.project $node.ID}}' class="fa fa-info fa-fw"></a>
+            <a href='{{url "TestPlans.Edit" $.project $node.ID}}' class="glyphicon glyphicon-edit fa-fw"></a>
+            <a href="#" class="glyphicon glyphicon-remove fa-fw"></a>
+            <a href='{{url "TestPlans.Fire" $.project $node.ID}}' class="glyphicon glyphicon-fire fa-fw"></a>
+          </td>
+        </tr>
+      {{end}}
+      </tbody>
+
+    </table>
+    </div><!-- .row -->
+    {{end}}
+</div><!-- /#page-wrapper -->
+</div><!-- /#wrapper -->
+
+{{template "footer.html" .}}
+{{if .plans}}
+<script src="/public/bower_components/datatables/media/js/jquery.dataTables.min.js"></script>
+<script src="/public/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    $('#datatable_ex').DataTable({
+    responsive:true,
+    columnDefs: [ {
+        "targets": 'no-sort',
+        "orderable": false,
+        },
+        {
+        "targets" : "min",
+        "width" : "12%",
+        },
+        {"targets" : "min12",
+        "width": "12%",
+        }
+        ]});
+    });
+</script>
+{{end}}

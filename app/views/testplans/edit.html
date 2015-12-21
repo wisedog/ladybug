@@ -1,0 +1,131 @@
+{{set . "title" "Test Plan"}}
+{{set . "showsidebar" "true"}}
+{{append . "moreStyle" "jstree/themes/default/style.min.css"}}
+{{template "header.html" .}}
+<div id="page-wrapper">
+  <form id="plan_form" method="POST" action="{{url "TestPlans.Save" .project }}">
+    {{with $field := field "execs" .}}
+    <input type="hidden" id="plan_exec" name="{{$field.Name}}" value="{{$field.Value}}">
+    {{end}}
+    <div class="row vertical-align padtop10 bottom10">
+      <div class="col-lg-1">
+        <strong>{{msg . "title"}}</strong>
+      </div>
+      {{with $field := field "testplan.Title" .}}
+      <div class="col-lg-8 {{if $field.Error}}has-error{{end}}">
+        <input class="form-control" name="{{$field.Name}}" value="{{if $field.Flash}}{{$field.Flash}}{{else}}{{$field.Value}}{{end}}">
+      </div>
+      {{end}}
+    </div>
+    <div class="row form-group padleft15">
+      <label>{{msg . "description"}}</label>
+      {{with $field := field "testplan.Description" .}}
+      <textarea class="form-control" rows="4" name="{{$field.Name}}">{{if $field.Flash}}{{$field.Flash}}{{else}}{{$field.Value}}{{end}}</textarea>
+      {{end}}
+    </div>
+
+    <div class="row padleft15">
+      <label>Test Suites/Cases to execute</label>
+    </div>
+    <div class="row top10 padleft15">
+      <div id="testtree_origin" class="col-lg-5 padright10 tree">
+      </div>
+    </div><!-- .row -->
+
+    <div class="row form-group padleft15 top15">
+      <label>Tester Assignment</label>
+      <select class="col-lg-6 form-control" name="testplan.ExecutorId">
+      {{range .prj.Users}}
+      <option value="{{.ID}}">{{.Name}}</option>
+      {{end}}
+      </select>
+    </div> <!-- .row -->
+    <div class="row form-group padleft15 top15">
+      <label>Target Build/Release</label>
+      <select class="col-lg-6 form-control">
+        <!-- Builds -->
+      </select>
+    </div>
+    <div class="row">
+      <button id="savebtn" class="btn btn-primary">Create</button>
+      <button id="temp" class="btn btn-secondary">Temp</button>
+    </div> <!-- .row -->
+  </form>
+  <!-- /#page-wrapper -->
+</div>
+<!-- /#wrapper -->
+
+{{template "footer.html" .}}
+
+<script src="/public/jstree/jstree.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#testtree_origin').jstree({
+      "core" : {
+      "multiple": true,
+      "animation" : 0,
+      "check_callback" : true,
+      "themes" : { "stripes" : true },
+      'data' : {
+      'url' : function (node) {
+      return node.id === '#' ?
+      '{{url "TestDesign.GetAllTestSuites" .project}}' : '/project/{{.project}}/suite/' + node.id;
+      },
+      'data' : function (node) {
+      return { 'id' : node.id };
+      }
+      }
+      },
+      "checkbox":{
+        cascade:"up"
+      },
+      "types" : {
+      "#" : {
+      "max_children" : 100, 
+      "max_depth" : 2, 
+      "valid_children" : ["root"]
+      },
+      "root" : {
+        //              "icon" : "/public/jstree/static/3.2.1/assets/images/tree_icon.png",
+        "valid_children" : ["default"]
+      },
+      "default" : {
+        "valid_children" : ["default","file"]
+      },
+      "file" : {
+        "icon" : "glyphicon glyphicon-file",
+        "valid_children" : []
+      }
+      },
+      "plugins" : [
+      "state", "types","checkbox"
+        ]
+    });
+
+});
+
+$('#savebtn').click(function(){
+    var k = $('#testtree_origin').jstree(true).get_checked();
+    var mytext = k.toString();
+
+    if(mytext == ""){
+        alert("Please select test suite(s) to execute");
+    }
+
+
+    $('#plan_exec').attr('value', mytext);
+    $('#plan_form').submit();
+    });
+
+
+$('#testtree_origin').bind("loaded.jstree", function(event, data) {
+    $(this).jstree("open_all");
+
+    });
+
+$('#testtree_origin').bind("ready.jstree", function(event, data){
+    $(this).find(".jstree-leaf").find(".jstree-checkbox").hide();
+    });
+
+</script>

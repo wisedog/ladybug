@@ -1,0 +1,62 @@
+{{set . "title" "Test Execution"}}
+{{set . "showsidebar" "true"}}
+{{template "header.html" .}}
+<div id="page-wrapper">
+  <div class="row padtop15">
+    <div class="col-lg-12" style="margin-left:-10px;">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <label>
+            Test execution list
+          </label>
+        </div> <!-- .panel-heading -->
+        <div class="panel-body">
+          <div class='table-responsive'>
+            <table class='table table-striped'>
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>TestPlan</th>
+                  <th>TestCase#</th>
+                  <th>Tester</th>
+                  <th>Build</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+              {{range .testexecs}}
+              <tr>
+                <td>
+                  {{if eq .Status 0}}
+                    Ready
+                  {{else if eq .Status 1}}
+                    In Progress
+                  {{else if eq .Status 2}}
+                    N/A
+                  {{else if eq .Status 3}}
+                    Done
+                  {{end}}
+                </td>
+                <td>{{.Plan.Title}}</td>
+                <td>{{.Plan.ExecCaseNum}}</td>
+                <td>{{.Executor.Name}}</td>
+                <td>{{.TargetBuild.Name}}</td>
+                <td><a href='{{url "TestExecs.Run" $.project .ID}}' class="glyphicon glyphicon-fire fa-fw"></a></td>
+              </tr>
+
+
+              {{end}}
+              </tbody>
+            </table>
+          </div>
+        </div><!-- .panel-body -->
+      </div> <!-- .panel-default -->       
+    </div>  <!-- .col-lg-12 -->
+  </div><!-- .row -->
+
+</div> <!-- /#page-wrapper -->
+</div>  <!-- /#wrapper -->  
+
+
+    
+{{template "footer.html" .}}

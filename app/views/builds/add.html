@@ -1,0 +1,39 @@
+{{set . "title" "Add Build/Release"}}
+{{set . "showsidebar" "true"}}
+{{template "header.html" .}}
+<div id="page-wrapper">
+  <form method="POST" action="{{url "Builds.Save" .project }}">
+    <div class="row">
+      {{with $field := field "build.Testsuite_id" .}}
+      <input type="hidden" name="{{$field.Name}}" value="{{$field.Value}}">
+      {{end}}
+      {{with $field := field "testcase.Prefix" .}}
+      <input type="hidden" name="{{$field.Name}}" value="{{$field.Value}}">
+      {{end}}
+      <div class="col-lg-12" style="margin-top:20px">
+        <div class="row vertical-align bottom10">
+          <div class="col-lg-1"><strong>Name</strong></div>
+          {{with $field := field "build.Name" .}}
+          <div class="col-lg-8 {{if $field.Error}}has-error{{end}}">
+            <input class="form-control" name="{{$field.Name}}" value="{{$field.Flash}}">
+          </div>
+          {{end}}
+        </div>
+        <div class="row form-group bottom10 left5">
+          <label>{{msg . "description"}}</label>
+          {{with $field := field "build.Description" .}}
+          <textarea class="form-control" rows="4" name="{{$field.Name}}">{{$field.Flash}}</textarea>
+          {{end}}
+        </div>
+        <div class="row">
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+    </form>
+        <!-- end of row -->
+      </div>
+    <!-- /#page-wrapper -->
+  </div>
+  <!-- /#wrapper -->  
+
+
+  {{template "footer.html" .}}

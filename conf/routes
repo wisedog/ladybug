@@ -1,0 +1,98 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+module:testrunner
+module:jobs
+
+GET     /                                       Application.Index
+GET     /register                               Application.Register
+POST    /register                               Application.SaveUser
+POST    /login                                  Application.Login
+GET     /logout                                 Application.Logout
+
+### For User
+GET     /user/:id/profile                       Users.Profile
+GET     /user/:id/general                       Users.Index
+POST    /user/:id/general                       Users.SaveGeneral
+GET     /user/register                          Application.Register
+POST    /user/register                          Application.SaveUser
+GET     /user/:id/edit                          Users.Edit
+
+### For Testing Project
+##TODO show "Hello" messages, show abstract count for todos
+GET     /hello                                  Hello.Index      
+
+#TODO Use nav dropdown menu to move between projects, but below url should be because "show all" item will be nav dropdown menu
+GET     /project/list                           Projects.List
+
+### Project Overall
+GET     /project/:project/dashboard             Projects.Index
+GET     /project/:project/testdesign            TestDesign.Index
+
+# Test Suites
+#GET     /project/:project/suite/add             TestDesign.AddSuite
+#POST    /project/:project/suite/save            TestDesign.SaveSuite
+#POST    /project/:project/suite/:id/delete      TestDesign.DeleteSuite
+#GET     /project/:project/suite/:id/edit        TestDesign.EditSuite
+#POST    /project/:project/suite/:id/update      TestDesign.UpdateSuite
+
+# Sections
+POST    /project/:project/section/save           Sections.Save
+POST    /project/:project/section/insert        Sections.Insert
+GET     /project/:project/section/:id             TestDesign.GetAllTestCases
+
+
+# Test cases
+GET     /project/:project/section/:section_id/add         TestCases.Add
+POST    /project/:project/case/save             TestCases.Save
+GET     /project/:project/case/:id/edit         TestCases.Edit
+POST    /project/:project/case/:id/delete       TestCases.Delete
+GET     /project/:project/case/:id              TestCases.Index
+#GET     /project/:project/case/add              TestCases.Add
+
+# Test Plans
+GET     /project/:project/testplan              TestPlans.Index
+GET     /project/:project/testplan/add          TestPlans.Add
+POST    /project/:project/testplan/save         TestPlans.Save
+GET     /project/:project/testplan/:id/edit     TestPlans.Edit
+GET     /project/:project/testplan/:id          TestPlans.View
+GET     /project/:project/testplan/:id/fire     TestPlans.Fire
+#TODO GET /project/:project/testplan/:id/edit TestPlans.Edit
+#TODO POST   /project/:project/testplan/:id/delete   TestPlans.Delete
+
+# Builds
+GET     /project/:project/build                 Builds.Index
+GET     /project/:project/build/add             Builds.Add
+POST    /project/:project/build/save            Builds.Save
+GET     /project/:project/build/:id             Builds.View
+GET     /project/:project/build/:id/edit        Builds.Edit
+
+# Test Executes
+GET     /project/:project/exec                  TestExecs.Index
+GET     /project/:project/:id/run               TestExecs.Run
+POST    /project/:project/result/update         TestExecs.UpdateResult
+
+#TODO 
+#GET    /project/:project/testexec/:id/edit     TestExecs.Edit
+#GET    /project/:project/testexec/add          TestExecs.Add
+#POST   /project/:project/testexec/save         TestExecs.Save
+#POST   /project/:project/testexec/:id/delete   TestExecs.Delete
+
+
+# to dos
+#GET     /project/:project/testrun               TestRun.Index #TODO
+#GET     /project/:project/req/:id               Requirements.Detail #TODO
+#GET     /project/:project/req                   Requirements.Index #TODO
+
+### Issues
+GET     /project/:project/issues                Issues.List
+GET     /project/:project/issue/:id             Issues.Detail
+
+
+# Map static resources from the /app/public folder to the /public path
+GET     /public/*filepath                       Static.Serve("public")
+GET     /favicon.ico                            Static.Serve("public/img","favicon.png")
+
+# Catch all
+*       /:controller/:action                  :controller.:action

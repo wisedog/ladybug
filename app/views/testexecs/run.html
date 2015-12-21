@@ -1,0 +1,180 @@
+{{set . "title" "Test Plan"}}
+{{set . "showsidebar" "true"}}
+
+{{template "header.html" .}}
+<div id="page-wrapper">
+  <div class="row vertical-align padtop10 bottom10">
+    <div class="col-lg-1">
+      <h4><strong>{{msg . "title"}}</strong></h4>
+    </div>
+    <div class="col-lg-8">
+      <h4><strong>{{.testexec.Plan.Title}}</strong></h4>
+    </div>
+  </div> <!-- .row -->
+  <div class="row top7">
+    <div class="col-lg-4">
+      <label class="right10">Build/Release</label>
+      <a href='{{url "Builds.View" .project .testexec.Plan.TargetBuildId }}'>1234</a>
+    </div>
+  </div> <!-- .row -->
+  <div class="row form-group padleft15">
+    <h4>{{msg . "description"}}</h4>
+    <div><span>{{.testexec.Plan.Description}}</span></div>
+  </div>
+  <div class="row padleft15">
+    <h4>Test cases to execute</h4>
+  </div>
+  <div class="row">
+    <div id="accordion" class="col-lg-8 left17">
+      {{range $idx, $element := .cases}}
+        <div class="accordion-toggle row accordion-header-normal">
+          <i class="arrow-indicator padleft10 fa {{if eq $idx 0}}fa-caret-down{{else}}fa-caret-right{{end}}"></i>
+          <span class="font17 top17 bottom10">{{.Title}}</span>
+        </div>
+        <div class="accordion-content {{if eq $idx 0}}default{{end}} {{if eq $idx 0}}active-accordion-item{{end}}">
+          <label>Description</label>
+          <p>{{nl2br .Description}}</p>
+          <label>Precondition</label>
+          <p>{{nl2br .Precondition}}</p>
+          <label>Steps</label>
+          <p>{{nl2br .Steps}}</p>
+          <label>Expected</label>
+          <p>{{nl2br .Expected}}</p>
+          <div class="form-group">
+            <label>Actual Result</label>
+            <textarea id="textarea-{{.ID}}" class="form-control bottom10" rows="4"></textarea>
+          </div><!-- .accordion-content -->
+          
+          <button id="{{.ID}}" class="btn btn-success btn-xs padright10 padleft10 right7 btn-passfail">Pass</button>
+          <button id="{{.ID}}" class="btn btn-danger btn-xs padright10 padleft10 right7 btn-passfail">Fail</button>
+          <button class="btn btn-default btn-xs padright10 padleft10 right7 btn-skip">Skip</button>
+        </div>
+        
+      {{end}}
+    </div> <!-- #accordian -->
+  </div> <!-- .row -->
+
+  <div class="row left17" style="font-size:30px;">
+    <div>
+      <span class="board-pass right7">Pass</span>
+      <span id="pass-score" class="board-pass right17">0</span>
+      <span class="board-fail righ7">Fail</span>
+      <span id="fail-score" class="board-fail right17">0</span>
+    </div>
+  </div> <!-- .row -->
+  
+  <div class="row bottom17 left10">
+    <div class="form-group">
+      <label>Comment</label>
+      <textarea id="exec-comment" class="form-control bottom10" rows="2"></textarea>
+    </div>
+  </div> <!-- .row -->
+  
+  <div class="row">
+    <a href="/project/{{.project}}/testplan/{{.testplan.ID}}/edit">
+      <button id="edit-btn" class="btn btn-primary">Done</button>
+    </a>
+    <a href="javascript:history.back();">
+      <button id="temp" class="btn btn-secondary">Back</button>
+    </a>
+  </div> <!-- .row -->
+  <!-- /#page-wrapper -->
+</div>
+<!-- /#wrapper -->
+
+{{template "footer.html" .}}
+
+
+<script>
+function goNext(){
+  $('.active-accordion-item').next().trigger("click");
+}
+
+function addScore(didPass){
+  var score = 0;
+  if(didPass){
+    score = parseInt($('#pass-score').text(), 10);
+  }else{
+    score = parseInt($('#fail-score').text(), 10);
+  }
+  
+  score++;
+  
+  if(didPass){
+    $('#pass-score').text(score);
+  }else{
+    $('#fail-score').text(score);
+  }
+  
+}
+
+$(document).ready(function(){
+  $('#accordion').find('.accordion-toggle').click(function(){
+
+    //Expand or collapse this panel
+    $(this).next().slideToggle('fast', function(){
+      if($(this).css('display') == 'none'){
+        $(this).removeClass('active-accordion-item');
+        $(this).prev().children("i").removeClass('fa-caret-down').addClass('fa-caret-right');
+      }
+      else{
+        $(this).addClass('active-accordion-item');
+        $(this).prev().children("i").removeClass('fa-caret-right').addClass('fa-caret-down');
+      }
+    });
+    
+    //Hide the other panels
+    $(".accordion-content").not($(this).next()).slideUp('fast');
+    $(".accordion-content").not($(this).next()).removeClass('active-accordion-item');
+    $(".accordion-toggle").not($(this)).children("i.arrow-indicator").removeClass('fa-caret-down').addClass('fa-caret-right');
+
+  });
+  
+  $('.btn-skip').click(function(){
+      goNext();
+    });
+    
+  $('.btn-passfail').click(function(){
+    var id = $(this).attr('id');
+    var exec_id = parseInt("{{.testexec.ID}}", 10);
+    var txt = $("#textarea-" + id).val();
+    var didPass = $(this).hasClass('btn-success');
+    
+    // if the testcase is failed, actual result should be filled.
+    if(!didPass && txt == ''){
+      $("#textarea-" + id).parent().addClass("has-error");
+      return;
+    }
+    
+    var data = {
+      case_id: id,
+      exec_id: exec_id,
+      result: didPass,
+      actual: txt,
+      case_ver:1
+    };
+    
+    // TODO disable button or progress bar to prevent misclick
+    
+    $.post("/project/{{.project}}/result/update", data).done(function(data){
+      if(data.status == 200){
+        if(didPass){
+      $('.active-accordion-item').prev().removeClass('accordion-header-normal accordion-header-fail').addClass('accordion-header-pass');
+        addScore(true);
+        }else{
+          $('.active-accordion-item').prev().removeClass('accordion-header-normal accordion-header-pass').addClass('accordion-header-fail');
+          addScore(false);
+        }
+        
+        goNext();
+      }else{
+        console.log("Done, but an error while on POST AJAX", data.msg);
+      }
+    });
+    
+    // TODO  If the last, show message "all done"  need to general comment for test executions
+    
+  });
+    
+}); // end of $(document).ready
+</script>
