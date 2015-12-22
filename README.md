@@ -18,13 +18,18 @@ Since I'm new to Go language, not familiar with code convention, documentation, 
 
 ## Getting Started
 
-### Installation
+### Prerequirements
 
 The Project Ladybug uses below... 
 
 * [revel](https://github.com/revel/revel) web framework.
 * [gorm](https://github.com/jinzhu/gorm) database driver. 
 
+### Installation
+
+* You need set up database before running ladybug
+* Now only Postgresql is required. You can use not only Postgresql but other relational database, but not tested. 
+* Default database name is "ladybug" and user "ladybug". see "gorm.go" in app/controllers/gorm.go
 
 ### Databases
 
@@ -34,4 +39,6 @@ This app uses now only Postgresql. Various databases(MySQL, MarinaDB ....) will 
 
 * Requirements management
 * Reports
+* Test environment
+* Milestone
 * Test coverage
