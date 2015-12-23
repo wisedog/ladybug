@@ -49,6 +49,7 @@ func createDummy() {
 	Db.DropTable(&models.TestPlan{})
 	Db.DropTable(&models.Build{})
 	Db.DropTable(&models.Section{})
+	Db.DropTable(&models.Execution{})
 
 	// Create dummy users
 	Db.AutoMigrate(&models.User{})
