@@ -5,14 +5,6 @@ import (
 	"time"
 )
 
-type ExecutionOut struct{
-	Exec			Execution
-	
-	FailCaseNum		int
-	PassCaseNum		int
-	Progress		int
-}
-
 type Execution struct {
 	ID            int
 	Status        int    // ready, in progress, N/A(if a tester is not assigned)

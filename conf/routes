@@ -65,8 +65,12 @@ GET     /project/:project/testplan/:id/fire     TestPlans.Fire
 GET     /project/:project/build                 Builds.Index
 GET     /project/:project/build/add             Builds.Add
 POST    /project/:project/build/save            Builds.Save
+GET     /project/:project/build/integrate       Builds.Integrate
+POST    /project/:project/build/tool/validate   Builds.ValidateTool
+POST    /project/:project/build/tool/add        Builds.AddTool
 GET     /project/:project/build/:id             Builds.View
 GET     /project/:project/build/:id/edit        Builds.Edit
+
 
 # Test Executes
 GET     /project/:project/exec                  TestExecs.Index

@@ -29,6 +29,7 @@ func InitDB() {
 		Db.AutoMigrate(&models.TestCase{})
 		Db.AutoMigrate(&models.TestPlan{})
 		Db.AutoMigrate(&models.Build{})
+		Db.AutoMigrate(&models.BuildItem{})
 		Db.AutoMigrate(&models.Section{})
 		Db.AutoMigrate(&models.Execution{})
 		Db.AutoMigrate(&models.TestResult{})
