@@ -14,7 +14,9 @@
   <div class="row top7">
     <div class="col-lg-4">
       <label class="right10">Build/Release</label>
-      <a href='{{url "Builds.View" .project .testexec.Plan.TargetBuildId }}'>1234</a>
+      <a href='{{url "Builds.View" .project .testexec.TargetBuild.BuildProjectID }}'>
+        {{.testexec.TargetBuild.FullDisplayName}}
+      </a>
     </div>
   </div> <!-- .row -->
   <div class="row form-group padleft15">
@@ -27,7 +29,7 @@
   <div class="row">
     <div id="accordion" class="col-lg-8 left17">
       {{range $idx, $element := .cases}}
-        <div class="accordion-toggle row accordion-header-normal">
+        <div class="accordion-toggle row {{range $k := $.results}}{{if eq $k.TestCaseId $element.ID}}accordion-header-pass{{end}}{{end}}">
           <i class="arrow-indicator padleft10 fa {{if eq $idx 0}}fa-caret-down{{else}}fa-caret-right{{end}}"></i>
           <span class="font17 top17 bottom10">{{.Title}}</span>
         </div>
@@ -57,26 +59,26 @@
   <div class="row left17" style="font-size:30px;">
     <div>
       <span class="board-pass right7">Pass</span>
-      <span id="pass-score" class="board-pass right17">0</span>
+      <span id="pass-score" class="board-pass right17">{{.pass_counter}}</span>
       <span class="board-fail righ7">Fail</span>
-      <span id="fail-score" class="board-fail right17">0</span>
+      <span id="fail-score" class="board-fail right17">{{.fail_counter}}</span>
     </div>
   </div> <!-- .row -->
   
   <div class="row bottom17 left10">
     <div class="form-group">
-      <label>Comment</label>
+      <label>Comment(Optional)</label>
       <textarea id="exec-comment" class="form-control bottom10" rows="2"></textarea>
     </div>
   </div> <!-- .row -->
   
   <div class="row">
-    <a href="/project/{{.project}}/testplan/{{.testplan.ID}}/edit">
-      <button id="edit-btn" class="btn btn-primary">Done</button>
-    </a>
+    <button id="done-btn" class="btn btn-primary btn-xs">Done</button>
+    {{if eq .testexec.Status 3}}
     <a href="javascript:history.back();">
-      <button id="temp" class="btn btn-secondary">Back</button>
+      <button id="temp" class="btn btn-secondary btn-xs">Back</button>
     </a>
+    {{end}}
   </div> <!-- .row -->
   <!-- /#page-wrapper -->
 </div>
@@ -109,6 +111,8 @@ function addScore(didPass){
 }
 
 $(document).ready(function(){
+  $('.accordion-header-fail .accordion-header-pass').removeClass('accordion-header-normal');
+  
   $('#accordion').find('.accordion-toggle').click(function(){
 
     //Expand or collapse this panel
@@ -133,6 +137,29 @@ $(document).ready(function(){
   $('.btn-skip').click(function(){
       goNext();
     });
+    
+  $('#done-btn').click(function(){
+    // verify that all test cases are executed
+    // -> check accordion-header-normal
+    if($('.accordion-header-normal').length > 0){
+      alert("Execute all test cases!");
+      return;
+    }
+    
+    var cmt = $('#exec-comment').val();
+    var data = {
+      comment : cmt,
+      exec_id: parseInt("{{.testexec.ID}}", 10)
+    };
+    
+    $.post("/project/{{.project}}/result/done", data).done(function(data){
+      if(data.status == 200){
+        window.location.href='/project/{{.project}}/exec';
+      }else{
+        alert("Error!" + data.msg);
+      }
+    });
+  });
     
   $('.btn-passfail').click(function(){
     var id = $(this).attr('id');
@@ -171,9 +198,6 @@ $(document).ready(function(){
         console.log("Done, but an error while on POST AJAX", data.msg);
       }
     });
-    
-    // TODO  If the last, show message "all done"  need to general comment for test executions
-    
   });
     
 }); // end of $(document).ready

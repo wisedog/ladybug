@@ -17,9 +17,11 @@
                 <tr>
                   <th>Status</th>
                   <th>TestPlan</th>
-                  <th>TestCase#</th>
+                  <th>TC#</th>
                   <th>Tester</th>
                   <th>Build</th>
+                  <th>Progress</th>
+                  <th>Pass/Fail</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -37,14 +39,22 @@
                     Done
                   {{end}}
                 </td>
-                <td>{{.Plan.Title}}</td>
+                <td><a href='{{url "TestPlans.View" $.project .Plan.ID}}'>{{.Plan.Title}}</a></td>
                 <td>{{.Plan.ExecCaseNum}}</td>
                 <td>{{.Executor.Name}}</td>
-                <td>{{.TargetBuild.Name}}</td>
-                <td><a href='{{url "TestExecs.Run" $.project .ID}}' class="glyphicon glyphicon-fire fa-fw"></a></td>
+                <td>
+                  <a href='{{url "Builds.View" $.project .TargetBuild.BuildProjectID }}'>
+                    {{.TargetBuild.FullDisplayName}}
+                  </a>
+                </td>
+                <td>{{.Progress}}%</td>
+                <td>{{.PassCaseNum}}/{{.FailCaseNum}}</td>
+                <td>
+                  {{if ne .Status 3}}
+                  <a href='{{url "TestExecs.Run" $.project .ID}}' class="glyphicon glyphicon-fire fa-fw"></a>
+                  {{end}}
+                </td>
               </tr>
-
-
               {{end}}
               </tbody>
             </table>

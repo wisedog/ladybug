@@ -21,7 +21,7 @@
       <thead>
         <tr>
           <th>{{msg . "title"}}</th>
-          <th class="min">TestCases</th>
+          <th class="min">{{msg . "testcase"}}</th>
           <th class="min">Active</th>
           <th class="min">Public</th>
           <th class="min12 no-sort">Action</th>
@@ -31,7 +31,7 @@
       {{range $index, $node := .plans}}
         <tr class="odd">
           <td>{{$node.Title}}</td>
-          <td>2</td>
+          <td>{{.ExecCaseNum}}</td>
           <td>True</td>
           <td>OK</td>
           <td>

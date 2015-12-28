@@ -9,7 +9,7 @@ type TestPlan struct {
 	ID            int
 	Title         string
 	Description   string
-	Status        int
+	Status        int		//Active , In Review 
 	ExecutionType int
 	Project       Project
 	Project_id    int
@@ -18,8 +18,8 @@ type TestPlan struct {
 	Executor      User
 	ExecutorId    int
 	ExecCaseNum		int
-	ExecuteCases  string
-	TargetBuild   Build
+	ExecuteCases  string	// ',' joined string like 1,2,3.... 
+	TargetBuild   BuildItem
 	TargetBuildId int
 
 	CreatedAt time.Time

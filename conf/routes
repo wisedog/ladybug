@@ -58,20 +58,25 @@ POST    /project/:project/testplan/save         TestPlans.Save
 GET     /project/:project/testplan/:id/edit     TestPlans.Edit
 GET     /project/:project/testplan/:id          TestPlans.View
 GET     /project/:project/testplan/:id/fire     TestPlans.Fire
-#TODO GET /project/:project/testplan/:id/edit TestPlans.Edit
+
 #TODO POST   /project/:project/testplan/:id/delete   TestPlans.Delete
 
 # Builds
 GET     /project/:project/build                 Builds.Index
 GET     /project/:project/build/add             Builds.Add
 POST    /project/:project/build/save            Builds.Save
+GET     /project/:project/build/integrate       Builds.Integrate
+POST    /project/:project/build/tool/validate   Builds.ValidateTool
+POST    /project/:project/build/tool/add        Builds.AddTool
 GET     /project/:project/build/:id             Builds.View
 GET     /project/:project/build/:id/edit        Builds.Edit
+
 
 # Test Executes
 GET     /project/:project/exec                  TestExecs.Index
 GET     /project/:project/:id/run               TestExecs.Run
 POST    /project/:project/result/update         TestExecs.UpdateResult
+POST    /project/:project/result/done           TestExecs.Done
 
 #TODO 
 #GET    /project/:project/testexec/:id/edit     TestExecs.Edit

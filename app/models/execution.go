@@ -7,7 +7,6 @@ import (
 
 type Execution struct {
 	ID            int
-	Title         string //???
 	Status        int    // ready, in progress, N/A(if a tester is not assigned)
 	ExecutionType int    //manual, automation
 	Plan          TestPlan
@@ -17,9 +16,12 @@ type Execution struct {
 	Executor      User
 	ExecutorId    int
 	ExecuteCases  string	// , separated string
-	ExecResult    string	// , separated string
-	TargetBuild   Build
+	TargetBuild   BuildItem
 	TargetBuildId int
+	
+	PassCaseNum		int `sql:"-"`
+	FailCaseNum		int	`sql:"-"`
+	Progress		int `sql:"-"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
