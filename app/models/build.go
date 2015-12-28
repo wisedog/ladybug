@@ -8,16 +8,23 @@ import (
 // A build may have several BuildItem
 type BuildItem struct {
 	ID				int
-	BuildID			int			// id for build.  TODO index? 
-	Toolname		string		//jenkins, .....
-	IdByTool		string		//for example, jenkins builds id is string
-	DisplayName		string		//for example in jenkins : "cJson #3"
+	BuildProject	Build		// TODO index.. or something else
+	BuildProjectID	int			// id for build.  TODO index? 
+	Toolname		string		// jenkins, .....
+	IdByTool		string		// for example, jenkins builds id is string
+	DisplayName		string		// for example in jenkins : "#3"
+	
+	/* for example in jenkins : "cJson #3". 
+	  This is the text what user see in test execution, testplan pages */
+	FullDisplayName	string		
 	Url				string
 	ArtifactsUrl	string
 	ArtifactsName	string
-	Result			string		//for example in jenkins "SUCCESS"
+	Result			string		// for example in jenkins "SUCCESS"
+	Status			int			// 0: failed 1: successful
 	
 	TimeStamp		int64
+	BuildAt			time.Time
 }
 
 type Build struct {
@@ -27,7 +34,7 @@ type Build struct {
 	Project      	Project
 	Project_id   	int
 	BuildUrl	 	string	// build url
-	From         	string 	// manual, jenkins, teamcity ....
+	ToolName       	string 	// manual, jenkins, teamcity ....
 	Status		 	int 	// 0 : failed 1 : successful and so on.... 
 	
 	BuildItemNum	int

@@ -24,10 +24,12 @@
     </div>
     <div class="col-lg-4">
       <label class="right10">Build/Release</label>
-      <a href='{{url "Builds.View" .project .testplan.TargetBuildId }}'>{{.build.Name}}</a>
+      <a href='{{url "Builds.View" .project .build.BuildProject.ID }}'>
+        {{.build.FullDisplayName}}
+      </a>
     </div>
   </div>
-  <div class="row form-group padleft15">
+  <div class="row form-group padleft15 top7">
     <label>{{msg . "description"}}</label>
     <div><span>{{.testplan.Description}}</span></div>
   </div>
@@ -45,7 +47,15 @@
         <div class="panel-body">
           <div class='table-responsive'>
             <table class='table table-striped'>
-              <thead><tr><th>#</th><th>ID</th><th>Title</th><th>Priority</th><th>Category</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>ID</th>
+                  <th>Title</th>
+                  <th>Priority</th>
+                  <th>Category</th>
+                </tr>
+              </thead>
               <tbody>
               {{range .cases}}
               <tr>

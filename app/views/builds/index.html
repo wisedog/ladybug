@@ -38,14 +38,14 @@
       <tbody>
       {{range $index, $node := .builds}}
         <tr class="odd">
-          <td>{{$node.Status}}</td>
-          <td>{{$node.Name}}</td>
+          <td>{{if eq $node.Status 0}}Fail{{else}}Pass{{end}}</td>
+          <td><a href='{{url "Builds.View" $.project $node.ID}}'>{{$node.Name}}</a></td>
           <td>{{$node.Description}}</td>
           <td>{{$node.BuildItemNum}}</td>
-          <td>{{$node.From}}</td>
+          <td>{{$node.ToolName}}</td>
           <td>
             <a href='{{url "Builds.View" $.project $node.ID}}' class="fa fa-info fa-fw"></a>
-            {{if eq $node.From "custom"}}
+            {{if eq $node.ToolName "custom"}}
             <a href='{{url "Builds.Edit" $.project $node.ID}}' class="glyphicon glyphicon-edit fa-fw"></a>
             {{end}}
             <a href="#" class="glyphicon glyphicon-remove fa-fw"></a>

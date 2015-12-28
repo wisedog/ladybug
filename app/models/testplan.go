@@ -19,7 +19,7 @@ type TestPlan struct {
 	ExecutorId    int
 	ExecCaseNum		int
 	ExecuteCases  string	// ',' joined string like 1,2,3.... 
-	TargetBuild   Build
+	TargetBuild   BuildItem
 	TargetBuildId int
 
 	CreatedAt time.Time

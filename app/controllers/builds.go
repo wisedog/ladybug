@@ -9,7 +9,14 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
+	"time"
 )
+
+const (
+	BUILD_FAIL = iota
+	BUILD_SUCCESS
+	
+	)
 
 type Builds struct {
 	Application
@@ -100,8 +107,15 @@ func (c Builds) View(project string, id int) revel.Result {
 		c.Response.Status = 500
 		return c.Render()
 	}
+	
+	var builds []models.BuildItem
+	r = c.Tx.Where("build_project_id = ?", build.ID).Find(&builds)
+	if r.Error != nil{
+		c.Response.Status = 500
+		return c.Render()
+	}
 
-	return c.Render(project, build)
+	return c.Render(project, build, builds)
 }
 
 /**
@@ -170,32 +184,29 @@ func (c Builds) AddTool(url string, toolname string, project string) revel.Resul
     // get status for building. it may be successful or failed
     status := 0
     if nextBuildNum -1 == lastSucessfulBuildNum {
-    	status = 1
+    	status = BUILD_SUCCESS
     } else{
-    	status = 0
+    	status = BUILD_FAIL
     }
 
+    builds := dat["builds"].([]interface{})
+    
     job := models.Build{
     	Name : name,
     	Description : dat["description"].(string),
     	Project_id : prj.ID,
     	BuildUrl : dat["url"].(string),
     	Status : status,
-    	From : "jenkins",
-    	
+    	ToolName : "jenkins",
+    	BuildItemNum : len(builds),
     }
     r = c.Tx.Save(&job)
     if r.Error != nil{
     	return c.RenderJson(res{Status:503, Msg:"Error while Saving "})	//TEMP
     }
     
-    revel.INFO.Println("JOB : ", job)
-    
-    builds := dat["builds"].([]interface{})
-    
     
     for idx, b := range builds {
-    	//TODO add build item and add 
     	if idx > 10 {
     		break
     	}
@@ -219,7 +230,6 @@ func (c Builds) AddTool(url string, toolname string, project string) revel.Resul
     	result := data["result"].(string)
     	url := data["url"].(string)
     	
-    	//revel.INFO.Println("aaaa", int(k["number"].(float64)))
     	
     	artifacts := data["artifacts"].([]interface{})
     	
@@ -234,22 +244,37 @@ func (c Builds) AddTool(url string, toolname string, project string) revel.Resul
     	}else if num == 1 {
     		a := artifacts[0].(map[string]interface{})
     		artifactsname = a["fileName"].(string)
-    		artifactsurl = url + "/artifact/" + a["relativePath"].(string)
+    		artifactsurl = url + "artifact/" + a["relativePath"].(string)
     	}else {
     		artifactsurl = ""
     		artifactsname = ""
     	}
     	
+    	// timestamp of jenkins build item represents in millisecond.
+    	// so divide by 1000 (1 second = 1000 milliseconds)
+    	buildat := time.Unix(int64(timestamp/1000),0)
+    	
+    	var rv int 
+    	if result == "SUCCESS"{
+    		rv = BUILD_SUCCESS
+    	}else {
+    		rv = BUILD_FAIL
+    	}
+    	
+    	
     	elem := models.BuildItem{
-    		BuildID : job.ID,
+    		BuildProjectID : job.ID,
     		IdByTool : idbytool,
     		DisplayName : displayname,
+    		FullDisplayName : name + " " + displayname,
     		Url : url,
     		ArtifactsUrl : artifactsurl,
     		ArtifactsName : artifactsname,
     		Result : result,
     		Toolname : "jenkins",
     		TimeStamp : timestamp,
+    		BuildAt : buildat,
+    		Status : rv,
     	}
     	
     	revel.INFO.Println("element", elem)
@@ -259,8 +284,6 @@ func (c Builds) AddTool(url string, toolname string, project string) revel.Resul
     	if r.Error != nil{
     		return c.RenderJson(res{Status:504, Msg:"Error while saving"})
     	}
-    	
-    	
     }
 	
 	// redirect index

@@ -30,15 +30,7 @@ func (c TestPlans) Index(project string) revel.Result {
 		return c.Render()
 	}
 
-	var prjs []models.Project
-	r = c.Tx.Find(&prjs)
-
-	if r.Error != nil {
-		c.Response.Status = 500
-		return c.Render()
-	}
-
-	return c.Render(project, plans, prjs)
+	return c.Render(project, plans)
 }
 
 /**
@@ -170,12 +162,12 @@ func (c TestPlans) View(project string, id int) revel.Result {
 		revel.ERROR.Println("An error while finding testcases SELECT operation")
 	}
 
-	var build models.Build
+	var build models.BuildItem
 	if testplan.TargetBuildId != 0 {
 		r = c.Tx.Where("id = ?", testplan.TargetBuildId).First(&build)
 
 		if r.Error != nil {
-			revel.ERROR.Println("An error while finding Build information in TestPlans")
+			revel.ERROR.Println("An error while finding Build information in TestPlans", r.Error)
 		}
 	}
 

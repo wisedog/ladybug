@@ -14,7 +14,9 @@
   <div class="row top7">
     <div class="col-lg-4">
       <label class="right10">Build/Release</label>
-      <a href='{{url "Builds.View" .project .testexec.Plan.TargetBuildId }}'>1234</a>
+      <a href='{{url "Builds.View" .project .testexec.TargetBuild.BuildProjectID }}'>
+        {{.testexec.TargetBuild.FullDisplayName}}
+      </a>
     </div>
   </div> <!-- .row -->
   <div class="row form-group padleft15">

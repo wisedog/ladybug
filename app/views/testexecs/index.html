@@ -42,7 +42,11 @@
                 <td><a href='{{url "TestPlans.View" $.project .Plan.ID}}'>{{.Plan.Title}}</a></td>
                 <td>{{.Plan.ExecCaseNum}}</td>
                 <td>{{.Executor.Name}}</td>
-                <td>{{.TargetBuild.Name}}</td>
+                <td>
+                  <a href='{{url "Builds.View" $.project .TargetBuild.BuildProjectID }}'>
+                    {{.TargetBuild.FullDisplayName}}
+                  </a>
+                </td>
                 <td>{{.Progress}}%</td>
                 <td>{{.PassCaseNum}}/{{.FailCaseNum}}</td>
                 <td>

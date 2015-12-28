@@ -16,7 +16,7 @@ type Execution struct {
 	Executor      User
 	ExecutorId    int
 	ExecuteCases  string	// , separated string
-	TargetBuild   Build
+	TargetBuild   BuildItem
 	TargetBuildId int
 	
 	PassCaseNum		int `sql:"-"`
