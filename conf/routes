@@ -78,6 +78,9 @@ GET     /project/:project/:id/run               TestExecs.Run
 POST    /project/:project/result/update         TestExecs.UpdateResult
 POST    /project/:project/result/done           TestExecs.Done
 
+# Reports
+GET     /project/:project/reports               Reports.Reports
+
 #TODO 
 #GET    /project/:project/testexec/:id/edit     TestExecs.Edit
 #GET    /project/:project/testexec/add          TestExecs.Add
@@ -89,6 +92,8 @@ POST    /project/:project/result/done           TestExecs.Done
 #GET     /project/:project/testrun               TestRun.Index #TODO
 #GET     /project/:project/req/:id               Requirements.Detail #TODO
 #GET     /project/:project/req                   Requirements.Index #TODO
+
+
 
 ### Issues
 GET     /project/:project/issues                Issues.List
