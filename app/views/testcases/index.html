@@ -52,12 +52,18 @@
               <strong>Priority :</strong>
             </div>
             <div class="col-lg-3">
-              {{if eq .tc.Priority 0}}
+              {{if eq .tc.Priority 1}}
+              Highest
+              {{else if eq .tc.Priority 2}}
               High
-              {{else if eq .tc.Priority 1}}
+              {{else if eq .tc.Priority 3}}
               Medium
-              {{else}}
+              {{else if eq .tc.Priority 4}}
               Low
+              {{else if eq .tc.Priority 5}}
+              Lowest
+              {{else}}
+              Unknown
               {{end}}
             </div>
             <div class="col-lg-2">

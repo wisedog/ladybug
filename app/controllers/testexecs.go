@@ -10,10 +10,11 @@ import (
 
 //status for test execution
 const(
-	READY = iota
-	IN_PROGRESS
-	NOT_AVAILABLE
-	DONE
+	EXEC_STATUS_READY = 1 + iota
+	EXEC_STATUS_IN_PROGRESS
+	EXEC_STATUS_NOT_AVAILABLE
+	EXEC_STATUS_DONE
+	EXEC_STATUS_DENY
 	)
 
 // struct for response in JSON 
@@ -103,7 +104,7 @@ func (c TestExecs) Done(project string, exec_id int, comment string) revel.Resul
 		return c.RenderJson(k)
 	}
 	
-	testexec.Status = DONE
+	testexec.Status = EXEC_STATUS_DONE
 	
 	r = c.Tx.Save(&testexec)
 	if r.Error != nil{
@@ -167,7 +168,7 @@ func (c TestExecs) UpdateResult(case_id int, exec_id int, result bool, actual st
 	r = c.Tx.Where("id = ?", exec_id).First(&exec)
 	
 	if r.Error == nil {
-		exec.Status = IN_PROGRESS
+		exec.Status = EXEC_STATUS_IN_PROGRESS
 		c.Tx.Save(&exec)
 	}else{
 		revel.ERROR.Println("Select execution operation failed in TestExecs.UpdateResult")
@@ -259,4 +260,30 @@ func (c TestExecs) Run(project string, id int) revel.Result {
 	}
 	
 	return c.Render(project, testexec, cases, results, pass_counter, fail_counter)
+}
+
+
+func (c TestExecs) Remove(project string, id int) revel.Result {
+	revel.INFO.Println("REMOVE : id, project", id, project)
+	r := c.Tx.Where("id = ?", id).Delete(models.Execution{})
+	if r.Error != nil {
+		return c.RenderJson(res{Status:500, Msg:"Problem while deleting execution"})
+	}
+	return c.RenderJson(res{Status : 200, Msg : "ok"})
+}
+
+func (c TestExecs) Deny(project string, id int, msg string) revel.Result {
+	var testexec models.Execution
+	r := c.Tx.Where("id = ?", id).First(&testexec)
+	if r.Error != nil{
+		return c.RenderJson(res{Status:500, Msg : "Not found Test Execution"})
+	}
+	testexec.Status = EXEC_STATUS_DENY
+	testexec.Message = msg
+	r = c.Tx.Save(testexec)
+	if r.Error != nil{
+		return c.RenderJson(res{Status:500, Msg : "Error while saving"})
+	}
+	
+	return c.RenderJson(res{Status : 200, Msg : "ok"})
 }

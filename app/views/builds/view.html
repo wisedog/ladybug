@@ -4,16 +4,23 @@
 {{template "header.html" .}}
 <div id="page-wrapper">
   <div class="row padtop20 bottom10">
+    <a href='#' class="">
+      <button id="btn-sync" class="btn btn-primary btn-xs" >
+        <i class='glyphicon glyphicon-refresh right7'></i>Sync builds info
+      </button>
+    </a>
+  </div>
+  <div class="row bottom10">
       <div class="col-lg-2">
           <label>Build Project</label>
       </div>
-      <div class="col-lg-3">
+      <div class="col-lg-2">
           {{.build.Name}}
       </div>
-      <div class="col-lg-2">
+      <div class="col-lg-1">
           <label>Tool</label>
       </div>
-      <div class="col-lg-3">
+      <div class="col-lg-2">
           {{.build.ToolName}}
       </div>
   </div> <!-- .row -->
@@ -28,7 +35,7 @@
       </div>
   </div> <!-- .row -->
   <div class="row">
-      <div class="col-lg-3">
+      <div class="col-lg-2">
           <label>Build History</label>
       </div>
   </div>
@@ -37,6 +44,7 @@
           <thead>
             <tr>
               <th class="min">Status</th>
+              <th class="min">Test Result</th>
               <th>ID</th>
               <th>Build time</th>
               <th class="min">Artifacts</th>
@@ -45,9 +53,10 @@
           <tbody>
           {{range $index, $node := .builds}}
             <tr class="odd">
-              <td>{{if eq $node.Status 0}}Fail{{else}}Pass{{end}}</td>
+              <td>{{if eq $node.Status 0}}Fail{{else}}Success{{end}}</td>
+              <td>asdf</td>
               <td>{{$.build.Name}} {{$node.DisplayName}}</td>
-              <td>{{$node.BuildAt}}</td>
+              <td>{{$node.BuildAt.Format "Jan 02, 2006 15:04:05"}}</td>
               <td><a href="{{$node.ArtifactsUrl}}">{{$node.ArtifactsName}}</a></td>
             </tr>
           {{end}}
@@ -75,6 +84,11 @@ $(document).ready(function(){
         "width" : "12%",
         }
         ]});
+        
+    $('#btn-sync').click(function(){
+      //TODO POST data and refresh page or reset data table
+      console.log("sync button is clicked!");
+    });// end of btn-sync
     });
 </script>
 {{end}}

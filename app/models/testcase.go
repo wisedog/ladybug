@@ -5,6 +5,14 @@ import (
 	"time"
 )
 
+const (
+	PRIORITY_HIGHEST = 1 + iota
+	PRIORITY_HIGH
+	PRIORITY_MEDIUM
+	PRIORITY_LOW
+	PRIORITY_LOWEST
+	)
+
 /*
   A model for test case.
 */

@@ -72,6 +72,31 @@
 .board-pass {color : #5CB85C;}
 .board-fail {color : #D9534F;}
 
+/* blue and red circle for general purpose */
+.green-circle20{
+    background: #38CC08;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+.red-circle20{
+    background: #FF2D23;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+/* Iteration items for hello page(Hello.Index)*/
+.iteration-item{
+  display:block;
+  border-bottom:1px solid #ddd;
+  line-height:1.7;
+  font-size:18px;
+  padding:5px 0px 5px 0px;
+}
+
+
+
 /*
 see http://uniondesign.ca/simple-accordion-without-jquery-ui/
 */
@@ -88,3 +113,4 @@ see http://uniondesign.ca/simple-accordion-without-jquery-ui/
 .accordion-header-normal{border:1px solid #DDD;background:#F5F5F5;}
 .accordion-header-pass{border:1px solid #DDD;background:#5CB85C;}
 .accordion-header-fail{border:1px solid #DDD;background:#D9534F;}
+

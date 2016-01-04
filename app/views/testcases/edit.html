@@ -30,6 +30,20 @@
             {{end}}
           </div>
         </div>
+        <div class="row vertical-align bottom10">
+          <div class="col-lg-1"><label>Priority</label></div>
+          <div class="col-lg-3">
+            {{with $field := field "testcase.Priority" .}}
+            <select class="form-control" name="{{$field.Name}}">
+              {{option $field "1" "Highest"}}
+              {{option $field "2" "High"}}
+              {{option $field "3" "Medium"}}
+              {{option $field "4" "Low"}}
+              {{option $field "5" "Lowest"}}
+            </select>
+            {{end}}
+          </div>
+        </div>
         <div class="row form-group bottom10 left5">
           <label>{{msg . "description"}}</label>
           {{with $field := field "testcase.Description" .}}

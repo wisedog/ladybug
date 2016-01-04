@@ -8,18 +8,6 @@ import (
 /*
   A model for test result.
 */
-
-
-	// make table : testresult
-	// ID
-	// actual result
-	// note
-	// status : pass/fail
-	// testcase id
-	// testcase version
-	// testplan id
-	// testexecution id 
-	// created update .... 
 type TestResult struct {
 	ID            int
 	Status          bool

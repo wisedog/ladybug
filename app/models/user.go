@@ -7,15 +7,12 @@ import (
 	"time"
 )
 
-/*
-type Role int
-
 const (
-	USER
-	MODERATOR
-	MANAGER
-	ADMIN
-)*/
+	ROLE_ADMIN = 1 + iota
+	ROLE_MANAGER
+	ROLE_USER
+	ROLE_GUEST
+)
 
 type User struct {
 	ID             int
@@ -28,7 +25,8 @@ type User struct {
 	Projects       []Project
 	Message        string
 	Location       string
-	Photo          string
+	Photo          string	// TODO URL
+	Roles			int
 	//TODO Roles          []Role
 	//TODO link of email, homepage, FB, TW, G+ ....
 
@@ -47,12 +45,6 @@ var userRegex = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 
 func (user *User) Validate(v *revel.Validation) {
 	v.Email(user.Email)
-	/*	v.Check(user.Email,
-		revel.Required{},
-		revel.MaxSize{60},
-		revel.MinSize{6},
-		revel.Match{userRegex},
-	)*/
 
 	ValidatePassword(v, user.Password).
 		Key("user.Password")

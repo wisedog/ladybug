@@ -139,11 +139,13 @@ $(document).ready(function() {
             items.push("<thead><tr><th>#</th><th>Title</th><th>Priority</th><th>Category</th><th>Action</th></tr></thead>");
             items.push("<tbody>");
             $.each(data, function(key, val){
+              var priority = ["Unknown", "Highest", "High", "Medium", "Low", "Lowest"];
+              
                 items.push("<tr>"+ 
                   "<td>"+ val.ID + "</td>" + 
                   "<td><a href='/project/{{.project}}/case/"+ val.ID + "'>" + 
                      val.Title + "</a></td>" + 
-                  "<td>" + val.Priority + "</td>" +
+                  "<td>" + priority[val.Priority] + "</td>" +
                   "<td>" + val.Category + "</td>" +
                   "<td>" + 
                   "<span class='glyphicon glyphicon-edit fa-fw right7 tc-edit' id='"+ val.ID

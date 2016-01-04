@@ -166,6 +166,7 @@ func (c TestCases) Update(project string, id int, testcase models.TestCase) reve
 	exist_case.Precondition = testcase.Precondition
 	exist_case.Steps = testcase.Steps
 	exist_case.Expected = testcase.Expected
+	exist_case.Priority = testcase.Priority
 
 	r = c.Tx.Save(&exist_case)
 

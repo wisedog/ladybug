@@ -7,6 +7,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type Application struct {
@@ -72,10 +73,6 @@ func (c Application) SaveUser(user models.User, verifyPassword string) revel.Res
 		[]byte(user.Password), bcrypt.DefaultCost)
 	c.Tx.NewRecord(user)
 	c.Tx.Create(user)
-	/*	err := c.Tx.Insert(&user)
-		if err != nil {
-			panic(err)
-		}*/
 
 	c.Session["user"] = user.Email
 	c.Flash.Success("Welcome, " + user.Name)
@@ -100,8 +97,12 @@ func (c Application) Login(email, password string, remember bool) revel.Result {
 			// TODO add language field to User model
 			// language field should be string and ISO639-1 codes.
 			// Region field should be string and ISO3166-1 alpha-2 code
+			
 			cookie := http.Cookie{Name: "REVEL_LANG", Value: "ko-KR", Path: "/"}
 			c.SetCookie(&cookie)
+			
+			user.LastLoginAt = time.Now()
+			c.Tx.Save(&user)
 			return c.Redirect(routes.Hello.Index())
 		}
 	}

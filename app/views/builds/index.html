@@ -27,7 +27,7 @@
     <table class="table table-striped table-bordered table-hover" id="datatable_ex">
       <thead>
         <tr>
-          <th class="min">Status</th>
+          <th class="min">Build Status</th>
           <th>Name</th>
           <th class="no-sort">{{msg . "description"}}</th>
           <th class="min">Builds</th>
@@ -38,7 +38,7 @@
       <tbody>
       {{range $index, $node := .builds}}
         <tr class="odd">
-          <td>{{if eq $node.Status 0}}Fail{{else}}Pass{{end}}</td>
+          <td><div class="{{if eq $node.Status 0}}red-circle20{{else}}green-circle20{{end}}"></div></td>
           <td><a href='{{url "Builds.View" $.project $node.ID}}'>{{$node.Name}}</a></td>
           <td>{{$node.Description}}</td>
           <td>{{$node.BuildItemNum}}</td>

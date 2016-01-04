@@ -7,6 +7,7 @@ import (
 	"github.com/revel/revel"
 	"github.com/wisedog/ladybug/app/models"
 	"golang.org/x/crypto/bcrypt"
+	"time"
 )
 
 type GormController struct {
@@ -33,9 +34,11 @@ func InitDB() {
 		Db.AutoMigrate(&models.Section{})
 		Db.AutoMigrate(&models.Execution{})
 		Db.AutoMigrate(&models.TestResult{})
+		Db.AutoMigrate(&models.Review{})
 
 		revel.INFO.Println("All tables are not dropped!")
 	} else {
+		revel.INFO.Println("All tables are DROPPED!")
 		createDummy()
 	}
 
@@ -49,8 +52,11 @@ func createDummy() {
 	Db.DropTable(&models.TestCase{})
 	Db.DropTable(&models.TestPlan{})
 	Db.DropTable(&models.Build{})
+	Db.DropTable(&models.BuildItem{})
 	Db.DropTable(&models.Section{})
 	Db.DropTable(&models.Execution{})
+	Db.DropTable(&models.Review{})
+	Db.DropTable(&models.TestResult{})
 
 	// Create dummy users
 	Db.AutoMigrate(&models.User{})
@@ -58,12 +64,19 @@ func createDummy() {
 	bcryptPassword, _ := bcrypt.GenerateFromPassword(
 		[]byte("demo"), bcrypt.DefaultCost)
 
-	demoUser := &models.User{Name: "Demo User", Email: "demo@demo.com", Password: "demo", HashedPassword: bcryptPassword, Language: "ko", Region: "KR"}
+	demoUser := &models.User{
+		Name: "Demo User", Email: "demo@demo.com", Password: "demo", 
+		HashedPassword: bcryptPassword, Language: "en", Region: "US",
+		LastLoginAt : time.Now(), Roles : models.ROLE_ADMIN,
+	}
 	Db.NewRecord(demoUser) // => returns `true` if primary key is blank
 	Db.Create(&demoUser)
 
 	demoUser1 := &models.User{Name: "Wisedog", Email: "wisedog@demo.com", Password: "demo",
-		HashedPassword: bcryptPassword, Language: "en", Region: "KR"}
+		HashedPassword: bcryptPassword, Language: "en", Region: "US", LastLoginAt : time.Now(),
+		Roles : models.ROLE_MANAGER,
+		
+	}
 	Db.NewRecord(demoUser1)
 	Db.Create(&demoUser1)
 
@@ -80,11 +93,18 @@ func createDummy() {
 			Prefix:      "tc",
 			Users:       []models.User{*demoUser, *demoUser1},
 	}
+	prj1 := models.Project{
+			Name:        "bremen",
+			Status:      0,
+			Description: "A test project2",
+			Prefix:      "wise",
+			Users:       []models.User{*demoUser, *demoUser1},
+	}
 
-	//for _, prj := range project {
-		Db.NewRecord(prj)
-		Db.Create(&prj)
-	//}
+	Db.NewRecord(prj)
+	Db.Create(&prj)
+	Db.NewRecord(prj1)
+	Db.Create(&prj1)
 
 	// Create dummy testcases
 	Db.AutoMigrate(&models.TestCase{})
@@ -97,17 +117,17 @@ func createDummy() {
 		&models.TestCase{
 			Prefix: "wise", Seq: 1, 
 			Title: "Do not go gentle", Status: 0, Description: "Desc", SectionID: 2,
-			ProjectID : prj.ID,
+			ProjectID : prj.ID, Priority : models.PRIORITY_HIGH,
 		},
 		&models.TestCase{
 			Prefix: "wise", Seq: 2, Title: "The Mars rover should be tested", 
 			Status: 0, Description: "Desc", SectionID: 3,
-			ProjectID : prj.ID,
+			ProjectID : prj.ID, Priority : models.PRIORITY_HIGHEST,
 		},
 		&models.TestCase{
 			Prefix: "wise", Seq: 3, Title: "I'm still arive!", 
 			Status: 0, Description: "Desc", SectionID: 4,
-			ProjectID : prj.ID,
+			ProjectID : prj.ID,Priority : models.PRIORITY_MEDIUM,
 		},
 		&models.TestCase{
 			Prefix: "wise", Seq: 4, Status: 0, SectionID: 4,
@@ -116,7 +136,7 @@ func createDummy() {
 			Precondition : "None",
 			Steps : "1. Drag some texts on web browser to select text and CTRL + C\n2. Click TextArea and CTRL + V",
 			Expected : "Selected text are copied in TextArea" ,
-			ProjectID : prj.ID,
+			ProjectID : prj.ID, Priority : models.PRIORITY_HIGH,
 		},
 		&models.TestCase{
 			Prefix: "wise", Seq: 5, Status: 0, SectionID: 4,
@@ -125,7 +145,7 @@ func createDummy() {
 			Precondition : "None",
 			Steps : "1. Drag some texts on web browser to select text and CTRL + C\n2. Click TextArea and CTRL + V",
 			Expected : "Selected text are copied in TextArea",
-			ProjectID : prj.ID,
+			ProjectID : prj.ID, Priority : models.PRIORITY_LOW,
 			},
 	}
 
@@ -145,7 +165,15 @@ func createDummy() {
 
 	// Create dummy build
 	Db.AutoMigrate(&models.Build{})
-	// for temp
+	
+	// Create dummy build items
+	Db.AutoMigrate(&models.BuildItem{})
+	
+	// Create dummy Review
+	Db.AutoMigrate(&models.Review{})
+	
+	
+	// Create dummy section
 	Db.AutoMigrate(&models.Section{})
 	sections := []*models.Section{
 		&models.Section{Seq: 1, Title: "Coding Conventions", Status: 0, RootNode: true, Prefix: "wise", ProjectID : prj.ID},

@@ -29,7 +29,7 @@
   <div class="row">
     <div id="accordion" class="col-lg-8 left17">
       {{range $idx, $element := .cases}}
-        <div class="accordion-toggle row {{range $k := $.results}}{{if eq $k.TestCaseId $element.ID}}accordion-header-pass{{end}}{{end}}">
+        <div class="accordion-toggle row {{range $k := $.results}}{{if eq $k.TestCaseId $element.ID}}{{if eq $k.Status true}}accordion-header-pass{{else}}accordion-header-fail{{end}}{{end}}{{end}}">
           <i class="arrow-indicator padleft10 fa {{if eq $idx 0}}fa-caret-down{{else}}fa-caret-right{{end}}"></i>
           <span class="font17 top17 bottom10">{{.Title}}</span>
         </div>

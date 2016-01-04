@@ -15,9 +15,9 @@ type Execution struct {
 	ProjectId     int
 	Executor      User
 	ExecutorId    int
-	ExecuteCases  string	// , separated string
 	TargetBuild   BuildItem
 	TargetBuildId int
+	Message			string	// for store a reason of deny
 	
 	PassCaseNum		int `sql:"-"`
 	FailCaseNum		int	`sql:"-"`

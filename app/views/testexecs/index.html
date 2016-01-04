@@ -29,14 +29,18 @@
               {{range .testexecs}}
               <tr>
                 <td>
-                  {{if eq .Status 0}}
+                  {{if eq .Status 1}}
                     Ready
-                  {{else if eq .Status 1}}
-                    In Progress
                   {{else if eq .Status 2}}
-                    N/A
+                    In Progress
                   {{else if eq .Status 3}}
+                    N/A
+                  {{else if eq .Status 4}}
                     Done
+                  {{else if eq .Status 5}}
+                    Done-Deny
+                  {{else}}
+                    Unknown
                   {{end}}
                 </td>
                 <td><a href='{{url "TestPlans.View" $.project .Plan.ID}}'>{{.Plan.Title}}</a></td>
@@ -50,23 +54,97 @@
                 <td>{{.Progress}}%</td>
                 <td>{{.PassCaseNum}}/{{.FailCaseNum}}</td>
                 <td>
-                  {{if ne .Status 3}}
+                  {{if lt .Status 4}}
                   <a href='{{url "TestExecs.Run" $.project .ID}}' class="glyphicon glyphicon-fire fa-fw"></a>
+                  <a href='#' id="{{.ID}}" class="exec-ban glyphicon glyphicon-ban-circle" data-toggle="modal" data-target="#myModal" ></a>
+                  <a href='javascript:remove({{.ID}});' class="glyphicon glyphicon-remove"></a>
                   {{end}}
                 </td>
               </tr>
               {{end}}
               </tbody>
             </table>
-          </div>
+          </div> <!-- .table-responsive -->
         </div><!-- .panel-body -->
       </div> <!-- .panel-default -->       
     </div>  <!-- .col-lg-12 -->
   </div><!-- .row -->
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <h4 class="modal-title" id="myModalLabel">Deny the test execution</h4>
+              </div>
+              <div class="modal-body">
+                <div id="deny-group" class="form-group">
+                  <label class="control-label">Please give me a reason to deny the test execution</label>
+                  <input id="deny-msg" class="form-control">
+                </div>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Cancel</button>
+                  <button id="btn-deny" type="button" class="btn btn-primary btn-sm">Deny</button>
+              </div>
+          </div>
+          <!-- /.modal-content -->
+      </div>
+      <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
 
 </div> <!-- /#page-wrapper -->
 </div>  <!-- /#wrapper -->  
 
-
     
 {{template "footer.html" .}}
+
+<script>
+  var target = -1;
+  function remove(p){
+    var r = confirm ("Do you want delete the test execution?");
+    if(r == true){
+      $.post('{{url "TestExecs.Remove" .project}}', {id: p})
+        .done(function(data){
+          if(data.status == 200){
+          }
+          else{
+            console.log("Failed to response : ", data);
+          }
+          location.reload();
+        });
+    }
+    else{
+      return;
+    }
+  }
+  
+  $(document).ready(function(){
+    $('.exec-ban').click(function(){
+      $("#deny-msg").val("");
+      target = $(this).attr("id");
+    });
+    
+    $('#btn-deny').click(function(){
+      var txt = $("#deny-msg").val();
+      if(txt == ""){
+        $("#deny-group").addClass("has-error");
+        return;
+      }
+      
+      if(target == -1){
+        return;
+      }
+      
+      $.post('{{url "TestExecs.Deny" .project}}'
+            , {id: target, msg: txt})
+          .done(function(data){
+            console.log("Result : ", data);
+            location.reload();
+          });
+    });
+    
+  });
+  
+</script>

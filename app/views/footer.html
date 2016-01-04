@@ -18,6 +18,30 @@
     <script src="/public/bower_components/morrisjs/morris.min.js"></script>
     <script src="/public/js/morris-data.js"></script>
     {{end}}
+    <script>
+        $(document).ready(function(){
+            $('#hdr-btn-prj').click(function(event){
+                console.log($(this).attr('aria-expanded'));
+                if($(this).attr('aria-expanded') == "true"){
+                    return;
+                }
+                $.getJSON('{{url "Projects.GetProjectList" 10}}', function(data){
+                    console.log(data);
+                    // append here project-dropdown 
+                    // output.html(loader);
+                    
+                    var inner = "";
+                    $.each(data, function(index, value) {
+                        inner = inner + "<li><a href='#'> <i class='fa fa-briefcase fa-fw'></i> "+ value.Name + "</a></li>";
+                    });
+                    inner += "<li class='divider'></li>";
+                    inner += '<li><a class="text-center" href="{{url "Projects.List"}}"><strong>Show All Projects</strong><i class="fa fa-angle-right"></i></a></li>';
+                    var target = $('#project-dropdown');
+                    $(target).html(inner);
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

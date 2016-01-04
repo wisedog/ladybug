@@ -210,7 +210,7 @@ func (c TestPlans) Fire(project string, id int) revel.Result {
 
 	// mendatory : testplan ID,project ID
 	// advisory : if executor id is zero, make status N/A
-	exec := models.Execution{ProjectId: prj.ID, PlanId: id, ExecutorId: plan.ExecutorId, TargetBuildId: plan.TargetBuildId}
+	exec := models.Execution{Status : EXEC_STATUS_READY, ProjectId: prj.ID, PlanId: id, ExecutorId: plan.ExecutorId, TargetBuildId: plan.TargetBuildId}
 
 	if plan.ExecutorId == 0 {
 		exec.Status = 2
