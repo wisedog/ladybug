@@ -1,0 +1,84 @@
+{{set . "title" "Builds"}}
+{{set . "showsidebar" "true"}}
+
+{{template "header.html" .}}
+<div id="page-wrapper">
+  <div class="row padtop20 bottom17">
+    <div class="col-lg-2">
+      <select class="form-control">
+        <option value="jenkins">Jenkins</option>
+      </select> 
+    </div>
+  </div><!-- .row -->
+  <div class="row vertical-align">
+    <div class="col-lg-1">
+      <label>
+          Job URL
+      </label>
+    </div>  
+    <div class="col-lg-5">
+      <input id="jenkins-url" class="form-control"></input>
+    </div>  
+    <button id="btn-validate" type="button" class="btn btn-primary btn-sm">Check</button>
+  </div> <!-- .row -->
+  <div class="row bottom17">
+    <div class="col-lg-1"></div>
+    <div class="col-lg-5">
+      <span class="text-muted">
+        ex) http://&lt;your jenkins server's IP&gt;/job/sample
+      </span>
+    </div>
+  </div> <!-- .row -->
+  <div id="board" class="row">
+    
+  </div>
+  <div id="btnbox" class="row" style="display:none;">
+    <button id="btn-add" type="button" class="btn btn-primary btn-sm">Add</button>
+    <a href='{{url "Builds.Index" .project }}'>
+      <button id="btn-cancel" type="button" class="btn btn-default btn-sm">Cancel</button>  
+    </a>
+  </div>
+</div><!-- /#page-wrapper -->
+</div><!-- /#wrapper -->
+
+{{template "footer.html" .}}
+
+<script>
+  $(document).ready(function(){
+    $("#btn-validate").click(function(){
+      var data={
+        url : $('#jenkins-url').val(),
+        toolname : "jenkins"
+      };
+      
+      $.post('/project/{{.project}}/build/tool/validate', data).done(function(r){
+        if(r.status == 200){
+          // show msg to panel
+          $("#board").html("<pre>" + r.msg + "</pre>");
+          $("#btnbox").show();
+        }
+        else{
+          // Each build tool has their own message. below code is for Jenkins
+          $("#board").html("<pre>Unable to get build information. Please check your Job URL.</pre>");
+        }
+      });
+    });
+    $('#btn-add').click(function(){
+      var data={
+        url : $('#jenkins-url').val(),
+        toolname : "jenkins",
+        project : "{{.project}}"
+      };
+      
+      $.post('/project/{{.project}}/build/tool/add', data).done(function(r){
+        console.log(r);
+        if(r.status == 200){
+          window.location.replace('/project/{{.project}}/build');
+        }else{
+          // TODO error handling
+        }
+        
+      });
+    });
+  });
+</script>
