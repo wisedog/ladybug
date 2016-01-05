@@ -177,10 +177,29 @@ func (c TestPlans) View(project string, id int) revel.Result {
 /**
 POST handler for DELETE operation for testplan
 */
-func (c TestPlans) Delete(project string) revel.Result {
-
-	//TODO fill
-	return c.Render(project)
+func (c TestPlans) Delete(project string, id int) revel.Result {
+	if user := c.connected(); user == nil {
+		c.Flash.Error("Please log in first")
+		return c.Redirect(routes.Application.Index())
+	}
+	
+	var plan models.TestPlan
+	r := c.Tx.Where("id = ?", id).First(&plan)
+	
+	if r.Error != nil{
+		revel.ERROR.Println("An error while select project operation in TestPlans.Delete", r.Error)
+		c.Response.Status = 500
+		return c.Render()
+	}
+	
+	r = c.Tx.Delete(plan)
+	if r.Error != nil{
+		revel.ERROR.Println("An error while select project operation in TestPlans.Delete", r.Error)
+		c.Response.Status = 500
+		return c.Render()
+	}
+	
+	return c.RenderJson(res{Status:200, Msg:"OK"})
 }
 
 func (c TestPlans) Fire(project string, id int) revel.Result {

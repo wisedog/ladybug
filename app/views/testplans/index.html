@@ -5,7 +5,10 @@
 <div id="page-wrapper">
   <div class="row vertical-align padtop10 bottom10">
     <a href='{{url "TestPlans.Add" .project }}' class="right15">
-        <button class="btn btn-primary">Create</button>
+      <button class="btn btn-outline btn-primary btn-sm">
+        <i class="glyphicon glyphicon-plus right7"></i>
+        Create
+      </button>
     </a>
   </div>
 
@@ -37,7 +40,7 @@
           <td>
             <a href='{{url "TestPlans.View" $.project $node.ID}}' class="fa fa-info fa-fw"></a>
             <a href='{{url "TestPlans.Edit" $.project $node.ID}}' class="glyphicon glyphicon-edit fa-fw"></a>
-            <a href="#" class="glyphicon glyphicon-remove fa-fw"></a>
+            <a href="javascript:remove({{.ID}});" class="glyphicon glyphicon-remove fa-fw"></a>
             <a href='{{url "TestPlans.Fire" $.project $node.ID}}' class="glyphicon glyphicon-fire fa-fw"></a>
           </td>
         </tr>
@@ -51,6 +54,28 @@
 </div><!-- /#wrapper -->
 
 {{template "footer.html" .}}
+<script>
+  function remove(plan_id){
+    var r = confirm("Do you want remove the test plan?");
+    if(r == true){
+      var data = {
+        id: plan_id
+      };
+      
+      // TODO disable button or progress bar to prevent misclick
+      
+      $.post('{{url "TestPlans.Delete" .project}}', data).done(function(data){
+        if(data.status == 200){
+          location.reload();
+        }else{
+          //TODO show error message
+        }
+      });
+    }else{
+      return;
+    }
+  }
+</script>
 {{if .plans}}
 <script src="/public/bower_components/datatables/media/js/jquery.dataTables.min.js"></script>
 <script src="/public/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js"></script>

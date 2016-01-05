@@ -8,11 +8,18 @@
 {{template "header.html" .}}
 <div id="page-wrapper">
   <div class="row vertical-align padtop10 bottom10">
+    
     <a href='{{url "Builds.Add" .project }}' class="right15">
-      <button class="btn btn-primary">Create Manual</button>
+      <button class="btn btn-outline btn-primary btn-sm">
+        <i class="glyphicon glyphicon-plus right7"></i>
+        Create Manual
+      </button>
     </a>
     <a href='{{url "Builds.Integrate" .project}}'>
-      <button class="btn btn-primary">Integrate with a CI tool</button>
+      <button class="btn btn-outline btn-primary btn-sm">
+        <i class="fa fa-gears right7"></i>
+        Integrate with a CI tool
+        </button>
     </a>
   </div>
 
