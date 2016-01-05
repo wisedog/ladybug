@@ -62,7 +62,9 @@
                 <td></td>
                 <td>{{.ID}}</td>
                 <td><a href="/project/{{$.project}}/case/{{.ID}}">{{.Title}}</a></td>
-                <td>{{.Priority}}</td>
+                <td>{{if eq .Priority 1}}Highest{{else if eq .Priority 2}}High{{else if eq .Priority 3}}Medium
+                    {{else if eq .Priority 4}}Low{{else if eq .Priority 5}}Lowest{{else}}Unknown{{end}}
+                </td>
                 <td>{{.Category}}</td>
               </tr>
               {{end}}
@@ -91,6 +93,12 @@
 
 
 <script>
+function getPriorityString(p){
+  var arr = ["Unknown", "Highest", "High", "Medium", "Low", "Lowest"];
+  
+  return arr[p];
+}
+
 $('#edit-btn').click(function(){
     });
 

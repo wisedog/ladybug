@@ -100,6 +100,12 @@
 // selected TC ID
 var selected_item = [];
 
+function getPriorityString(p){
+  var arr = ["Unknown", "Highest", "High", "Medium", "Low", "Lowest"];
+  
+  return arr[p];
+}
+
 $(document).ready(function() {
     $('#testtree').jstree({
       "core" : {
@@ -124,8 +130,8 @@ $(document).ready(function() {
 
     //handle click(select) action on node
     $("#testtree").bind("select_node.jstree", function(event, data){
-        node_id = data.node.id;
-        parent_id = data.node.parent;
+        var node_id = data.node.id;
+        var parent_id = data.node.parent;
         var level = data.node.parents.length;
         console.log("level : ", level);
         console.log("parent_id : ", parent_id);
@@ -160,7 +166,7 @@ $(document).ready(function() {
                   "<td>"+ val.ID + "</td>" + 
                   "<td><a href='/project/{{.project}}/case/"+ val.ID + "'>" + 
                      val.Title + "</a></td>" + 
-                  "<td>" + val.Important + "</td>" +
+                  "<td>" + getPriorityString(val.Priority) + "</td>" +
                   "<td>" + val.Category + "</td>" +
                   "</tr>");
             $('#tc_list').html(items.join(""));
@@ -207,7 +213,6 @@ function add_to_selected(){
       selected_item.push(id);
       }
   });
-  console.log("ll : ", selected_item);
 }
 
 function remove_selected(v){
@@ -216,7 +221,6 @@ function remove_selected(v){
     var alter = "<input type='checkbox' class='tc-cb' id='" + id + "'></input>";
     $(v).closest('tr').remove();
     $("#" + id + "-s").replaceWith(alter);
-    console.log("checked!", $(v).attr('id'));
   }
   else{
     console.log("unchecked!");

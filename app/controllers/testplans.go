@@ -97,9 +97,6 @@ func (c TestPlans) Save(project string, testplan models.TestPlan, execs string) 
 	var t string
 	rv := handleSelected(execs, &t)
 	
-	revel.INFO.Println("buf : ", t)
-	revel.INFO.Println("rv : ", rv)
-	
 	testplan.ExecuteCases = t
 	testplan.ExecCaseNum = rv
 	testplan.Project_id = prj.ID
@@ -232,7 +229,7 @@ func (c TestPlans) Fire(project string, id int) revel.Result {
 	exec := models.Execution{Status : EXEC_STATUS_READY, ProjectId: prj.ID, PlanId: id, ExecutorId: plan.ExecutorId, TargetBuildId: plan.TargetBuildId}
 
 	if plan.ExecutorId == 0 {
-		exec.Status = 2
+		exec.Status = EXEC_STATUS_NOT_AVAILABLE
 	}
 
 	c.Tx.NewRecord(exec)
