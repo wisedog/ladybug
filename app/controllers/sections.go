@@ -48,8 +48,6 @@ func (c Sections) Insert(project string, id int, parent_id int, title string, ed
 		Msg    string `json:"msg"`
 	}
 
-	revel.INFO.Println("is edit? ", edit)
-
 	var s models.Section
 	var e Reply
 	if user := c.connected(); user == nil {

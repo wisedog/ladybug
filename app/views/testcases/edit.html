@@ -1,4 +1,5 @@
-{{set . "title" "Testcase Editn"}}
+{{set . "title" "Testcase Edit"}}
+{{set . "sel" "selected"}}
 {{template "header.html" .}}
 <div id="page-wrapper">
   <form method="POST" action="{{url "TestCases.Update" .project .id}}">
@@ -20,19 +21,10 @@
             <input class="form-control" name="{{$field.Name}}" value="{{if $field.Flash}}{{$field.Flash}}{{else}}{{$field.Value}}{{end}}">
             {{end}}
           </div>
-
-        </div>
-        <div class="row vertical-align bottom10">
-          <div class="col-lg-1"><strong>Prefix</strong></div>
-          <div class="col-lg-3">
-            {{with $field := field "testcase.Prefix" .}}
-            <input class="form-control" name="{{$field.Name}}" value="{{$field.Value}}" disabled>
-            {{end}}
-          </div>
         </div>
         <div class="row vertical-align bottom10">
           <div class="col-lg-1"><label>Priority</label></div>
-          <div class="col-lg-3">
+          <div class="col-lg-2">
             {{with $field := field "testcase.Priority" .}}
             <select class="form-control" name="{{$field.Name}}">
               {{option $field "1" "Highest"}}
@@ -43,13 +35,52 @@
             </select>
             {{end}}
           </div>
-        </div>
+          <div class="col-lg-1">
+            <label>Type</label>
+          </div>
+          <div class="col-lg-2">
+            {{with $field := field "testcase.CategoryID" .}}
+            <select class="form-control" name="{{$field.Name}}">
+              {{range $.category}}
+              <option value="{{.ID}}" {{if eq $field.Value .ID}}{{raw $.sel}}{{end}}>{{.Name}}</option>
+              {{end}}
+            </select>
+            {{end}}
+          </div>
+          <div class="col-lg-1">
+            <label>Estimate Time</label>
+          </div>
+          <div class="col-lg-2">
+            {{with $field := field "testcase.Estimated" .}}
+            <input class="form-control" name="{{$field.Name}}" value="{{$field.Value}}">
+            {{end}}
+          </div>
+        </div> <!-- .row -->
+        <div class="row vertical-align bottom10">
+          <div class="col-lg-1"><strong>Status</strong></div>
+          <div class="col-lg-3">
+            {{with $field := field "testcase.Status" .}}
+            <select class="form-control" name="{{$field.Name}}">
+              {{option $field "1" "Active"}}
+              {{option $field "2" "Inactive"}}
+              {{option $field "3" "Close"}}
+            </select>
+            {{end}}
+          </div>
+        </div> <!-- .row -->
+        
         <div class="row form-group bottom10 left5">
           <label>{{msg . "description"}}</label>
           {{with $field := field "testcase.Description" .}}
           <textarea class="form-control" rows="4" name="{{$field.Name}}">{{if $field.Flash}}{{$field.Flash}}{{else}}{{$field.Value}}{{end}}</textarea>
           {{end}}
-        </div>
+        </div> <!-- .row -->
+        <div class="row form-group bottom10 left5">
+            <label>Precondition</label>
+            {{with $field := field "testcase.Precondition" .}}
+            <textarea class="form-control" rows="4" name="{{$field.Name}}">{{$field.Value}}</textarea>
+            {{end}}
+        </div><!-- end of row -->
         <div class="row form-group bottom10 left5">
             <label>Steps</label>
             {{with $field := field "testcase.Steps" .}}
@@ -62,19 +93,7 @@
             <textarea class="form-control" rows="4" name="{{$field.Name}}">{{if $field.Flash}}{{$field.Value}}{{else}}{{$field.Value}}{{end}}</textarea>
             {{end}}
         </div>
-        <div class="row vertical-align bottom10">
-          <div class="col-lg-1"><strong>Status</strong></div>
-          <div class="col-lg-3">
-            {{with $field := field "testcase.Status" .}}
-            <select class="form-control" name="{{$field.Name}}">
-              {{option $field "1" "Draft"}}
-              {{option $field "2" "In Progress"}}
-              {{option $field "3" "In Review"}}
-              {{option $field "4" "Release"}}
-            </select>
-            {{end}}
-          </div>
-        </div>
+        
         <div class="row">
           <button type="submit" class="btn btn-primary">Update</button>
         </div>

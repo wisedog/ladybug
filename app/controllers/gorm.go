@@ -35,6 +35,8 @@ func InitDB() {
 		Db.AutoMigrate(&models.Execution{})
 		Db.AutoMigrate(&models.TestResult{})
 		Db.AutoMigrate(&models.Review{})
+		Db.AutoMigrate(&models.Category{})
+		Db.AutoMigrate(&models.Specification{})
 
 		revel.INFO.Println("All tables are not dropped!")
 	} else {
@@ -57,6 +59,8 @@ func createDummy() {
 	Db.DropTable(&models.Execution{})
 	Db.DropTable(&models.Review{})
 	Db.DropTable(&models.TestResult{})
+	Db.DropTable(&models.Category{})
+	Db.DropTable(&models.Specification{})
 
 	// Create dummy users
 	Db.AutoMigrate(&models.User{})
@@ -88,14 +92,14 @@ func createDummy() {
 
 	prj := models.Project{
 			Name:        "Koblentz",
-			Status:      0,
+			Status:      1,
 			Description: "A test project",
 			Prefix:      "tc",
 			Users:       []models.User{*demoUser, *demoUser1},
 	}
 	prj1 := models.Project{
 			Name:        "bremen",
-			Status:      0,
+			Status:      1,
 			Description: "A test project2",
 			Prefix:      "wise",
 			Users:       []models.User{*demoUser, *demoUser1},
@@ -115,37 +119,42 @@ func createDummy() {
 */
 	testcases := []*models.TestCase{
 		&models.TestCase{
-			Prefix: "wise", Seq: 1, 
-			Title: "Do not go gentle", Status: 0, Description: "Desc", SectionID: 2,
-			ProjectID : prj.ID, Priority : models.PRIORITY_HIGH,
+			Prefix: prj.Prefix, Seq: 1, 
+			Title: "Do not go gentle", Status: models.TC_STATUS_ACTIVATE, Description: "Desc", SectionID: 2,
+			ProjectID : prj.ID, Priority : models.PRIORITY_HIGH, CategoryID : 1,
+			DisplayID : prj.Prefix + "-1", Estimated : 10,
 		},
 		&models.TestCase{
-			Prefix: "wise", Seq: 2, Title: "The Mars rover should be tested", 
-			Status: 0, Description: "Desc", SectionID: 3,
+			Prefix: prj.Prefix, Seq: 2, Title: "The Mars rover should be tested", 
+			Status: models.TC_STATUS_ACTIVATE, Description: "Desc", SectionID: 3,
 			ProjectID : prj.ID, Priority : models.PRIORITY_HIGHEST,
+			CategoryID : 1, DisplayID : prj.Prefix + "-2",Estimated : 1,
 		},
 		&models.TestCase{
-			Prefix: "wise", Seq: 3, Title: "I'm still arive!", 
-			Status: 0, Description: "Desc", SectionID: 4,
+			Prefix: prj.Prefix, Seq: 3, Title: "I'm still arive!",  CategoryID : 3,
+			Status: models.TC_STATUS_ACTIVATE, Description: "Desc", SectionID: 4,
 			ProjectID : prj.ID,Priority : models.PRIORITY_MEDIUM,
+			DisplayID : prj.Prefix + "-3",Estimated : 4,
 		},
 		&models.TestCase{
-			Prefix: "wise", Seq: 4, Status: 0, SectionID: 4,
+			Prefix: prj.Prefix, Seq: 4, Status: models.TC_STATUS_DRAFT, SectionID: 4, CategoryID : 2,
 			Title: "Copy operation should be supported", 
 			Description: "Copy operation is essential feature for text editing.",
 			Precondition : "None",
 			Steps : "1. Drag some texts on web browser to select text and CTRL + C\n2. Click TextArea and CTRL + V",
 			Expected : "Selected text are copied in TextArea" ,
 			ProjectID : prj.ID, Priority : models.PRIORITY_HIGH,
+			DisplayID : prj.Prefix + "-4",Estimated : 5,
 		},
 		&models.TestCase{
-			Prefix: "wise", Seq: 5, Status: 0, SectionID: 4,
+			Prefix: prj.Prefix, Seq: 5, Status: models.TC_STATUS_INACTIVE, SectionID: 4, CategoryID : 1,
 			Title: "Paste operation should be supported", 
 			Description: "Paste operation is essential feature for text editing.",
 			Precondition : "None",
 			Steps : "1. Drag some texts on web browser to select text and CTRL + C\n2. Click TextArea and CTRL + V",
 			Expected : "Selected text are copied in TextArea",
 			ProjectID : prj.ID, Priority : models.PRIORITY_LOW,
+			DisplayID : prj.Prefix + "-5",Estimated : 10,
 			},
 	}
 
@@ -176,20 +185,81 @@ func createDummy() {
 	// Create dummy section
 	Db.AutoMigrate(&models.Section{})
 	sections := []*models.Section{
-		&models.Section{Seq: 1, Title: "Coding Conventions", Status: 0, RootNode: true, Prefix: "wise", ProjectID : prj.ID},
-		&models.Section{Seq: 1, Title: "Theme and Design", Status: 0, RootNode: true, Prefix: "wise", ProjectID : prj.ID},
-		&models.Section{Seq: 1, Title: "Source code control", Status: 0, RootNode: true, Prefix: "wise", ProjectID : prj.ID},
-		&models.Section{Seq: 1, Title: "Go language", RootNode: false, ParentsID: 1, Prefix: "too", ProjectID : prj.ID},
-		&models.Section{Seq: 2, Title: "Javascript", RootNode: false, ParentsID: 1, Prefix: "too", ProjectID : prj.ID},
-		&models.Section{Seq: 1, Title: "SB Admin2", RootNode: false, ParentsID: 2, Prefix: "aaa", ProjectID : prj.ID},
-		&models.Section{Seq: 1, Title: "Git", RootNode: false, ParentsID: 3, Prefix: "tpp", ProjectID : prj.ID},
+		&models.Section{Seq: 1, Title: "Coding Conventions", Status: 0, RootNode: true, 
+			Prefix: prj.Prefix, ProjectID : prj.ID, ForTestCase : true,},
+		&models.Section{Seq: 1, Title: "Theme and Design", Status: 0, RootNode: true, 
+			Prefix: prj.Prefix, ProjectID : prj.ID, ForTestCase : true,},
+		&models.Section{Seq: 1, Title: "Source code control", Status: 0, RootNode: true, 
+			Prefix: prj.Prefix, ProjectID : prj.ID, ForTestCase : true,},
+		&models.Section{Seq: 1, Title: "Go language", RootNode: false, 
+			ParentsID: 1, Prefix: prj.Prefix, ProjectID : prj.ID, ForTestCase : true,},
+		&models.Section{Seq: 2, Title: "Javascript", RootNode: false, 
+			ParentsID: 1, Prefix: prj.Prefix, ProjectID : prj.ID, ForTestCase : true,},
+		&models.Section{Seq: 1, Title: "SB Admin2", RootNode: false, ParentsID: 2, 
+			Prefix: prj.Prefix, ProjectID : prj.ID, ForTestCase : true,},
+		&models.Section{Seq: 1, Title: "Git", RootNode: false, ParentsID: 3, 
+			Prefix: prj.Prefix, ProjectID : prj.ID, ForTestCase : true,},
+		&models.Section{Seq: 1, Title: "AAA", RootNode: true,  
+			Prefix: prj1.Prefix, ProjectID : prj1.ID, ForTestCase : true,},
+		&models.Section{Seq: 1, Title: "BBB", RootNode: false, ParentsID : 8,  
+			Prefix: prj1.Prefix, ProjectID : prj1.ID, ForTestCase : true,},
+		&models.Section{Seq: 1, Title: "ccc", RootNode: true,  
+			Prefix: prj1.Prefix, ProjectID : prj1.ID, ForTestCase : true,},
+		&models.Section{Seq: 1, Title: "ddd", RootNode: false, ParentsID : 10, 
+			Prefix: prj1.Prefix, ProjectID : prj1.ID, ForTestCase : true,},
+		&models.Section{Seq: 1, Title: "Test Specifications", RootNode: true,
+			Prefix: prj.Prefix, ProjectID : prj.ID, ForTestCase : false,},
+		&models.Section{Seq: 1, Title: "Functional", RootNode: false,
+			Prefix: prj.Prefix, ProjectID : prj.ID, ForTestCase : false,
+			ParentsID : 12,
+		},
+		&models.Section{Seq: 1, Title: "Non-Functional", RootNode: false,
+			Prefix: prj.Prefix, ProjectID : prj.ID, ForTestCase : false,
+			ParentsID : 12,
+		},
 	}
 
 	for _, section := range sections {
 		Db.NewRecord(section)
 		Db.Create(&section)
 	}
-
+	
+	Db.AutoMigrate(&models.Category{})
+	cate := []*models.Category{
+		&models.Category{Name : "Funtionality"},
+		&models.Category{Name : "Performance"},
+		&models.Category{Name : "Usability"},
+		&models.Category{Name : "Regression"},
+		&models.Category{Name : "Automated"},
+		&models.Category{Name : "Security"},
+		&models.Category{Name : "Compatibility"},
+		&models.Category{Name : "Accessability"},
+	}
+	
+	for _, ct := range cate {
+		Db.NewRecord(ct)
+		Db.Create(&ct)
+	}
+	
+	Db.AutoMigrate(&models.Specification{})
+	
+	specs := []*models.Specification{
+		&models.Specification{Name:"Hello, world", SectionID : 13, 
+			Status : models.SPEC_STATUS_ACTIVATE, Priority: models.PRIORITY_HIGH,
+		},
+		&models.Specification{Name:"Hello, stranger", SectionID : 14,
+			Status : models.SPEC_STATUS_ACTIVATE, Priority: models.PRIORITY_MEDIUM,
+		},
+		&models.Specification{Name:"Good bye", SectionID : 14,
+			Status : models.SPEC_STATUS_ACTIVATE, Priority: models.PRIORITY_LOW,
+		},
+	}
+	
+	for _, sp := range specs {
+		Db.NewRecord(sp)
+		Db.Create(&sp)
+	}
+	
 }
 
 func (c *GormController) Begin() revel.Result {

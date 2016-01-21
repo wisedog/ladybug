@@ -1,4 +1,5 @@
-{{set . "title" "Test Design"}}
+{{set . "title" "Test Case"}}
+{{set . "showsidebar" "true"}}
 {{template "header.html" .}}
 <div id="page-wrapper">
   <div class="row">
@@ -32,10 +33,10 @@
               <strong>Status :</strong>
             </div>
             <div class="col-lg-3">
-              {{if eq .tc.Status 0}}
-              Activation
-              {{else if eq .tc.Status 1}}
-              Deactivation
+              {{if eq .tc.Status 1}}
+              Active
+              {{else if eq .tc.Status 2}}
+              Inactive
               {{else}}
               Closed
               {{end}}
@@ -103,49 +104,45 @@
           <div class="row">
             <div class="col-lg-5">
               <h4><strong>Precondition</strong></h4>
-                      </div>
-                    </div> <!--/#row -->
-                    <div class="row">
-                      <div class="col-lg-10">
-                      {{.tc.Precondition}}
-                      </div>
-                    </div><!-- /#row -->
-                    <div class="row">
-                      <div class="col-lg-5">
-                        <h4><strong>Steps</strong></h4>
-                      </div>
-                    </div> <!--/#row -->
-                    <div class="row">
-                      <div class="col-lg-5">
-                      {{.Action}}
-                      </div>
-                      <div class="col-lg-5">
-                      {{.Expected}}
-                      </div>
-                    </div><!-- /#row -->
-                    <div class="row">
-                      <div class="col-lg-5">
-                        <h4><strong>Related Requirements</strong></h4>
-                      </div>
-                    </div> <!--/#row -->
-                    <div class="row">
-                      <div class="col-lg-5">
-                        <h4><strong>Tags</strong></h4>
-                      </div>
-                    </div> <!--/#row -->
+            </div>
+          </div> <!--/#row -->
+          <div class="row">
+            <div class="col-lg-10">
+              {{.tc.Precondition}}
+            </div>
+          </div><!-- /#row -->
+          <div class="row">
+            <div class="col-lg-5">
+              <h4><strong>Steps</strong></h4>
+            </div>
+          </div> <!--/#row -->
+          <div class="row">
+            <div class="col-lg-10">
+              {{.tc.Steps}}
+            </div>
+          </div> <!--/#row -->
+          <div class="row">
+            <div class="col-lg-5">
+              <h4><strong>Expected</strong></h4>
+            </div>
+          </div> <!--/#row -->
+          <div class="row">
+            <div class="col-lg-10">
+              {{.tc.Expected}}
+            </div>
+          </div> <!--/#row -->
+                    
 
-                  </div><!--/#panel-body -->
-                </div> <!-- /#panel panel-default -->
-              {{else}}
-                <p> no data! </p>
-              {{end}}
-            </div>
-            </div>
-            <!-- end of row -->
+            </div><!--/#panel-body -->
+          </div> <!-- /#panel panel-default -->
+          {{else}}
+            <p> no data! </p>
+          {{end}}
         </div>
-        <!-- /#page-wrapper -->
+      </div>
+      <!-- end of row -->
     </div>
-    <!-- /#wrapper -->  
-
-    
+    <!-- /#page-wrapper -->
+</div>
+<!-- /#wrapper -->  
 {{template "footer.html" .}}

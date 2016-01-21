@@ -81,6 +81,9 @@ POST    /project/:project/result/done           TestExecs.Done
 POST    /project/:project/result/deny           TestExecs.Deny
 GET     /project/:project/:id/run               TestExecs.Run
 
+# Specification
+GET     /project/:project/spec                  Specifications.Spec
+GET     /project/:project/spec/list             Specifications.List
 
 # Reports
 GET     /project/:project/reports               Reports.Reports

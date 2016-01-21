@@ -59,7 +59,7 @@
 
 {{template "footer.html" .}}
 
- <script src="/public/jstree/jstree.min.js"></script>
+<script src="/public/jstree/jstree.min.js"></script>
 
 <script>
 var ts_id = -1;
@@ -116,8 +116,6 @@ $(document).ready(function() {
         node_id = data.node.id;
         parent_id = data.node.parent;
         var level = data.node.parents.length;
-        console.log("level : ", level);
-        console.log("parent_id : ", parent_id);
 
         // run AJAX and render
         $.getJSON('/project/{{.project}}/section/'+ node_id, function(data){
@@ -136,17 +134,18 @@ $(document).ready(function() {
           }
           else{
             items.push("<div class='table-responsive'><table class='table table-striped'>");
-            items.push("<thead><tr><th>#</th><th>Title</th><th>Priority</th><th>Category</th><th>Action</th></tr></thead>");
+            items.push("<thead><tr><th>#</th><th>Title</th><th>Status</th><th>Priority</th><th>Category</th><th>Action</th></tr></thead>");
             items.push("<tbody>");
             $.each(data, function(key, val){
               var priority = ["Unknown", "Highest", "High", "Medium", "Low", "Lowest"];
-              
+              var status=["Unknown", "Active", "Inactive", "Close"];
                 items.push("<tr>"+ 
-                  "<td>"+ val.ID + "</td>" + 
+                  "<td>"+ val.DisplayID + "</td>" + 
                   "<td><a href='/project/{{.project}}/case/"+ val.ID + "'>" + 
                      val.Title + "</a></td>" + 
+                  "<td>" + status[val.Status] + "</td>" + 
                   "<td>" + priority[val.Priority] + "</td>" +
-                  "<td>" + val.Category + "</td>" +
+                  "<td>" + val.Category.Name + "</td>" +
                   "<td>" + 
                   "<span class='glyphicon glyphicon-edit fa-fw right7 tc-edit' id='"+ val.ID
                   +"' style='cursor:pointer;'></span>"+
@@ -193,12 +192,6 @@ $(document).ready(function() {
         if(parent_id == -1 || node_id == -1){
             return;
         }
-        /*if(parent_id != "#"){
-            pid = parent_id;
-        }*/
-
-        console.log('from subsection', from_subsection);
-
         if(from_subsection){
             pid = node_id;
         }
