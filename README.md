@@ -42,3 +42,10 @@ This app uses now only Postgresql. Various databases(MySQL, MarinaDB ....) will 
 * Test environment
 * Milestone
 * Test coverage
+
+### Open Sources
+
+* revel
+* gorm
+* AdminLTE : https://github.com/almasaeed2010/AdminLTE
+* Icon : http://www.freestockphotos.biz/stockphoto/10655
