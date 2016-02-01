@@ -56,12 +56,15 @@ func (c Users) Edit(id int) revel.Result {
 }
 
 func (c Users) Profile(id int) revel.Result {
-	var usr models.User
-	r := c.Tx.Where("id = ?", id).First(&usr)
+	var user models.User
+	r := c.Tx.Where("id = ?", id).First(&user)
 
 	if r.Error != nil {
 		return c.NotFound("Something wrong....")
 	}
+	
+	var activities []models.Activity
+	c.Tx.Where("user_id = ?", user.ID).Preload("User").Find(&activities)
 
-	return c.Render(usr)
+	return c.Render(user, activities)
 }

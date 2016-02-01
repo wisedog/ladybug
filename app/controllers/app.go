@@ -47,7 +47,7 @@ func (c Application) getUser(username string) *models.User {
 
 func (c Application) Index() revel.Result {
 	if c.connected() != nil {
-		return c.Redirect(routes.Hello.Index())
+		return c.Redirect(routes.Hello.Welcome())
 	}
 	c.Flash.Error("Please log in first")
 	return c.Render()
@@ -103,7 +103,7 @@ func (c Application) Login(email, password string, remember bool) revel.Result {
 			
 			user.LastLoginAt = time.Now()
 			c.Tx.Save(&user)
-			return c.Redirect(routes.Hello.Index())
+			return c.Redirect(routes.Hello.Welcome())
 		}
 	}
 

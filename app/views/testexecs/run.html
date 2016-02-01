@@ -1,91 +1,125 @@
-{{set . "title" "Test Plan"}}
-{{set . "showsidebar" "true"}}
+{{set . "title" "Test Execution"}}
+{{set . "active_index" "testexecution"}}
 
 {{template "header.html" .}}
-<div id="page-wrapper">
-  <div class="row vertical-align padtop10 bottom10">
-    <div class="col-lg-1">
-      <h4><strong>{{msg . "title"}}</strong></h4>
-    </div>
-    <div class="col-lg-8">
-      <h4><strong>{{.testexec.Plan.Title}}</strong></h4>
-    </div>
-  </div> <!-- .row -->
-  <div class="row top7">
-    <div class="col-lg-4">
-      <label class="right10">Build/Release</label>
-      <a href='{{url "Builds.View" .project .testexec.TargetBuild.BuildProjectID }}'>
-        {{.testexec.TargetBuild.FullDisplayName}}
-      </a>
-    </div>
-  </div> <!-- .row -->
-  <div class="row form-group padleft15">
-    <h4>{{msg . "description"}}</h4>
-    <div><span>{{.testexec.Plan.Description}}</span></div>
-  </div>
-  <div class="row padleft15">
-    <h4>Test cases to execute</h4>
-  </div>
-  <div class="row">
-    <div id="accordion" class="col-lg-8 left17">
-      {{range $idx, $element := .cases}}
-        <div class="accordion-toggle row {{range $k := $.results}}{{if eq $k.TestCaseId $element.ID}}{{if eq $k.Status true}}accordion-header-pass{{else}}accordion-header-fail{{end}}{{end}}{{end}}">
-          <i class="arrow-indicator padleft10 fa {{if eq $idx 0}}fa-caret-down{{else}}fa-caret-right{{end}}"></i>
-          <span class="font17 top17 bottom10">{{.Title}}</span>
-        </div>
-        <div class="accordion-content {{if eq $idx 0}}default{{end}} {{if eq $idx 0}}active-accordion-item{{end}}">
-          <label>Description</label>
-          <p>{{nl2br .Description}}</p>
-          <label>Precondition</label>
-          <p>{{nl2br .Precondition}}</p>
-          <label>Steps</label>
-          <p>{{nl2br .Steps}}</p>
-          <label>Expected</label>
-          <p>{{nl2br .Expected}}</p>
-          <div class="form-group">
-            <label>Actual Result</label>
-            <textarea id="textarea-{{.ID}}" class="form-control bottom10" rows="4"></textarea>
-          </div><!-- .accordion-content -->
-          
-          <button id="{{.ID}}" class="btn btn-success btn-xs padright10 padleft10 right7 btn-passfail">Pass</button>
-          <button id="{{.ID}}" class="btn btn-danger btn-xs padright10 padleft10 right7 btn-passfail">Fail</button>
-          <button class="btn btn-default btn-xs padright10 padleft10 right7 btn-skip">Skip</button>
-        </div>
-        
-      {{end}}
-    </div> <!-- #accordian -->
-  </div> <!-- .row -->
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <h1>
+      Running test
+      <small>Run a test plan</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="{{url "Projects.Dashboard" .project}}"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li><a href="{{url "TestExecs.Index" .project}}"> Test Execution</a></li>
+      <li class="active">Run</li>
+    </ol>
+  </section>
 
-  <div class="row left17" style="font-size:30px;">
-    <div>
-      <span class="board-pass right7">Pass</span>
-      <span id="pass-score" class="board-pass right17">{{.pass_counter}}</span>
-      <span class="board-fail righ7">Fail</span>
-      <span id="fail-score" class="board-fail right17">{{.fail_counter}}</span>
+  <!-- Main content -->
+  <section class="content">
+    <div class="box box-primary">
+      <div class="box-body">
+        <div class="row vertical-align bottom10">
+          <div class="col-md-1">
+            <h4><strong>{{msg . "title"}}</strong></h4>
+          </div>
+          <div class="col-md-8">
+            <h4><strong>{{.testexec.Plan.Title}}</strong></h4>
+          </div>
+        </div> <!-- .row -->
+        <div class="row">
+          <div class="col-md-4">
+            <label class="right10">Build/Release</label>
+            <a href='{{url "Builds.View" .project .testexec.TargetBuild.BuildProjectID }}'>
+              {{.testexec.TargetBuild.FullDisplayName}}
+            </a>
+          </div>
+        </div> <!-- .row -->
+        <div class="row form-group padleft15">
+          <h4>{{msg . "description"}}</h4>
+          <div><span>{{nl2br .testexec.Plan.Description}}</span></div>
+        </div>
+      </div>
     </div>
-  </div> <!-- .row -->
+    
+    <div class="row">
+      <div class="col-md-10">
+        <div class="box box-primary">
+          <div class="box-header with-border">
+            <h3 class="box-title">
+              Test cases to execute
+            </h3>
+          </div>
+          <div class="box-body">
+            <div id="accordion" class="col-md-8 left17">
+            {{range $idx, $element := .cases}}
+              <div class="accordion-toggle row {{range $k := $.results}}{{if eq $k.TestCaseId $element.ID}}{{if eq $k.Status true}}accordion-header-pass{{else}}accordion-header-fail{{end}}{{end}}{{end}}">
+                <i class="arrow-indicator padleft10 fa {{if eq $idx 0}}fa-caret-down{{else}}fa-caret-right{{end}}"></i>
+                <span class="font17 top17 bottom10">{{.Title}}</span>
+              </div>
+              <div class="accordion-content {{if eq $idx 0}}default{{end}} {{if eq $idx 0}}active-accordion-item{{end}}">
+                <label>Description</label>
+                <p>{{nl2br .Description}}</p>
+                <label>Precondition</label>
+                <p>{{nl2br .Precondition}}</p>
+                <label>Steps</label>
+                <p>{{nl2br .Steps}}</p>
+                <label>Expected</label>
+                <p>{{nl2br .Expected}}</p>
+                <div class="form-group">
+                  <label>Actual Result</label>
+                  <textarea id="textarea-{{.ID}}" class="form-control bottom10" rows="4"></textarea>
+                </div><!-- .accordion-content -->
+                
+                <button id="{{.ID}}" class="btn btn-success btn-xs padright10 padleft10 right7 btn-passfail">Pass</button>
+                <button id="{{.ID}}" class="btn btn-danger btn-xs padright10 padleft10 right7 btn-passfail">Fail</button>
+                <button class="btn btn-default btn-xs padright10 padleft10 right7 btn-skip">Skip</button>
+              </div>
+              
+            {{end}}
+            </div> <!-- #accordian -->
+          </div> <!-- .box-body -->
+        </div> <!-- .box -->
+      </div> <!-- .col-md- -->
+    </div> <!-- .row -->
   
-  <div class="row bottom17 left10">
-    <div class="form-group">
-      <label>Comment(Optional)</label>
-      <textarea id="exec-comment" class="form-control bottom10" rows="2"></textarea>
-    </div>
-  </div> <!-- .row -->
-  
-  <div class="row">
-    <button id="done-btn" class="btn btn-primary btn-xs">Done</button>
-    {{if eq .testexec.Status 3}}
-    <a href="javascript:history.back();">
-      <button id="temp" class="btn btn-secondary btn-xs">Back</button>
-    </a>
-    {{end}}
-  </div> <!-- .row -->
-  <!-- /#page-wrapper -->
+    <div class="row" style="font-size:30px;">
+      <div class="col-md-6">
+        <span class="board-pass right7">Pass</span>
+        <span id="pass-score" class="board-pass right17">{{.pass_counter}}</span>
+        <span class="board-fail righ7">Fail</span>
+        <span id="fail-score" class="board-fail right17">{{.fail_counter}}</span>
+      </div>
+    </div> <!-- .row -->
+    
+    <div class="row bottom17">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label>Comment(Optional)</label>
+          <textarea id="exec-comment" class="form-control bottom10" rows="2"></textarea>
+        </div>
+      </div>
+    </div> <!-- .row -->
+    
+    <div class="row">
+      <div class="col-md-6">
+        <button id="done-btn" class="btn btn-primary btn-sm btn-flat">Done</button>
+        {{if eq .testexec.Status 3}}
+        <a href="javascript:history.back();">
+          <button id="temp" class="btn btn-secondary btn-xs">Back</button>
+        </a>
+        {{end}}
+      </div>
+    </div> <!-- .row -->
+
+  </section>
+  <!-- /.content -->
 </div>
-<!-- /#wrapper -->
+<!-- /.content-wrapper -->
 
 {{template "footer.html" .}}
-
 
 <script>
 function goNext(){
@@ -202,3 +236,5 @@ $(document).ready(function(){
     
 }); // end of $(document).ready
 </script>
+
+{{template "footer_rest.html" .}}

@@ -22,7 +22,7 @@ func (c TestCases) checkUser() revel.Result {
 /*
  A page to show testcase's information
 */
-func (c TestCases) Index(project string, id int) revel.Result {
+func (c TestCases) CaseIndex(project string, id int) revel.Result {
 	var tc models.TestCase
 	r := c.Tx.Where("id = ?", id).First(&tc)
 
@@ -82,7 +82,7 @@ func (c TestCases) Save(project string, testcase models.TestCase, reviewerID int
 		revel.ERROR.Println("Update operation failed in TestCase.Save", r.Error)
 	}
 
-	return c.Redirect(routes.TestDesign.Index(project))
+	return c.Redirect(routes.TestDesign.DesignIndex(project))
 }
 
 /*
@@ -125,7 +125,7 @@ func (c TestCases) Delete(project string, id int) revel.Result {
 		return c.Render()
 	}
 
-	return c.Redirect(routes.TestDesign.Index(project))
+	return c.Redirect(routes.TestDesign.DesignIndex(project))
 }
 
 /*
@@ -151,7 +151,7 @@ func (c TestCases) Edit(project string, id int) revel.Result {
 	if r.Error != nil {
 		revel.ERROR.Println("An Error while SELECT operation for TestCase.Edit", r.Error)
 		c.Response.Status = 500
-		return c.Render(routes.TestDesign.Index(project))
+		return c.Render(routes.TestDesign.DesignIndex(project))
 	}
 	
 	flash := map[string]string{
@@ -216,5 +216,5 @@ func (c TestCases) Update(project string, id int, testcase models.TestCase) reve
 	c.Flash.Success("Update Success!")
 
 
-	return c.Redirect(routes.TestDesign.Index(project))
+	return c.Redirect(routes.TestDesign.DesignIndex(project))
 }

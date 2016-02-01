@@ -12,7 +12,7 @@ type TestDesign struct {
 	Application
 }
 
-func (c TestDesign) Index(project string) revel.Result {
+func (c TestDesign) DesignIndex(project string) revel.Result {
 
 	if user := c.connected(); user == nil {
 		c.Flash.Error("Please log in first")

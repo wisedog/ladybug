@@ -10,7 +10,7 @@ type Hello struct {
 	Application
 }
 
-func (c Hello) Index() revel.Result {
+func (c Hello) Welcome() revel.Result {
 	var user *models.User
 
 	if user = c.connected(); user == nil {

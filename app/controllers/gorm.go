@@ -61,6 +61,7 @@ func createDummy() {
 	Db.DropTable(&models.TestResult{})
 	Db.DropTable(&models.Category{})
 	Db.DropTable(&models.Specification{})
+	Db.DropTable(&models.Activity{})
 
 	// Create dummy users
 	Db.AutoMigrate(&models.User{})
@@ -69,16 +70,19 @@ func createDummy() {
 		[]byte("demo"), bcrypt.DefaultCost)
 
 	demoUser := &models.User{
-		Name: "Demo User", Email: "demo@demo.com", Password: "demo", 
+		Name: "Rey", Email: "demo@demo.com", Password: "demo", 
 		HashedPassword: bcryptPassword, Language: "en", Region: "US",
 		LastLoginAt : time.Now(), Roles : models.ROLE_ADMIN,
+		Photo : "rey_160x160", Location : "Jakku",
+		Notes : "I know all about waiting. For my family. They'll be back, one day.",
 	}
 	Db.NewRecord(demoUser) // => returns `true` if primary key is blank
 	Db.Create(&demoUser)
 
-	demoUser1 := &models.User{Name: "Wisedog", Email: "wisedog@demo.com", Password: "demo",
+	demoUser1 := &models.User{Name: "Poe Dameron", Email: "wisedog@demo.com", Password: "demo",
 		HashedPassword: bcryptPassword, Language: "en", Region: "US", LastLoginAt : time.Now(),
-		Roles : models.ROLE_MANAGER,
+		Roles : models.ROLE_MANAGER, Photo : "poe_160x160",
+		Location : "D'Qar", Notes : "Red squad, blue squad, take my lead.",
 		
 	}
 	Db.NewRecord(demoUser1)
@@ -174,6 +178,18 @@ func createDummy() {
 
 	// Create dummy build
 	Db.AutoMigrate(&models.Build{})
+	b := []*models.Build{
+		&models.Build{Name:"Millenium Falcon", 
+			Description : "Modeling files for Millenium Falcon", 
+			Project_id : prj.ID, ToolName: "manual",
+		},
+	}
+	
+	for _, bi := range b {
+		Db.NewRecord(bi)
+		Db.Create(&bi)
+	}
+	
 	
 	// Create dummy build items
 	Db.AutoMigrate(&models.BuildItem{})
@@ -260,6 +276,18 @@ func createDummy() {
 		Db.Create(&sp)
 	}
 	
+	Db.AutoMigrate(&models.Activity{})
+	
+	activities := []*models.Activity{
+		&models.Activity{UserID : demoUser.ID, Content : "Rey finished Test Execution #1"},
+		&models.Activity{UserID : demoUser.ID, Content : "Rey created Test Plan #1"},
+		&models.Activity{UserID : demoUser.ID, Content : "Rey modified TC-5"},
+	}
+	
+	for _, ac := range activities {
+		Db.NewRecord(ac)
+		Db.Create(&ac)
+	}
 }
 
 func (c *GormController) Begin() revel.Result {

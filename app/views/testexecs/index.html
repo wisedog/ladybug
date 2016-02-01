@@ -1,102 +1,117 @@
 {{set . "title" "Test Execution"}}
-{{set . "showsidebar" "true"}}
+{{set . "active_index" "testexecution"}}
 {{template "header.html" .}}
-<div id="page-wrapper">
-  <div class="row padtop15">
-    <div class="col-lg-12" style="margin-left:-10px;">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <label>
-            Test execution list
-          </label>
-        </div> <!-- .panel-heading -->
-        <div class="panel-body">
-          <div class='table-responsive'>
-            <table class='table table-striped'>
-              <thead>
-                <tr>
-                  <th>Status</th>
-                  <th>TestPlan</th>
-                  <th>TC#</th>
-                  <th>Tester</th>
-                  <th>Build</th>
-                  <th>Progress</th>
-                  <th>Pass/Fail</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-              {{range .testexecs}}
-              <tr>
-                <td>
-                  {{if eq .Status 1}}
-                    Ready
-                  {{else if eq .Status 2}}
-                    In Progress
-                  {{else if eq .Status 3}}
-                    N/A
-                  {{else if eq .Status 4}}
-                    Done
-                  {{else if eq .Status 5}}
-                    Done-Deny
-                  {{else}}
-                    Unknown
-                  {{end}}
-                </td>
-                <td><a href='{{url "TestPlans.View" $.project .Plan.ID}}'>{{.Plan.Title}}</a></td>
-                <td>{{.Plan.ExecCaseNum}}</td>
-                <td>{{.Executor.Name}}</td>
-                <td>
-                  <a href='{{url "Builds.View" $.project .TargetBuild.BuildProjectID }}'>
-                    {{.TargetBuild.FullDisplayName}}
-                  </a>
-                </td>
-                <td>{{.Progress}}%</td>
-                <td>{{.PassCaseNum}}/{{.FailCaseNum}}</td>
-                <td>
-                  {{if lt .Status 4}}
-                  <a href='{{url "TestExecs.Run" $.project .ID}}' class="glyphicon glyphicon-fire fa-fw"></a>
-                  <a href='#' id="{{.ID}}" class="exec-ban glyphicon glyphicon-ban-circle" data-toggle="modal" data-target="#myModal" ></a>
-                  <a href='javascript:remove({{.ID}});' class="glyphicon glyphicon-remove"></a>
-                  {{end}}
-                </td>
-              </tr>
-              {{end}}
-              </tbody>
-            </table>
-          </div> <!-- .table-responsive -->
-        </div><!-- .panel-body -->
-      </div> <!-- .panel-default -->       
-    </div>  <!-- .col-lg-12 -->
-  </div><!-- .row -->
-  <!-- Modal -->
-  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-          <div class="modal-content">
-              <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                  <h4 class="modal-title" id="myModalLabel">Deny the test execution</h4>
-              </div>
-              <div class="modal-body">
-                <div id="deny-group" class="form-group">
-                  <label class="control-label">Please give me a reason to deny the test execution</label>
-                  <input id="deny-msg" class="form-control">
-                </div>
-              </div>
-              <div class="modal-footer">
-                  <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Cancel</button>
-                  <button id="btn-deny" type="button" class="btn btn-primary btn-sm">Deny</button>
-              </div>
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <h1>
+      Test Execution
+      <small>Manage test executions</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="{{url "Projects.Dashboard" .project}}"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li class="active">Test Execution</li>
+    </ol>
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="box box-primary">
+          <div class="box-header with-border">
+            <label>
+              Test execution list
+            </label>
           </div>
-          <!-- /.modal-content -->
-      </div>
-      <!-- /.modal-dialog -->
-  </div>
-  <!-- /.modal -->
-
-</div> <!-- /#page-wrapper -->
-</div>  <!-- /#wrapper -->  
-
+          <div class="box-body">
+            <div class='table-responsive'>
+              <table class='table table-striped'>
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>TestPlan</th>
+                    <th>TC#</th>
+                    <th>Tester</th>
+                    <th>Build</th>
+                    <th>Progress</th>
+                    <th>Pass/Fail</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {{range .testexecs}}
+                <tr>
+                  <td>
+                    {{if eq .Status 1}}
+                      Ready
+                    {{else if eq .Status 2}}
+                      In Progress
+                    {{else if eq .Status 3}}
+                      N/A
+                    {{else if eq .Status 4}}
+                      Done
+                    {{else if eq .Status 5}}
+                      Done-Deny
+                    {{else}}
+                      Unknown
+                    {{end}}
+                  </td>
+                  <td><a href='{{url "TestPlans.View" $.project .Plan.ID}}'>{{.Plan.Title}}</a></td>
+                  <td>{{.Plan.ExecCaseNum}}</td>
+                  <td>{{.Executor.Name}}</td>
+                  <td>
+                    <a href='{{url "Builds.View" $.project .TargetBuild.BuildProjectID }}'>
+                      {{.TargetBuild.FullDisplayName}}
+                    </a>
+                  </td>
+                  <td>{{.Progress}}%</td>
+                  <td>{{.PassCaseNum}}/{{.FailCaseNum}}</td>
+                  <td>
+                    {{if lt .Status 4}}
+                    <a href='{{url "TestExecs.Run" $.project .ID}}' class="glyphicon glyphicon-fire fa-fw"></a>
+                    <a href='#' id="{{.ID}}" class="exec-ban glyphicon glyphicon-ban-circle" data-toggle="modal" data-target="#myModal" ></a>
+                    <a href='javascript:remove({{.ID}});' class="glyphicon glyphicon-remove"></a>
+                    {{end}}
+                  </td>
+                </tr>
+                {{end}}
+                </tbody>
+              </table>
+            </div> <!-- .table-responsive -->
+          </div> <!-- .box-body -->
+        </div> <!-- .box -->
+      </div>  <!-- .col-md-12 -->
+    </div><!-- .row -->
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Deny the test execution</h4>
+                </div>
+                <div class="modal-body">
+                  <div id="deny-group" class="form-group">
+                    <label class="control-label">Please give me a reason to deny the test execution</label>
+                    <input id="deny-msg" class="form-control">
+                  </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Cancel</button>
+                    <button id="btn-deny" type="button" class="btn btn-primary btn-sm">Deny</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+  </section>
+  <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
     
 {{template "footer.html" .}}
 
@@ -148,3 +163,5 @@
   });
   
 </script>
+
+{{template "footer_rest.html" .}}

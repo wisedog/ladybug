@@ -22,7 +22,7 @@ type BuildItem struct {
 	ArtifactsName	string
 	Result			string		// for example in jenkins "SUCCESS"
 	Status			int			// 0: failed 1: successful
-	
+	Seq				int			// for adding manual build. start from 1
 	TimeStamp		int64
 	BuildAt			time.Time
 }
@@ -35,9 +35,9 @@ type Build struct {
 	Project_id   	int
 	BuildUrl	 	string	// build url
 	ToolName       	string 	// manual, jenkins, teamcity ....
-	Status		 	int 	// 0 : failed 1 : successful and so on.... 
+	Status		 	int 	// 0 : unknown 1 : successful, 2 : failed and so on.... 
 	
-	BuildItemNum	int
+	BuildItemNum	int		// total build items of this build project
 	BuildItems		[]BuildItem
 
 	CreatedAt time.Time

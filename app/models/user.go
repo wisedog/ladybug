@@ -27,6 +27,7 @@ type User struct {
 	Location       string
 	Photo          string	// TODO URL
 	Roles			int
+	Notes			string
 	//TODO Roles          []Role
 	//TODO link of email, homepage, FB, TW, G+ ....
 

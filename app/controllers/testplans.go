@@ -51,7 +51,7 @@ func (c TestPlans) Add(project string) revel.Result {
 	r = c.Tx.Where("project_id = ?", prj.ID).Find(&builds)
 
 	var sections []models.Section
-	c.Tx.Where("project_id = ?", prj.ID).Find(&sections)
+	c.Tx.Where("project_id = ?", prj.ID).Where("for_test_case = ?", true).Find(&sections)
 
 	var nodes []models.JSTreeNode
 
