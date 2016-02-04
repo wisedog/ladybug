@@ -8,13 +8,12 @@ services:
   - redis-server
 install:
   - export PATH=$PATH:$HOME/gopath/bin
-  - go get -v github.com/revel/revel
+  - go get -v github.com/revel/revel/...
   - go get -v github.com/agtorre/gocolorize
   - go get -v github.com/robfig/config
   - go get -v github.com/robfig/pathtree
   - go get -v github.com/revel/cmd/revel
   - go get -v github.com/revel/revel/cache
-  - go get -v github.com/revel/revel/harness 
   - go get -v golang.org/x/net
   - go get -v gopkg.in/fsnotify.v1
   - go get -v github.com/jinzhu/gorm
