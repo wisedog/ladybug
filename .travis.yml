@@ -3,6 +3,7 @@ language: go
 go:
   - 1.3
   - tip
+sudo: false
 services:
   - memcache # github.com/revel/revel/cache
   - redis-server
@@ -20,6 +21,9 @@ install:
   #- go get -v github.com/jinzhu/inflection
   - go get -v github.com/robfig/cron
   #- go get -v golang.org/x/net
-  #- go get -v golang.org/x/crypto
+  - go get -v golang.org/x/crypto
   #- go get -v github.com/revel/modules
-
+script:
+  - go test github.com/wisedog/ladybug
+  - revel test github.com/wisedog/ladybug
+  - sleep 30
