@@ -7,6 +7,11 @@ sudo: false
 services:
   - memcache # github.com/revel/revel/cache
   - redis-server
+  - postgresql
+addons:
+  postgresql: "9.3"
+before_script:
+  - psql -c 'create database ladybug;' -U postgres
 install:
   - export PATH=$PATH:$HOME/gopath/bin
   - go get -v github.com/revel/revel/...
@@ -18,12 +23,8 @@ install:
   - go get -v gopkg.in/fsnotify.v1
   - go get -v github.com/lib/pq
   - go get -v github.com/jinzhu/gorm
-  #- go get -v github.com/jinzhu/inflection
   - go get -v github.com/robfig/cron
-  #- go get -v golang.org/x/net
   - go get -v golang.org/x/crypto/bcrypt
-  #- go get -v github.com/revel/modules
 script:
-  - go test github.com/wisedog/ladybug
   - revel test github.com/wisedog/ladybug
   - sleep 30

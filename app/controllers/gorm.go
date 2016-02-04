@@ -19,7 +19,7 @@ var Db gorm.DB
 
 func InitDB() {
 	var err error
-	Db, err = gorm.Open("postgres", "user=ladybug password=a1234567! dbname=ladybug sslmode=disable")
+	Db, err = gorm.Open("postgres", "user=postgres dbname=ladybug sslmode=disable")
 	if err != nil {
 		revel.ERROR.Println("FATAL", err)
 		panic(err)
@@ -62,6 +62,7 @@ func createDummy() {
 	Db.DropTable(&models.Category{})
 	Db.DropTable(&models.Specification{})
 	Db.DropTable(&models.Activity{})
+	Db.DropTable(&models.History{})
 
 	// Create dummy users
 	Db.AutoMigrate(&models.User{})
@@ -158,7 +159,7 @@ func createDummy() {
 			Steps : "1. Drag some texts on web browser to select text and CTRL + C\n2. Click TextArea and CTRL + V",
 			Expected : "Selected text are copied in TextArea",
 			ProjectID : prj.ID, Priority : models.PRIORITY_LOW,
-			DisplayID : prj.Prefix + "-5",Estimated : 10,
+			DisplayID : prj.Prefix + "-5",
 			},
 	}
 
@@ -276,6 +277,8 @@ func createDummy() {
 		Db.Create(&sp)
 	}
 	
+	
+	// for creating dummy for Activity
 	Db.AutoMigrate(&models.Activity{})
 	
 	activities := []*models.Activity{
@@ -288,6 +291,9 @@ func createDummy() {
 		Db.NewRecord(ac)
 		Db.Create(&ac)
 	}
+	
+	// for creating dummy for History
+	Db.AutoMigrate(&models.History{})
 }
 
 func (c *GormController) Begin() revel.Result {
