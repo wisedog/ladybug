@@ -14,12 +14,12 @@ install:
   - go get -v github.com/robfig/pathtree
   - go get -v github.com/revel/cmd/revel
   - go get -v github.com/revel/revel/cache
-  - go get -v golang.org/x/net
   - go get -v gopkg.in/fsnotify.v1
-  - go get -v github.com/jinzhu/gorm
-  - go get -v github.com/jinzhu/inflection
   - go get -v github.com/lib/pq
-  - go get -v golang.org/x/crypto
-  - go get -v github.com/revel/modules
+  - go get -v github.com/jinzhu/gorm
+  #- go get -v github.com/jinzhu/inflection
   - go get -v github.com/robfig/cron
+  #- go get -v golang.org/x/net
+  #- go get -v golang.org/x/crypto
+  - go get -v github.com/revel/modules
 
