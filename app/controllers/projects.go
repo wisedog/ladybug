@@ -3,13 +3,21 @@ package controllers
 import (
 	"github.com/revel/revel"
 	"github.com/wisedog/ladybug/app/models"
+	"github.com/wisedog/ladybug/app/routes"
 )
 
 type Projects struct {
 	Application
 }
 
-func (c Projects) Index(project string) revel.Result {
+func (c Projects) Dashboard(project string) revel.Result {
+	var user *models.User
+
+	if user = c.connected(); user == nil {
+		c.Flash.Error("Please log in first")
+		return c.Redirect(routes.Application.Index())
+	}
+	
 	var prj models.Project
 	r := c.Tx.Where("name = ?", project).First(&prj)
 	
@@ -25,7 +33,7 @@ func (c Projects) Index(project string) revel.Result {
 	
 	var execs []models.Execution
 	
-	c.Tx.Where("projecT_id = ?", prj.ID).Find(&execs)
+	c.Tx.Where("project_id = ?", prj.ID).Find(&execs)
 	
 	exec_count := 0
 	task_count := 0
@@ -37,7 +45,7 @@ func (c Projects) Index(project string) revel.Result {
 		}
 	}
 	
-	return c.Render(prj, project, tc_count, exec_count, task_count)
+	return c.Render(user, prj, project, tc_count, exec_count, task_count)
 }
 
 func (c Projects) GetProjectList(limit int) revel.Result{

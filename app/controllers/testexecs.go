@@ -15,6 +15,8 @@ const(
 	EXEC_STATUS_NOT_AVAILABLE
 	EXEC_STATUS_DONE
 	EXEC_STATUS_DENY
+	EXEC_STATUS_PASS
+	EXEC_STATUS_FAIL
 	)
 
 // struct for response in JSON 
@@ -105,6 +107,10 @@ func (c TestExecs) Done(project string, exec_id int, comment string) revel.Resul
 	}
 	
 	testexec.Status = EXEC_STATUS_DONE
+	//TODO add param pass_cnt, fail_cnt. 
+	//TODO validation pass_cnt+fail_cnt == total count
+	// if true, choose EXEC_STATUS_PASS or EXEC_STATUS_FAIL
+	// else EXEC_STATUS_DONE
 	
 	r = c.Tx.Save(&testexec)
 	if r.Error != nil{
@@ -144,7 +150,6 @@ func (c TestExecs) UpdateResult(case_id int, exec_id int, result bool, actual st
 			return c.RenderJson(k)
 		}
 	} else{
-		revel.INFO.Println("INFO : ", exec_id, case_id)
 		r = c.Tx.Where("exec_id = ? and test_case_id = ?", exec_id, case_id).First(&rv)
 		if r.Error != nil{
 			revel.ERROR.Println("Select operation failed in TestExecs.UpdateResult")

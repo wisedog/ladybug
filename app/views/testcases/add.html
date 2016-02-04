@@ -1,115 +1,172 @@
 {{set . "title" "Test Case"}}
-{{set . "showsidebar" "true"}}
+{{set . "active_index" "testdesign"}}
 {{template "header.html" .}}
-<div id="page-wrapper">
-  <form id="form_case" method="POST" action="{{url "TestCases.Save" .project }}">
-    <div class="row">
-      {{with $field := field "testcase.SectionID" .}}
-      <input type="hidden" name="{{$field.Name}}" value="{{$field.Value}}">
-      {{end}}
-      {{with $field := field "testcase.Prefix" .}}
-      <input type="hidden" name="{{$field.Name}}" value="{{$field.Value}}">
-      {{end}}
-      <div class="col-lg-12" style="margin-top:20px">
-        <div class="row vertical-align bottom10">
-          <div class="col-lg-1">
-            <strong>Title</strong>
-          </div>
-          {{with $field := field "testcase.Title" .}}
-          <div class="col-lg-8 {{if $field.Error}}has-error{{end}}">
-            <input id="tc-title" class="form-control" name="{{$field.Name}}" value="{{$field.Flash}}">
-          </div>
-          {{end}}
-        </div>
-        <div class="row vertical-align bottom10">
-          <div class="col-lg-1">
-            <label>Priority</label>
-          </div>
-          <div class="col-lg-2">
-            <!-- TODO options below -->
-            {{with $field := field "testcase.Status" .}}
-            <select class="form-control" name="{{$field.Name}}">
-              {{option $field "1" "Draft"}}
-              {{option $field "2" "In Progress"}}
-              {{option $field "3" "In Review"}}
-              {{option $field "4" "Release"}}
-            </select>
-            {{end}}
-          </div>
-          <div class="col-lg-1">
-            <label>Type</label>
-          </div>
-          <div class="col-lg-2">
-            <!-- TODO options below -->
-            {{with $field := field "testcase.Status" .}}
-            <select class="form-control" name="{{$field.Name}}">
-              {{option $field "1" "Draft"}}
-              {{option $field "2" "In Progress"}}
-              {{option $field "3" "In Review"}}
-              {{option $field "4" "Release"}}
-            </select>
-            {{end}}
-          </div>
-          <div class="col-lg-1">
-            <label>Estimate Time</label>
-          </div>
-          <div class="col-lg-2">
-            <input class="form-control">
-          </div>
-        </div> <!-- .row -->
-        <div class="row vertical-align bottom10">
-          <div class="col-lg-1"><strong>Status</strong></div>
-          <div class="col-lg-3">
-            {{with $field := field "testcase.Status" .}}
-            <select class="form-control" name="{{$field.Name}}">
-              {{option $field "1" "Draft"}}
-              {{option $field "2" "In Progress"}}
-              {{option $field "3" "In Review"}}
-              {{option $field "4" "Release"}}
-            </select>
-            {{end}}
-          </div>
-        </div>
-        <div class="row vertical-align bottom10">
-          <div class="col-lg-1"><strong>Prefix</strong></div>
-          <div class="col-lg-3">
-            {{with $field := field "testcase.Prefix" .}}
-            <input class="form-control" name="{{$field.Name}}" value="{{$field.Value}}" disabled>
-            {{end}}
-          </div>
-        </div> <!-- end of row -->
-        <div class="row form-group bottom10 left5">
-          <label>{{msg . "description"}}</label>
-          {{with $field := field "testcase.Description" .}}
-          <textarea class="form-control" rows="4" name="{{$field.Name}}">{{$field.Flash}}</textarea>
-          {{end}}
-        </div><!-- end of row -->
-        <div class="row form-group bottom10 left5">
-            <label>Steps</label>
-            {{with $field := field "testcase.Steps" .}}
-            <textarea class="form-control" rows="4" name="{{$field.Name}}">{{$field.Value}}</textarea>
-            {{end}}
-        </div>
-        <div class="row form-group bottom10 left5">
-            <label>Expected Result</label>
-            {{with $field := field "testcase.Expected" .}}
-            <textarea class="form-control" rows="4" name="{{$field.Name}}">{{$field.Value}}</textarea>
-            {{end}}
-        </div>
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <h1>
+      Add a test case
+      <small></small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="{{url "Projects.Dashboard" .project}}"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li><a href="{{url "TestDesign.DesignIndex" .project}}">Test Design</a></li>
+      <li class="active">Here</li>
+    </ol>
+  </section>
 
-        <div class="row">
-          <button type="submit" class="btn btn-primary">Create</button>
-          <button id="btn_cancel" type="button" class="btn btn-default">Cancel</button>
-          <button id="btn_temp" type="button" class="btn btn-secondary">Temp</button>
-        </div>
-        <div id="board" class="row">
-
-        </div>
-        <!-- end of row -->
-      </div>
+  <!-- Main content -->
+  <section class="content">
+    <form id="form_case" method="POST" action="{{url "TestCases.Save" .project }}">
+    {{with $field := field "testcase.SectionID" .}}
+    <input type="hidden" name="{{$field.Name}}" value="{{$field.Value}}">
+    {{end}}
+    {{with $field := field "testcase.Prefix" .}}
+    <input type="hidden" name="{{$field.Name}}" value="{{$field.Value}}">
+    {{end}}
+    {{with $field := field "testcase.Status" .}}
+    <input type="hidden" name="{{$field.Name}}" value="1">
+    {{end}}
     </form>
-    <!-- /#page-wrapper -->
-  </div>
-  <!-- /#wrapper -->  
+    <div class="box box-primary">
+      <div class="box-body">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="row vertical-align bottom10">
+              <div class="col-md-1">
+                <strong>Title</strong>
+              </div>
+              {{with $field := field "testcase.Title" .}}
+              <div class="col-md-8 {{if $field.Error}}has-error{{end}}">
+                <input id="tc-title" class="form-control" name="{{$field.Name}}" value="{{$field.Flash}}">
+              </div>
+              {{end}}
+            </div>
+            <div class="row vertical-align bottom10">
+              <div class="col-md-1">
+                <label>Priority</label>
+              </div>
+              <div class="col-md-2">
+                <!-- TODO options below -->
+                {{with $field := field "testcase.Priority" .}}
+                <select class="form-control" name="{{$field.Name}}">
+                  {{option $field "1" "Highest"}}
+                  {{option $field "2" "High"}}
+                  {{option $field "3" "Medium"}}
+                  {{option $field "4" "Low"}}
+                  {{option $field "5" "Lowest"}}
+                </select>
+                {{end}}
+              </div>
+              <div class="col-md-1">
+                <label>Type</label>
+              </div>
+              <div class="col-md-2">
+                {{with $field := field "testcase.CategoryID" .}}
+                <select class="form-control" name="{{$field.Name}}">
+                  {{range $.category}}
+                  <option value="{{.ID}}">{{.Name}}</option>
+                  {{end}}
+                </select>
+                {{end}}
+              </div>
+              <div class="col-md-1">
+                <label>Estimate Time</label>
+              </div>
+              <div class="col-md-2">
+                {{with $field := field "testcase.Estimated" .}}
+                <input class="form-control" name="{{$field.Name}}">
+                {{end}}
+              </div>
+            </div> <!-- .row -->
+            <div class="row vertical-align bottom10">
+              <div class="col-md-1"><strong>Prefix</strong></div>
+              <div class="col-md-3">
+                {{with $field := field "testcase.Prefix" .}}
+                <input class="form-control" name="{{$field.Name}}" value="{{$field.Value}}" disabled>
+                {{end}}
+              </div>
+              <div class="col-md-2">
+                <input type="checkbox" id="chk-reviewer"></input>
+                <label>Review(TODO)</label>
+              </div>
+              <div class="col-md-3">
+                {{with $field := field "reviewerID" .}}
+                <select class="form-control" name="{{$field.Name}}" id="reviewer-select" disabled>
+                  {{option $field "1" "Demo"}}
+                  {{option $field "2" "Wisedog"}}
+                </select>
+                {{end}}
+              </div><!-- .row -->
+            </div> <!-- end of row -->
+          </div> <!-- .col-md-12 -->
+        </div> <!-- .row -->
+      </div> <!-- .box-body -->
+    </div> <!-- .box -->
+    
+    
+    <div class="row form-group bottom10">
+      <div class="col-md-12">
+        <label>{{msg . "description"}}</label>
+        {{with $field := field "testcase.Description" .}}
+        <textarea class="form-control" rows="4" name="{{$field.Name}}">{{$field.Flash}}</textarea>
+        {{end}}
+      </div>
+    </div><!-- end of row -->
+    <div class="row form-group bottom10">
+      <div class="col-md-12">
+        <label>Precondition</label>
+        {{with $field := field "testcase.Precondition" .}}
+        <textarea class="form-control" rows="4" name="{{$field.Name}}">{{$field.Value}}</textarea>
+        {{end}}
+      </div>
+    </div><!-- end of row -->
+    <div class="row form-group bottom10">
+      <div class="col-md-12">
+        <label>Steps</label>
+        {{with $field := field "testcase.Steps" .}}
+        <textarea class="form-control" rows="4" name="{{$field.Name}}">{{$field.Value}}</textarea>
+        {{end}}
+      </div>
+    </div><!-- end of row -->
+    <div class="row form-group bottom10">
+      <div class="col-md-12">
+        <label>Expected Result</label>
+        {{with $field := field "testcase.Expected" .}}
+        <textarea class="form-control" rows="4" name="{{$field.Name}}">{{$field.Value}}</textarea>
+        {{end}}
+      </div>
+    </div><!-- end of row -->
 
-  {{template "footer.html" .}}
+    <div class="row">
+      <div class="col-md-6">
+        <button type="submit" class="btn btn-primary btn-sm btn-flat">Create</button>
+        <button id="btn_cancel" type="button" class="btn btn-danger btn-sm btn-flat">Cancel</button>
+        <button id="btn_temp" type="button" class="btn btn-secondary">Temp</button>
+      </div>
+    </div><!-- end of row -->
+    <div id="board" class="row">
+
+    </div><!-- .row -->
+  </section>
+  <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+{{template "footer.html" .}}
+
+<script>
+  $('#chk-reviewer').change(function(){
+    if($(this).is(':checked') == true){
+      $('#reviewer-select').prop('disabled', false);
+    }else{
+      $('#reviewer-select').prop('disabled', true);
+    }
+  });
+  
+  $('#btn_cancel').click(function(){
+    window.location='{{url "TestDesign.DesignIndex" .project}}';
+  });
+</script>
+
+{{template "footer_rest.html" .}}

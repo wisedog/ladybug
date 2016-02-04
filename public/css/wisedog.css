@@ -85,6 +85,13 @@
     height: 20px;
     border-radius: 50%;
 }
+.gray-circle20{
+  background : #A4A4A4;
+  width : 20px;
+  height : 20px;
+  border-radius : 50%;
+  
+}
 
 /* Iteration items for hello page(Hello.Index)*/
 .iteration-item{
@@ -100,17 +107,39 @@
 /*
 see http://uniondesign.ca/simple-accordion-without-jquery-ui/
 */
-.accordion-toggle {cursor: pointer;}
+.accordion-toggle {
+  cursor: pointer;
+  border-top:3px solid #DDD;
+  border-bottom:1px solid #F4F4F4;
+  border-top-color:#DDD;
+  padding : 10px;
+  margin-bottom:5px;
+}
 .accordion-content {
   padding:7px;
   display: none;
-  border:1px solid #DDD;
-  border-radius:4px;
+  
+  
 }
 .accordion-content.default {display: block;}
 
 /* below are custom css for accordion */
-.accordion-header-normal{border:1px solid #DDD;background:#F5F5F5;}
-.accordion-header-pass{border:1px solid #DDD;background:#5CB85C;}
-.accordion-header-fail{border:1px solid #DDD;background:#D9534F;}
+.accordion-header-normal{
+  border-top:3px solid #DDD;
+  border-bottom:1px solid #F4F4F4;
+  border-top-color:#DDD;
+  background:#F5F5F5;
+  
+}
+.accordion-header-pass{
+  border-top:3px solid #DDD; 
+  border-bottom:1px solid #F4F4F4;
+  border-top-color:#00a65a;
+  
+}
+.accordion-header-fail{
+  border-top:3px solid #DDD;
+  border-bottom:1px solid #F4F4F4;
+  border-top-color:#dd4b39;
+}
 

@@ -1,32 +1,44 @@
-{{set . "title" "Home"}}
-{{template "header.html" .}}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/public/img/favicon.png">
+    {{set . "title" "Home"}}
+    <title>{{.title}}</title>
 
-<div id="login">
+    <!-- Bootstrap core CSS -->
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet">
 
-  (try with demo/demo)
+    <!-- Custom styles for this template -->
+    <link href="/public/css/signin.css" rel="stylesheet">
 
-  <form action="{{url "Application.Login"}}" id="formLogin" method="POST">
-    <p class="field">
-      <label>Login Name:</label>
-      <input type="text" name="username" size="19" value="{{.flash.username}}" />
-    </p>
-    <p class="field">
-      <label>Password:</label>
-      <input type="password" name="password" size="19"/>
-    </p>
-    <p class="field">
-      <label>Remember:</label>
-      <input type="checkbox" name="remember" value="true"/>
-    </p>
-    <p class="buttons">
-      <input type="submit" value="Account login" />
-    </p>
-  </form>
+  </head>
 
-  <p>
-    <a href="{{url "Application.Register"}}">Register New User</a>
-  </p>
+  <body>
 
-</div>
+    <div class="container">
 
-{{template "footer.html" .}}
+      <form class="form-signin" action="{{url "Application.Login"}}" id="formLogin" method="POST">
+        <h3 class="form-signin-heading">Log in to Ladybug</h3>
+        <label for="inputEmail" class="sr-only">Email address</label>
+        <input type="email" name="email" id="inputEmail" class="form-control" value="{{.flash.email}}" placeholder="Email address" required autofocus>
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" value="remember"> Remember me
+          </label>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        <a href="{{url "Application.Register"}}">Sign up</a>
+      </form>
+    </div> <!-- /container -->
+  </body>
+</html>
+
+

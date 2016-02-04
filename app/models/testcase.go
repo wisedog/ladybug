@@ -13,12 +13,21 @@ const (
 	PRIORITY_LOWEST
 	)
 
+const (
+	TC_STATUS_ACTIVATE = 1 + iota
+	TC_STATUS_INACTIVE
+	TC_STATUS_DRAFT
+	)
+
+
+
 /*
   A model for test case.
 */
 type TestCase struct {
 	ID            int
 	Prefix        string `sql:"not null"`
+	DisplayID		string	`sql:"not null"`
 	Seq           int    `sql:"not null"`
 	Title         string `sql:"size:400"`
 	Section       Section
@@ -31,11 +40,15 @@ type TestCase struct {
 	Estimated     int    // unit : min(s)
 	RelatedReq    int    // TODO
 	Version       int
-	Category      int    // Functionality....
 	Steps         string `sql:"size:1000"`
 	Expected      string `sql:"size:1000"`
 	Project		  Project	
 	ProjectID	  int
+	Category		Category
+	CategoryID		int
+	
+	// need many-to-many releationship between specification and testcase. 
+	// Specifications       []Specification `gorm:"many2many:spec_cases;"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

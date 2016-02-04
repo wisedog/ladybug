@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"fmt"
 )
 
 const (
@@ -36,7 +37,7 @@ func (c Builds) checkUser() revel.Result {
 func (c Builds) Index(project string) revel.Result {
 	var builds []models.Build
 
-	r := c.Tx.Find(&builds)
+	r := c.Tx.Order("id desc").Find(&builds)
 	if r.Error != nil {
 	}
 
@@ -50,6 +51,51 @@ func (c Builds) Add(project string) revel.Result {
 	var build models.Build
 
 	return c.Render(project, build)
+}
+
+func (c Builds) AddBuildItem(project string, id int) revel.Result{
+	var build models.Build
+	r := c.Tx.Where("id = ?", id).First(&build)
+	
+	if r.Error != nil{
+		revel.ERROR.Println("Could not find build project")
+		c.Response.Status = 500
+		return c.Render()
+	}
+	
+	return c.Render(project, build)
+}
+
+func (c Builds) SaveBuildItem(project string, id int) revel.Result{
+	var build models.Build
+	r := c.Tx.Where("id = ?", id).First(&build)
+	
+	if r.Error != nil{
+		revel.ERROR.Println("Could not find build project")
+		c.Response.Status = 500
+		return c.Render()
+	}
+	
+	//get largest number
+	var largest models.BuildItem
+	r = c.Tx.Where("build_project_id = ?", build.ID).Order("seq desc").First(&largest)
+	
+	idByTool := fmt.Sprintf("%d", largest.Seq + 1)
+	displayName := "#" + idByTool
+	fullDisplayName := build.Name + " " + displayName
+	
+	bi := models.BuildItem{Toolname : "manual", BuildProjectID : build.ID, BuildAt : time.Now(), 
+			Seq : largest.Seq +1, TimeStamp : 0, Status : 1, IdByTool : idByTool, 
+			DisplayName : displayName , FullDisplayName : fullDisplayName,
+	}
+	
+	c.Tx.NewRecord(bi)
+	c.Tx.Create(&bi)
+	
+	build.BuildItemNum += 1
+	c.Tx.Save(&build)
+	
+	return c.Redirect(routes.Builds.View(project, id))
 }
 
 /**
@@ -78,6 +124,7 @@ func (c Builds) Save(project string, build models.Build) revel.Result {
 	}
 
 	build.Project_id = prj.ID
+	build.ToolName = "manual"
 
 	c.Tx.NewRecord(build)
 	r = c.Tx.Create(&build)
@@ -343,3 +390,11 @@ func (c Builds) getJenkinsJobInfo(url string) ([]byte, error) {
 	return body, nil
 }
 
+func (c Builds) GetBuildItems(id int) revel.Result {
+	var items []models.BuildItem
+	
+	c.Tx.Where("build_project_id = ?", id).Find(&items)
+	
+	return c.RenderJson(items)
+	
+}

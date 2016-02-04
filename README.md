@@ -2,6 +2,13 @@
 
 The simple and straightforward testcase management tools.
 
+Branch | Travis-CI Status
+-------|-----------------|
+Master | [![Build Status](https://secure.travis-ci.org/wisedog/ladybug.svg?branch=master)](http://travis-ci.org/wisedog/ladybug)
+Develop | [![Build Status](https://secure.travis-ci.org/wisedog/ladybug.svg?branch=develop)](http://travis-ci.org/wisedog/ladybug)
+
+[![Code Climate](https://codeclimate.com/github/wisedog/ladybug/badges/gpa.svg)](https://codeclimate.com/github/wisedog/ladybug)
+
 ## Description
 
 Project Ladubug can 
@@ -42,3 +49,10 @@ This app uses now only Postgresql. Various databases(MySQL, MarinaDB ....) will 
 * Test environment
 * Milestone
 * Test coverage
+
+### Open Sources
+
+* revel
+* gorm
+* AdminLTE : https://github.com/almasaeed2010/AdminLTE
+* Icon : http://www.freestockphotos.biz/stockphoto/10655

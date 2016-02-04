@@ -11,10 +11,11 @@ type Section struct {
 	Seq         int // may use...
 	Title       string
 	Description string // may not used
-	Status      int
+	Status      int	// may not use
 	ParentsID   int
 	ProjectID   int
 	RootNode    bool
+	ForTestCase	bool	//TestCase or Specification
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

@@ -51,7 +51,7 @@ func (c TestPlans) Add(project string) revel.Result {
 	r = c.Tx.Where("project_id = ?", prj.ID).Find(&builds)
 
 	var sections []models.Section
-	c.Tx.Find(&sections)
+	c.Tx.Where("project_id = ?", prj.ID).Where("for_test_case = ?", true).Find(&sections)
 
 	var nodes []models.JSTreeNode
 
@@ -96,9 +96,6 @@ func (c TestPlans) Save(project string, testplan models.TestPlan, execs string) 
 	
 	var t string
 	rv := handleSelected(execs, &t)
-	
-	revel.INFO.Println("buf : ", t)
-	revel.INFO.Println("rv : ", rv)
 	
 	testplan.ExecuteCases = t
 	testplan.ExecCaseNum = rv
@@ -177,10 +174,29 @@ func (c TestPlans) View(project string, id int) revel.Result {
 /**
 POST handler for DELETE operation for testplan
 */
-func (c TestPlans) Delete(project string) revel.Result {
-
-	//TODO fill
-	return c.Render(project)
+func (c TestPlans) Delete(project string, id int) revel.Result {
+	if user := c.connected(); user == nil {
+		c.Flash.Error("Please log in first")
+		return c.Redirect(routes.Application.Index())
+	}
+	
+	var plan models.TestPlan
+	r := c.Tx.Where("id = ?", id).First(&plan)
+	
+	if r.Error != nil{
+		revel.ERROR.Println("An error while select project operation in TestPlans.Delete", r.Error)
+		c.Response.Status = 500
+		return c.Render()
+	}
+	
+	r = c.Tx.Delete(plan)
+	if r.Error != nil{
+		revel.ERROR.Println("An error while select project operation in TestPlans.Delete", r.Error)
+		c.Response.Status = 500
+		return c.Render()
+	}
+	
+	return c.RenderJson(res{Status:200, Msg:"OK"})
 }
 
 func (c TestPlans) Fire(project string, id int) revel.Result {
@@ -213,7 +229,7 @@ func (c TestPlans) Fire(project string, id int) revel.Result {
 	exec := models.Execution{Status : EXEC_STATUS_READY, ProjectId: prj.ID, PlanId: id, ExecutorId: plan.ExecutorId, TargetBuildId: plan.TargetBuildId}
 
 	if plan.ExecutorId == 0 {
-		exec.Status = 2
+		exec.Status = EXEC_STATUS_NOT_AVAILABLE
 	}
 
 	c.Tx.NewRecord(exec)

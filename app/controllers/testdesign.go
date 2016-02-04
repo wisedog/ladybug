@@ -12,7 +12,7 @@ type TestDesign struct {
 	Application
 }
 
-func (c TestDesign) Index(project string) revel.Result {
+func (c TestDesign) DesignIndex(project string) revel.Result {
 
 	if user := c.connected(); user == nil {
 		c.Flash.Error("Please log in first")
@@ -20,11 +20,16 @@ func (c TestDesign) Index(project string) revel.Result {
 	}
 
 	// Project list is needed to show upper right menu for moving between projects
-	var prjs []models.Project
-	c.Tx.Find(&prjs)
+	var prj models.Project
+	r := c.Tx.Where("name = ?", project).First(&prj)
+	if r.Error != nil{
+		revel.ERROR.Println("Project is not found in TestDesign.Index")
+		
+	}
+	
 
 	var sections []models.Section
-	c.Tx.Find(&sections)
+	c.Tx.Where("project_id = ?", prj.ID).Where("for_test_case = ?", true).Find(&sections)
 
 	var nodes []models.JSTreeNode
 
@@ -44,7 +49,7 @@ func (c TestDesign) Index(project string) revel.Result {
 	treedataByte, _ := json.Marshal(nodes)
 	treedata := string(treedataByte)
 
-	return c.Render(project, prjs, treedata)
+	return c.Render(project, treedata)
 }
 
 /*
@@ -60,7 +65,7 @@ func (c TestDesign) GetAllTestCases(project string, id int) revel.Result {
 	}
 
 	// if there is no result, return empty JSON array
-	r := c.Tx.Where("section_id = ? ", id).Find(&testcases)
+	r := c.Tx.Where("section_id = ? ", id).Preload("Category").Find(&testcases)
 	if r.Error != nil {
 		revel.ERROR.Println("Error while select section operation in TestDesign.GetAllTestCases")
 	}

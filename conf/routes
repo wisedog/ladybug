@@ -19,24 +19,17 @@ GET     /user/register                          Application.Register
 POST    /user/register                          Application.SaveUser
 GET     /user/:id/edit                          Users.Edit
 
-### For Testing Project
-##TODO show "Hello" messages, show abstract count for todos
-GET     /hello                                  Hello.Index      
+## show "Hello" messages, show abstract count for todos
+GET     /hello                                  Hello.Welcome
 
-#TODO Use nav dropdown menu to move between projects, but below url should be because "show all" item will be nav dropdown menu
+# Use nav dropdown menu to move between projects, 
+# but below url should be because "show all" item will be nav dropdown menu
 GET     /project/list                           Projects.List
 GET     /project/getlist                        Projects.GetProjectList
 
 ### Project Overall
-GET     /project/:project/dashboard             Projects.Index
-GET     /project/:project/testdesign            TestDesign.Index
-
-# Test Suites
-#GET     /project/:project/suite/add             TestDesign.AddSuite
-#POST    /project/:project/suite/save            TestDesign.SaveSuite
-#POST    /project/:project/suite/:id/delete      TestDesign.DeleteSuite
-#GET     /project/:project/suite/:id/edit        TestDesign.EditSuite
-#POST    /project/:project/suite/:id/update      TestDesign.UpdateSuite
+GET     /project/:project/dashboard             Projects.Dashboard
+GET     /project/:project/testdesign            TestDesign.DesignIndex
 
 # Sections
 POST    /project/:project/section/save           Sections.Save
@@ -49,8 +42,7 @@ GET     /project/:project/section/:section_id/add         TestCases.Add
 POST    /project/:project/case/save             TestCases.Save
 GET     /project/:project/case/:id/edit         TestCases.Edit
 POST    /project/:project/case/:id/delete       TestCases.Delete
-GET     /project/:project/case/:id              TestCases.Index
-#GET     /project/:project/case/add              TestCases.Add
+GET     /project/:project/case/:id              TestCases.CaseIndex
 
 # Test Plans
 GET     /project/:project/testplan              TestPlans.Index
@@ -71,6 +63,9 @@ POST    /project/:project/build/tool/validate   Builds.ValidateTool
 POST    /project/:project/build/tool/add        Builds.AddTool
 GET     /project/:project/build/:id             Builds.View
 GET     /project/:project/build/:id/edit        Builds.Edit
+GET     /project/:project/build/:id/add         Builds.AddBuildItem
+POST    /project/:project/build/:id/save        Builds.SaveBuildItem
+GET     /project/:project/build/:id/list        Builds.GetBuildItems
 
 
 # Test Executes
@@ -81,6 +76,9 @@ POST    /project/:project/result/done           TestExecs.Done
 POST    /project/:project/result/deny           TestExecs.Deny
 GET     /project/:project/:id/run               TestExecs.Run
 
+# Specification
+GET     /project/:project/spec                  Specifications.Spec
+GET     /project/:project/spec/list             Specifications.List
 
 # Reports
 GET     /project/:project/reports               Reports.Reports
@@ -96,12 +94,6 @@ GET     /project/:project/reports               Reports.Reports
 #GET     /project/:project/testrun               TestRun.Index #TODO
 #GET     /project/:project/req/:id               Requirements.Detail #TODO
 #GET     /project/:project/req                   Requirements.Index #TODO
-
-
-
-### Issues
-GET     /project/:project/issues                Issues.List
-GET     /project/:project/issue/:id             Issues.Detail
 
 
 # Map static resources from the /app/public folder to the /public path
