@@ -21,7 +21,7 @@ install:
   #- go get -v github.com/jinzhu/inflection
   - go get -v github.com/robfig/cron
   #- go get -v golang.org/x/net
-  - go get -v golang.org/x/crypto
+  - go get -d golang.org/x/crypto
   #- go get -v github.com/revel/modules
 script:
   - go test github.com/wisedog/ladybug
