@@ -1,5 +1,5 @@
 {{set . "title" "Test Case"}}
-{{set . "showsidebar" "true"}}
+{{set . "active_index" "testdesign"}}
 {{template "header.html" .}}
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
@@ -22,8 +22,8 @@
       <div class="col-md-12">
       {{ if .tc}}
         <div class="box box-primary">
-          <div class="box-header">
-            <h3>{{.tc.Prefix}}-{{.tc.Seq}}&nbsp;&nbsp;{{.tc.Title}}</h3>
+          <div class="box-header with-border">
+            <h3 class="box-title">{{.tc.Prefix}}-{{.tc.Seq}}&nbsp;&nbsp;{{.tc.Title}}</h3>
           </div><!-- .box-header -->
 
           <div class="box-body">
@@ -110,7 +110,7 @@
             </div> <!--.row -->
             <div class="row">
               <div class="col-md-10">
-                {{.tc.Description}}
+                {{nl2br .tc.Description}}
               </div>
             </div><!-- .row -->
             <div class="row">
@@ -120,7 +120,7 @@
             </div> <!--.row -->
             <div class="row">
               <div class="col-md-10">
-                {{.tc.Precondition}}
+                {{nl2br .tc.Precondition}}
               </div>
             </div><!-- .row -->
             <div class="row">
@@ -130,7 +130,7 @@
             </div> <!--.row -->
             <div class="row">
               <div class="col-md-10">
-                {{.tc.Steps}}
+                {{nl2br .tc.Steps}}
               </div>
             </div> <!--.row -->
             <div class="row">
@@ -140,7 +140,7 @@
             </div> <!--.row -->
             <div class="row">
               <div class="col-md-10">
-                {{.tc.Expected}}
+                {{nl2br .tc.Expected}}
               </div>
             </div> <!--.row -->
             </div><!--.box-body -->
@@ -148,7 +148,42 @@
           {{else}}
             <p> no data! </p>
           {{end}}
-        </div>
+          
+          <div class="box box-primary">
+            <div class="box-header with-border">
+              <h3 class="box-title">History</h3>
+            </div>
+            <div class="box-body">
+              <div>
+                <ul class="timeline timeline-inverse">
+                  {{range .histories}}
+                  <li>
+                    <i class="fa fa-envelope bg-blue"></i>
+
+                    <div class="timeline-item">
+                      <span class="time"><i class="fa fa-clock-o"></i> {{.CreatedAt.Format "Jan 02, 2006 15:04:05"}}</span>
+
+                      <h3 class="timeline-header">Updated by <a href="#">{{.User.Name}}</a></h3>
+
+                      <div class="timeline-body">
+                        {{range $index, $element := .Changes}}
+                          <i class="fa fa-check right7"></i><b>{{$element.Msg}}</b><br />
+                        {{end}}
+                      </div>
+                      {{if .Note}}
+                      <div class="timeline-footer">
+                        {{.Note}}
+                      </div>
+                      {{end}}
+                    </div>
+                  </li>
+                  {{end}}
+                </ul>
+              </div>
+            </div><!-- .box-body-->
+          </div> <!-- .box -->
+        </div> <!-- .col-md -->
+        
       </div>
       <!-- end of row -->
   </section>

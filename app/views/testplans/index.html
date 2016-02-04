@@ -51,6 +51,7 @@
                   <th class="min">Active</th>
                   <th class="min">Public</th>
                   <th class="min12 no-sort">Action</th>
+                  <th class="min"></th>
                 </tr>
               </thead>
               <tbody>
@@ -64,7 +65,10 @@
                     <a href='{{url "TestPlans.View" $.project $node.ID}}' class="fa fa-info fa-fw"></a>
                     <a href='{{url "TestPlans.Edit" $.project $node.ID}}' class="glyphicon glyphicon-edit fa-fw"></a>
                     <a href="javascript:remove({{.ID}});" class="glyphicon glyphicon-remove fa-fw"></a>
-                    <a href='{{url "TestPlans.Fire" $.project $node.ID}}' class="glyphicon glyphicon-fire fa-fw"></a>
+                    
+                  </td>
+                  <td>
+                    <a href='{{url "TestPlans.Fire" $.project $node.ID}}'>Run</a>
                   </td>
                 </tr>
               {{end}}

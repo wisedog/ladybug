@@ -5,11 +5,13 @@ import (
 	"time"
 )
 
+
 // Activity only belongs to user
 type Activity struct {
 	ID				int
-	UserID      	int
 	User            User
+	UserID      	int
+	
 	Content         string  `sql:"size:1000"`
 	
 	CreatedAt time.Time

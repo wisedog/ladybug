@@ -4,7 +4,10 @@ import (
 	"github.com/revel/revel"
 	"github.com/wisedog/ladybug/app/models"
 	"github.com/wisedog/ladybug/app/routes"
+	"encoding/json"
+	"strings"
 	"strconv"
+	"fmt"
 )
 
 type TestCases struct {
@@ -19,6 +22,38 @@ func (c TestCases) checkUser() revel.Result {
 	return nil
 }
 
+
+
+func (c TestCases) makeMessage(historyUnit *[]models.HistoryTestCaseUnit){
+	if historyUnit == nil{
+		revel.ERROR.Println("Nil historyunit!")
+		return
+	}
+	
+	var msg string
+	for i := 0; i < len(*historyUnit); i++{
+		if (*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_CHANGED{
+			if((*historyUnit)[i].From == 0 && (*historyUnit)[i].To == 0 ){
+				msg = fmt.Sprintf(`"%s" is changed from "%s" to "%s".`, 
+				(*historyUnit)[i].What, (*historyUnit)[i].FromStr, (*historyUnit)[i].ToStr)
+			}else{
+				msg = fmt.Sprintf(`"%s" is changed from %d to %d.`, 
+				(*historyUnit)[i].What, (*historyUnit)[i].From, (*historyUnit)[i].To)
+			}
+			
+		}else if(*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_SET{
+			msg = fmt.Sprintf(`"%s" is set to "%s".`, 
+				(*historyUnit)[i].What, (*historyUnit)[i].Set)
+		}else if(*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_NOTE{
+			msg = ""	// do nothing
+		}else{
+			msg = ""
+		}
+		(*historyUnit)[i].Msg = msg
+		revel.INFO.Println("MSG : ", msg)
+	}
+}
+
 /*
  A page to show testcase's information
 */
@@ -31,8 +66,25 @@ func (c TestCases) CaseIndex(project string, id int) revel.Result {
 		c.Response.Status = 500
 		return c.Render()
 	}
+	
+	var histories []models.History
+	c.Tx.Where("category = ?", models.HISTORY_TYPE_TC).Where("target_id = ?", tc.ID).Preload("User").Find(&histories)
+	
+	
+	
+	for i := 0; i < len(histories); i++{
+		var res []models.HistoryTestCaseUnit
+		json.Unmarshal([]byte(histories[i].ChangesJson), &res)
+		
+		// make message
+		c.makeMessage(&res)
+		
+		histories[i].Changes = res
+		revel.INFO.Println("res", histories[i].Changes)
+	}
+	
 
-	return c.Render(project, tc)
+	return c.Render(project, tc, histories)
 
 }
 
@@ -163,7 +215,6 @@ func (c TestCases) Edit(project string, id int) revel.Result {
 	
 	//TODO change section here.
 
-
 	return c.Render(project, id, testcase, category, flash)
 }
 
@@ -182,8 +233,6 @@ func (c TestCases) Update(project string, id int, testcase models.TestCase) reve
 		return c.Redirect(routes.TestCases.Edit(project, id))
 	}
 
-	revel.INFO.Println("In TC update : ", testcase)
-
 	exist_case := models.TestCase{}
 	r := c.Tx.Where("id = ?", testcase.ID).First(&exist_case)
 
@@ -194,6 +243,8 @@ func (c TestCases) Update(project string, id int, testcase models.TestCase) reve
 		return c.Redirect(TestCases.Edit)
 
 	}
+	
+	c.findDiff(&exist_case, &testcase)
 
 	exist_case.Title = testcase.Title
 	exist_case.Description = testcase.Description
@@ -217,4 +268,43 @@ func (c TestCases) Update(project string, id int, testcase models.TestCase) reve
 
 
 	return c.Redirect(routes.TestDesign.DesignIndex(project))
+}
+
+// Find difference between two models.TestCase and create 
+// HistoryTestCaseUnit to database
+func (c TestCases) findDiff(exist_case, testcase *models.TestCase){
+	user := c.connected()
+	if user == nil {
+		c.Flash.Error("Please log in first")
+	}
+	
+	var changes []models.HistoryTestCaseUnit
+	his := models.History{Category : models.HISTORY_TYPE_TC,
+			TargetID : exist_case.ID, UserID : user.ID,
+		}
+	
+	if strings.Compare(exist_case.Title, testcase.Title) != 0 {
+		unit := models.HistoryTestCaseUnit{
+			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, What : "Title",
+			FromStr : exist_case.Title, ToStr : testcase.Title,
+		}
+		
+		changes = append(changes, unit)
+	}
+	
+	if exist_case.Priority != testcase.Priority {
+		unit := models.HistoryTestCaseUnit{
+			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, What : "Priority",
+			FromStr : c.getStatusL10N(exist_case.Priority),
+			ToStr : c.getStatusL10N(testcase.Priority),
+		}
+		changes = append(changes, unit)
+	}
+	
+	
+	result, _ := json.Marshal(changes)
+	his.ChangesJson = string(result)
+	
+	c.Tx.NewRecord(his)
+	c.Tx.Create(&his)
 }

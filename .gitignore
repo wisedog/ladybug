@@ -1,5 +1,6 @@
 test-results/
 tmp/
 routes/
+builds/
 *.swp
 app/controllers/core

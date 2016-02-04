@@ -118,3 +118,24 @@ func (c Application) Logout() revel.Result {
 	}
 	return c.Redirect(routes.Application.Index())
 }
+
+// Return from status code to string. 
+// TODO should be localization
+func (c Application) getStatusL10N(status int) string{
+	str := "Unknown Status"
+	switch{
+		case status == models.PRIORITY_HIGHEST:
+			str = "Highest"
+		case status == models.PRIORITY_HIGH:
+			str = "High"
+		case status == models.PRIORITY_MEDIUM:
+			str = "Medium"
+		case status == models.PRIORITY_LOW:
+			str = "Low"
+		case status == models.PRIORITY_LOWEST:
+			str = "Lowest"
+	}
+	
+	
+	return str
+}

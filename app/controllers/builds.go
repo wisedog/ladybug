@@ -324,8 +324,6 @@ func (c Builds) AddTool(url string, toolname string, project string) revel.Resul
     		Status : rv,
     	}
     	
-    	revel.INFO.Println("element", elem)
-    	
     	// save to BuildItem
     	r = c.Tx.Save(&elem)
     	if r.Error != nil{

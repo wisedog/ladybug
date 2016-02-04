@@ -54,6 +54,10 @@
                       Done
                     {{else if eq .Status 5}}
                       Done-Deny
+                    {{else if eq .Status 6}}
+                      Pass
+                    {{else if eq .Status 7}}
+                      Fail
                     {{else}}
                       Unknown
                     {{end}}

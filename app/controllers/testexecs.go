@@ -55,7 +55,7 @@ func (c TestExecs) Index(project string) revel.Result {
 	c.Tx.Preload("Plan").Preload("Executor").Preload("TargetBuild").Where("project_id = ?", prj.ID).Find(&testexecs)
 	
 	for idx := 0; idx < len(testexecs); idx++ {
-		var results []models.TestResult
+		/*var results []models.TestResult
 		r = c.Tx.Where("exec_id = ?", testexecs[idx].ID).Find(&results)
 		pass_counter := 0
 		fail_counter := 0
@@ -65,10 +65,11 @@ func (c TestExecs) Index(project string) revel.Result {
 			}else{
 				fail_counter++
 			}
-		}
+		}*/
+		f, p := c.calculatePassFail(&testexecs[idx])
 		rv := c.calculateProgress(&testexecs[idx])
-		testexecs[idx].FailCaseNum = fail_counter
-		testexecs[idx].PassCaseNum = pass_counter
+		testexecs[idx].FailCaseNum = f
+		testexecs[idx].PassCaseNum = p
 		testexecs[idx].Progress = rv
 	}
 	
@@ -100,13 +101,20 @@ func (c TestExecs) Done(project string, exec_id int, comment string) revel.Resul
 	 second, find all test cases belongs to this execution's testplan
 	 third, check all test cases are tested*/
 	progress := c.calculateProgress(&testexec)
-	revel.INFO.Println("progress:", progress)
+	
 	if progress != 100{
 		k := res{Status:500, Msg : "Not complete test execution."}
 		return c.RenderJson(k)
 	}
+	f, _ := c.calculatePassFail(&testexec)
 	
-	testexec.Status = EXEC_STATUS_DONE
+	if f > 0{
+		testexec.Status = EXEC_STATUS_FAIL
+	}else{
+		testexec.Status = EXEC_STATUS_PASS
+	}
+	
+	//testexec.Status = EXEC_STATUS_DONE
 	//TODO add param pass_cnt, fail_cnt. 
 	//TODO validation pass_cnt+fail_cnt == total count
 	// if true, choose EXEC_STATUS_PASS or EXEC_STATUS_FAIL
@@ -182,6 +190,22 @@ func (c TestExecs) UpdateResult(case_id int, exec_id int, result bool, actual st
 	k := res{Status : 200, Msg : "OK"}
 	
 	return c.RenderJson(k)
+}
+
+func (c TestExecs) calculatePassFail(exec *models.Execution) (int,int){
+	var results []models.TestResult
+	c.Tx.Where("exec_id = ?", exec.ID).Find(&results)
+	pass_counter := 0
+	fail_counter := 0
+	for _, k := range results{
+		if k.Status == true{
+			pass_counter++
+		}else{
+			fail_counter++
+		}
+	}
+	
+	return fail_counter, pass_counter
 }
 
 /*

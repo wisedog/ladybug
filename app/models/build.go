@@ -25,6 +25,7 @@ type BuildItem struct {
 	Seq				int			// for adding manual build. start from 1
 	TimeStamp		int64
 	BuildAt			time.Time
+	
 }
 
 type Build struct {
