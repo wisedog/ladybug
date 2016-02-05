@@ -27,3 +27,5 @@ install:
   - go get -v golang.org/x/crypto/bcrypt
 script:
   - revel test github.com/wisedog/ladybug
+notifications:
+  slack: jonghakim:3MifSQNabecHhOm0h65QRHLj

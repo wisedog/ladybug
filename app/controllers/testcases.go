@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"strings"
 	"strconv"
 	"fmt"
 	"encoding/json"
@@ -50,12 +49,12 @@ func (c TestCases) makeMessage(historyUnit *[]models.HistoryTestCaseUnit){
 			msg = fmt.Sprintf(`"%s" is set to "%s".`, 
 				(*historyUnit)[i].What, (*historyUnit)[i].Set)
 		}else if(*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_NOTE{
-			msg = ""	// do nothing
+			revel.INFO.Println("INFO : ", (*historyUnit)[i])
+			msg = fmt.Sprintf("%s added a note.", "")
 		}else{
 			msg = ""
 		}
 		(*historyUnit)[i].Msg = msg
-		revel.INFO.Println("MSG : ", msg)
 	}
 }
 
@@ -234,10 +233,6 @@ func (c TestCases) Update(project string, id int, testcase models.TestCase, note
 		return c.Redirect(routes.TestCases.Edit(project, id))
 	}
 	
-	revel.INFO.Println("NOTE : ", note)
-	// TODO add a note see History
-	
-
 	exist_case := models.TestCase{}
 	r := c.Tx.Where("id = ?", testcase.ID).First(&exist_case)
 
@@ -249,7 +244,11 @@ func (c TestCases) Update(project string, id int, testcase models.TestCase, note
 
 	}
 	
-	c.findDiff(&exist_case, &testcase)
+	c.findDiff(&exist_case, &testcase, note)
+	
+	revel.INFO.Println("NOTE : ", note)
+	// TODO add a note see History
+
 
 	exist_case.Title = testcase.Title
 	exist_case.Description = testcase.Description
@@ -276,19 +275,26 @@ func (c TestCases) Update(project string, id int, testcase models.TestCase, note
 }
 
 // findDiff compares between two models.TestCase and create 
-// HistoryTestCaseUnit to database
-func (c TestCases) findDiff(exist_case, testcase *models.TestCase){
+// HistoryTestCaseUnit to database. Used in Update
+func (c TestCases) findDiff(exist_case, testcase *models.TestCase, note string){
 	user := c.connected()
 	if user == nil {
 		c.Flash.Error("Please log in first")
+		return
 	}
 	
 	var changes []models.HistoryTestCaseUnit
 	his := models.History{Category : models.HISTORY_TYPE_TC,
 			TargetID : exist_case.ID, UserID : user.ID,
-		}
+	}
+	// check note
+	if note != ""{
+		
+	}
 	
-	if strings.Compare(exist_case.Title, testcase.Title) != 0 {
+	
+	// check title
+	if exist_case.Title != testcase.Title {
 		unit := models.HistoryTestCaseUnit{
 			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, What : "Title",
 			FromStr : exist_case.Title, ToStr : testcase.Title,
