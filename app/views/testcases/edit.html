@@ -117,6 +117,19 @@
               {{end}}
             </div>
           </div>
+          
+          <div class="row col-md-12">
+            <div class="box box-primary">
+              <div class="box-header with-border">
+                <h3 class="box-title">Add a note</h3>
+              </div>
+              <div class="box-body">
+                {{with $field := field "note" .}}
+                <textarea class="form-control" rows=3 name="{{$field.Name}}">{{if $field.Flash}}{{$field.Value}}{{else}}{{$field.Value}}{{end}}</textarea>
+                {{end}}
+              </div>
+            </div>
+          </div>
         
           <div class="row col-md-12">
             <button type="submit" class="btn btn-primary btn-flat btn-sm">Update</button>

@@ -14,6 +14,7 @@ func init() {
 	revel.InterceptMethod((*GormController).Commit, revel.AFTER)
 	revel.InterceptMethod((*GormController).Rollback, revel.FINALLY)
 	
+	// FIXME I could not find way to i18N in init() function.
 	revel.TemplateFuncs["priority2str"] = func(p int) string { 
 		str := ""
 		switch p{

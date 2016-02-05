@@ -213,14 +213,16 @@ func (c TestCases) Edit(project string, id int) revel.Result {
 	}
 	
 	//TODO change section here.
+	
+	var note string
 
-	return c.Render(project, id, testcase, category, flash)
+	return c.Render(project, id, testcase, category, flash, note)
 }
 
 /*
  Update POST handler for Testcase Edit
 */
-func (c TestCases) Update(project string, id int, testcase models.TestCase) revel.Result {
+func (c TestCases) Update(project string, id int, testcase models.TestCase, note string) revel.Result {
 	//Validate input testcase
 	testcase.Validate(c.Validation)
 
@@ -231,6 +233,10 @@ func (c TestCases) Update(project string, id int, testcase models.TestCase) reve
 
 		return c.Redirect(routes.TestCases.Edit(project, id))
 	}
+	
+	revel.INFO.Println("NOTE : ", note)
+	// TODO add a note see History
+	
 
 	exist_case := models.TestCase{}
 	r := c.Tx.Where("id = ?", testcase.ID).First(&exist_case)
@@ -300,6 +306,7 @@ func (c TestCases) findDiff(exist_case, testcase *models.TestCase){
 		changes = append(changes, unit)
 	}
 	
+	// TODO more fields to compare
 	
 	result, _ := json.Marshal(changes)
 	his.ChangesJson = string(result)
