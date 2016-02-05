@@ -1,19 +1,24 @@
 package controllers
 
 import (
-	"github.com/revel/revel"
-	"github.com/wisedog/ladybug/app/models"
-	"github.com/wisedog/ladybug/app/routes"
-	"encoding/json"
 	"strings"
 	"strconv"
 	"fmt"
+	"encoding/json"
+	
+	"github.com/revel/revel"
+	"github.com/wisedog/ladybug/app/models"
+	"github.com/wisedog/ladybug/app/routes"
 )
 
+// TestCases is inherited from Application. 
+// See app.go
 type TestCases struct {
 	Application
 }
 
+// checkUser is private utilitiy function for checking 
+// this user id now on connected or not.
 func (c TestCases) checkUser() revel.Result {
 	if user := c.connected(); user == nil {
 		c.Flash.Error("Please log in first")
@@ -22,8 +27,8 @@ func (c TestCases) checkUser() revel.Result {
 	return nil
 }
 
-
-
+// makeMessage is private utility function for comparing and make
+// messages for status changing
 func (c TestCases) makeMessage(historyUnit *[]models.HistoryTestCaseUnit){
 	if historyUnit == nil{
 		revel.ERROR.Println("Nil historyunit!")
@@ -54,9 +59,8 @@ func (c TestCases) makeMessage(historyUnit *[]models.HistoryTestCaseUnit){
 	}
 }
 
-/*
- A page to show testcase's information
-*/
+
+// CaseIndex renders a page to show testcase's information
 func (c TestCases) CaseIndex(project string, id int) revel.Result {
 	var tc models.TestCase
 	r := c.Tx.Where("id = ?", id).First(&tc)
@@ -67,11 +71,14 @@ func (c TestCases) CaseIndex(project string, id int) revel.Result {
 		return c.Render()
 	}
 	
+	
+	tc.PriorityStr = c.getPriorityL10N(tc.Priority)
+	
 	var histories []models.History
 	c.Tx.Where("category = ?", models.HISTORY_TYPE_TC).Where("target_id = ?", tc.ID).Preload("User").Find(&histories)
 	
 	
-	
+	// making status changement messages
 	for i := 0; i < len(histories); i++{
 		var res []models.HistoryTestCaseUnit
 		json.Unmarshal([]byte(histories[i].ChangesJson), &res)
@@ -88,9 +95,7 @@ func (c TestCases) CaseIndex(project string, id int) revel.Result {
 
 }
 
-/*
-	A POST handler from Add
-*/
+//	Save is a POST handler from Add page.
 func (c TestCases) Save(project string, testcase models.TestCase, reviewerID int) revel.Result {
 
 	if user := c.connected(); user == nil {
@@ -137,9 +142,7 @@ func (c TestCases) Save(project string, testcase models.TestCase, reviewerID int
 	return c.Redirect(routes.TestDesign.DesignIndex(project))
 }
 
-/*
-	Render a page to add a testcase
-*/
+//	Add just renders a page too add a testcase
 func (c TestCases) Add(project string, section_id int) revel.Result {
 	var testcase models.TestCase
 	var section models.Section
@@ -164,9 +167,7 @@ func (c TestCases) Add(project string, section_id int) revel.Result {
 	return c.Render(testcase, project, category, reviewerID)
 }
 
-/**
-A POST handler for delete testcase
-*/
+// Delete is a POST handler for DELETE request
 func (c TestCases) Delete(project string, id int) revel.Result {
 
 	// Delete the testcase  permanently for sequence
@@ -180,9 +181,7 @@ func (c TestCases) Delete(project string, id int) revel.Result {
 	return c.Redirect(routes.TestDesign.DesignIndex(project))
 }
 
-/*
-	A handler for EDIT GET and render edit page
-*/
+// Edit just renders a EDIT page.
 func (c TestCases) Edit(project string, id int) revel.Result {
 	
 	var category []models.Category
@@ -270,7 +269,7 @@ func (c TestCases) Update(project string, id int, testcase models.TestCase) reve
 	return c.Redirect(routes.TestDesign.DesignIndex(project))
 }
 
-// Find difference between two models.TestCase and create 
+// findDiff compares between two models.TestCase and create 
 // HistoryTestCaseUnit to database
 func (c TestCases) findDiff(exist_case, testcase *models.TestCase){
 	user := c.connected()
@@ -307,4 +306,18 @@ func (c TestCases) findDiff(exist_case, testcase *models.TestCase){
 	
 	c.Tx.NewRecord(his)
 	c.Tx.Create(&his)
+}
+
+func (c TestCases) getPriorityL10N(priority int) string{
+	s := ""
+	switch priority{
+		case 1: s = c.Message("priority.highest")
+		case 2: s = c.Message("priority.high")
+		case 3: s = c.Message("priority.medium")
+		case 4: s = c.Message("priority.low")
+		case 5: s = c.Message("priority.lowest")
+		default : s = "Unknown"
+	}
+	
+	return s
 }

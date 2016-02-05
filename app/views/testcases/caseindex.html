@@ -66,19 +66,7 @@
                 <strong>Priority :</strong>
               </div>
               <div class="col-md-3">
-                {{if eq .tc.Priority 1}}
-                Highest
-                {{else if eq .tc.Priority 2}}
-                High
-                {{else if eq .tc.Priority 3}}
-                Medium
-                {{else if eq .tc.Priority 4}}
-                Low
-                {{else if eq .tc.Priority 5}}
-                Lowest
-                {{else}}
-                Unknown
-                {{end}}
+                {{.tc.PriorityStr}}
               </div>
               <div class="col-md-2">
                 <strong>Execution Type :</strong>
@@ -182,8 +170,15 @@
               </div>
             </div><!-- .box-body-->
           </div> <!-- .box -->
-        </div> <!-- .col-md -->
+          {{if .tc}}
+        <div class="row">
+          <div class="col-md-6">
+            <a href="{{url "TestCases.Edit" .project .tc.ID}}"><button class="btn btn-sm btn-flat btn-primary">Edit</button></a>
+          </div>
+        </div>
+        {{end}}
         
+        </div> <!-- .col-md -->
       </div>
       <!-- end of row -->
   </section>

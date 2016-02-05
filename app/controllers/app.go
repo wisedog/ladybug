@@ -98,7 +98,7 @@ func (c Application) Login(email, password string, remember bool) revel.Result {
 			// language field should be string and ISO639-1 codes.
 			// Region field should be string and ISO3166-1 alpha-2 code
 			
-			cookie := http.Cookie{Name: "REVEL_LANG", Value: "ko-KR", Path: "/"}
+			cookie := http.Cookie{Name: "REVEL_LANG", Value: "en-US", Path: "/"}
 			c.SetCookie(&cookie)
 			
 			user.LastLoginAt = time.Now()

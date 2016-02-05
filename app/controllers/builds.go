@@ -1,16 +1,18 @@
 package controllers
 
 import (
-	"github.com/revel/revel"
-	"github.com/wisedog/ladybug/app/models"
-	"github.com/wisedog/ladybug/app/routes"
-	"net/http"
-	"io/ioutil"
-	"encoding/json"
 	"strconv"
 	"strings"
 	"time"
 	"fmt"
+	
+	"net/http"
+	"io/ioutil"
+	"encoding/json"
+	
+	"github.com/revel/revel"
+	"github.com/wisedog/ladybug/app/models"
+	"github.com/wisedog/ladybug/app/routes"
 )
 
 const (
@@ -23,6 +25,9 @@ type Builds struct {
 	Application
 }
 
+
+// checkUser is private utilitiy function for checking 
+// this user id now on connected or not.
 func (c Builds) checkUser() revel.Result {
 	if user := c.connected(); user == nil {
 		c.Flash.Error("Please log in first")
@@ -31,9 +36,8 @@ func (c Builds) checkUser() revel.Result {
 	return nil
 }
 
-/*
- A page to show testcase's information
-*/
+
+// Index is to render a Builds page
 func (c Builds) Index(project string) revel.Result {
 	var builds []models.Build
 
@@ -44,15 +48,16 @@ func (c Builds) Index(project string) revel.Result {
 	return c.Render(project, builds)
 }
 
-/*
-Render a page to add
-*/
+
+// Add is to render a Add page
 func (c Builds) Add(project string) revel.Result {
 	var build models.Build
 
 	return c.Render(project, build)
 }
 
+// AddBuildItem function renders build item page.
+// This page is used for only adding manual build items.
 func (c Builds) AddBuildItem(project string, id int) revel.Result{
 	var build models.Build
 	r := c.Tx.Where("id = ?", id).First(&build)
@@ -66,6 +71,7 @@ func (c Builds) AddBuildItem(project string, id int) revel.Result{
 	return c.Render(project, build)
 }
 
+// SaveBuildItem function handles a POST save request. 
 func (c Builds) SaveBuildItem(project string, id int) revel.Result{
 	var build models.Build
 	r := c.Tx.Where("id = ?", id).First(&build)
@@ -92,15 +98,14 @@ func (c Builds) SaveBuildItem(project string, id int) revel.Result{
 	c.Tx.NewRecord(bi)
 	c.Tx.Create(&bi)
 	
-	build.BuildItemNum += 1
+	build.BuildItemNum++
 	c.Tx.Save(&build)
 	
 	return c.Redirect(routes.Builds.View(project, id))
 }
 
-/**
-POST handler for save build
-*/
+
+//Save handles a saving request via POST
 func (c Builds) Save(project string, build models.Build) revel.Result {
 	if user := c.connected(); user == nil {
 		c.Flash.Error("Please log in first")
@@ -137,9 +142,8 @@ func (c Builds) Save(project string, build models.Build) revel.Result {
 
 }
 
-/**
-Render a page to view
-*/
+
+//View renders a page to show build detail
 func (c Builds) View(project string, id int) revel.Result {
 	var prj models.Project
 	r := c.Tx.Where("name = ?", project).First(&prj)
@@ -165,9 +169,8 @@ func (c Builds) View(project string, id int) revel.Result {
 	return c.Render(project, build, builds)
 }
 
-/**
-Render a page to edit
-*/
+
+//Edit function renders a edit page.
 func (c Builds) Edit(project string, id int) revel.Result {
 
 	var build models.Build
@@ -182,17 +185,14 @@ func (c Builds) Edit(project string, id int) revel.Result {
 }
 
 
-/*
-Render a page helps integration with CI tools
-*/
+
+//Integrate function renders only a a page helps integration with CI tools
 func (c Builds) Integrate(project string) revel.Result{
 	
 	return c.Render(project)
 }
 
-/*
-POST Handler for adding CI tool
-*/
+// AddTool has responsibility for handling a POST request adding CI tool pages.
 func (c Builds) AddTool(url string, toolname string, project string) revel.Result{
 	
 	var prj models.Project
@@ -260,8 +260,8 @@ func (c Builds) AddTool(url string, toolname string, project string) revel.Resul
     	
     	k := b.(map[string]interface{})
     	
-    	targetUrl := k["url"].(string) + "/api/json"
-    	info, err := c.getJenkinsJobInfo(targetUrl)
+    	targetURL := k["url"].(string) + "/api/json"
+    	info, err := c.getJenkinsJobInfo(targetURL)
     	if err != nil{
     		continue
     	}
@@ -331,10 +331,12 @@ func (c Builds) AddTool(url string, toolname string, project string) revel.Resul
     	}
     }
 	
-	// redirect index
 	return c.RenderJson(res{Status:200, Msg:"OK"})
 }
 
+// ValidationTool function checks the given url is valid.
+// TODO Now this checks only jenkins connection without auth, we will add more
+// next target is travis CI
 func (c Builds) ValidateTool(url string, toolname string) revel.Result{
 	
     // TODO the code below only handle Jenkins
