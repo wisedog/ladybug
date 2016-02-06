@@ -35,6 +35,8 @@ func (c TestCases) makeMessage(historyUnit *[]models.HistoryTestCaseUnit){
 	}
 	
 	var msg string
+	
+	// TODO L10N with using c.Message format string
 	for i := 0; i < len(*historyUnit); i++{
 		if (*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_CHANGED{
 			if((*historyUnit)[i].From == 0 && (*historyUnit)[i].To == 0 ){
@@ -50,7 +52,7 @@ func (c TestCases) makeMessage(historyUnit *[]models.HistoryTestCaseUnit){
 				(*historyUnit)[i].What, (*historyUnit)[i].Set)
 		}else if(*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_NOTE{
 			revel.INFO.Println("INFO : ", (*historyUnit)[i])
-			msg = fmt.Sprintf("%s added a note.", "")
+			msg = fmt.Sprintf("%s added a note.", (*historyUnit)[i].What)
 		}else{
 			msg = ""
 		}
@@ -208,7 +210,6 @@ func (c TestCases) Edit(project string, id int) revel.Result {
 	    "testcase.Priority": strconv.Itoa(testcase.Priority),
 	    "testcase.Category": strconv.Itoa(testcase.CategoryID),
 	    "testcase.Status" : strconv.Itoa(testcase.Status),
-	    
 	}
 	
 	//TODO change section here.
@@ -246,10 +247,6 @@ func (c TestCases) Update(project string, id int, testcase models.TestCase, note
 	
 	c.findDiff(&exist_case, &testcase, note)
 	
-	revel.INFO.Println("NOTE : ", note)
-	// TODO add a note see History
-
-
 	exist_case.Title = testcase.Title
 	exist_case.Description = testcase.Description
 	exist_case.Seq = testcase.Seq
@@ -287,11 +284,17 @@ func (c TestCases) findDiff(exist_case, testcase *models.TestCase, note string){
 	his := models.History{Category : models.HISTORY_TYPE_TC,
 			TargetID : exist_case.ID, UserID : user.ID,
 	}
+	
 	// check note
 	if note != ""{
+		// this means user add a note on this testcase
+		unit := models.HistoryTestCaseUnit{
+			ChangeType : models.HISTORY_CHANGE_TYPE_NOTE, What : user.Name,
+		}
 		
+		his.Note = note
+		changes = append(changes, unit)
 	}
-	
 	
 	// check title
 	if exist_case.Title != testcase.Title {
@@ -299,10 +302,10 @@ func (c TestCases) findDiff(exist_case, testcase *models.TestCase, note string){
 			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, What : "Title",
 			FromStr : exist_case.Title, ToStr : testcase.Title,
 		}
-		
 		changes = append(changes, unit)
 	}
 	
+	// check priority
 	if exist_case.Priority != testcase.Priority {
 		unit := models.HistoryTestCaseUnit{
 			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, What : "Priority",
@@ -312,7 +315,32 @@ func (c TestCases) findDiff(exist_case, testcase *models.TestCase, note string){
 		changes = append(changes, unit)
 	}
 	
-	// TODO more fields to compare
+	// check execution type
+	if exist_case.ExecutionType != testcase.ExecutionType {
+		arr := [2]string{"Manual", "Automated"}
+		unit := models.HistoryTestCaseUnit{
+			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, What : "Execution type",
+			FromStr : arr[exist_case.ExecutionType], ToStr : arr[testcase.ExecutionType],
+		}
+		changes = append(changes, unit)
+	}
+	
+	// check execution type
+	if exist_case.ExecutionType != testcase.ExecutionType {
+		unit := models.HistoryTestCaseUnit{
+			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, What : "Execution type",
+			FromStr : exist_case.Title, ToStr : testcase.Title,
+		}
+		changes = append(changes, unit)
+	}
+	
+	// check Status
+	// check Description
+	// check Precondition
+	// check Estimated
+	// check Steps
+	// check Expected
+	// check CategoryID
 	
 	result, _ := json.Marshal(changes)
 	his.ChangesJson = string(result)
@@ -321,6 +349,8 @@ func (c TestCases) findDiff(exist_case, testcase *models.TestCase, note string){
 	c.Tx.Create(&his)
 }
 
+
+// getPriorityL10N function returns localization string 
 func (c TestCases) getPriorityL10N(priority int) string{
 	s := ""
 	switch priority{

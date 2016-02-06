@@ -27,9 +27,8 @@ type HistoryTestCaseUnit struct{
 	Msg			string
 }
 
-/*
-  A model for history of test cases or something stuff.
-*/
+// History is a model for history of test cases or something stuff.
+// 
 type History struct {
 	ID              int
 	ChangesJson		string	`sql:"size:1000"`
