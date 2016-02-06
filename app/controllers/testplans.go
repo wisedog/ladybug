@@ -115,8 +115,8 @@ func (c TestPlans) Save(project string, testplan models.TestPlan, execs string) 
 
 	if r.Error != nil {
 		revel.ERROR.Println("Insert operation failed in TestPlans.Save")
-		r.Response.Status = 500
-		r.Render()
+		c.Response.Status = 500
+		c.Render()
 	}
 	return c.Redirect(routes.TestPlans.Index(project))
 }
