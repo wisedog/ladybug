@@ -1,31 +1,38 @@
 language: go
-
 go:
-  - 1.3
-  - 1.4
+- 1.3
+- 1.4
 sudo: false
 services:
-  - memcache # github.com/revel/revel/cache
-  - redis-server
-  - postgresql
+- memcache
+- redis-server
+- postgresql
 addons:
-  postgresql: "9.3"
+  postgresql: '9.3'
 before_script:
-  - psql -c 'create database ladybug;' -U postgres
+- psql -c 'create database ladybug;' -U postgres
 install:
-  - export PATH=$PATH:$HOME/gopath/bin
-  - go get -v github.com/revel/revel/...
-  - go get -v github.com/agtorre/gocolorize
-  - go get -v github.com/robfig/config
-  - go get -v github.com/robfig/pathtree
-  - go get -v github.com/revel/cmd/revel
-  - go get -v github.com/revel/revel/cache
-  - go get -v gopkg.in/fsnotify.v1
-  - go get -v github.com/lib/pq
-  - go get -v github.com/jinzhu/gorm
-  - go get -v github.com/robfig/cron
-  - go get -v golang.org/x/crypto/bcrypt
+- export PATH=$PATH:$HOME/gopath/bin
+- go get -v github.com/revel/revel/...
+- go get -v github.com/agtorre/gocolorize
+- go get -v github.com/robfig/config
+- go get -v github.com/robfig/pathtree
+- go get -v github.com/revel/cmd/revel
+- go get -v github.com/revel/revel/cache
+- go get -v gopkg.in/fsnotify.v1
+- go get -v github.com/lib/pq
+- go get -v github.com/jinzhu/gorm
+- go get -v github.com/robfig/cron
+- go get -v golang.org/x/crypto/bcrypt
 script:
-  - revel test github.com/wisedog/ladybug
+- revel test github.com/wisedog/ladybug
 notifications:
   slack: jonghakim:3MifSQNabecHhOm0h65QRHLj
+deploy:
+  provider: heroku
+  api_key:
+    secure: mkLMASzeNbH6O38yMTLySC6UcRGSigXW1LsyHHXZ8+xcMR+G82v5l9pfvq1BPQgg6CN41EbK+0HJOfv6YAHv8ZSI6PlqTkMYiHzUdo2vKNkhK/OR1JxbDVqkD2yIRjTBR3bAcogHsKJK6bYcJ815XB0CDKxb0pzrD+JXdVzWnMATSVWuvUSRAXJLMYuRQ2O65+v6bQwBKuBFSICZ7cQD+pMmLz9rpD7oB8WHXgN23wYlboBzl03BNi7w8RLgjghz7L+5PBx0+hGe2ePS7E3mlzXIOOrNgiV2+7OoYcsEReeqHC+suCvR/k9OPWuEcjNYrPomCiNgsZk+50hufnXHyM6Mr7qnCDqFsFwE0UDP8Im4JlBIWGvXat5sh+sgSf7dADqWK9Wdh1YAr3tgXmxbt0w6d63qJqC2geKSB6HWkKXfhHBzam6epfOWOdCXmf2XuIV0Smajqop2rF+D/6+/NSN089vpkzy5jP9TA8jl6dPgAEjegmrFghVU5dSd83tHv0qWGk0QKsv1ftMrgXJbnj/KCXcIVjiVzxyEaxGh+xQx2SPPLdfjBqHdq2pvvKWx1bPggvncYQrDaOln72lGXmiNZ2853h6GxZPxDHQAXw4qlMzGgddvQB8g717HG3yktLpUpHjsI5eZ98ZFw/m9RpoCfkQrfEMCMf9SHPo9ndA=
+  app: ladybug-dev
+  on:
+    repo: wisedog/ladybug
+    branch: develop
