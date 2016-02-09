@@ -12,6 +12,7 @@ const (
 	HISTORY_CHANGE_TYPE_CHANGED = 1 + iota
 	HISTORY_CHANGE_TYPE_SET
 	HISTORY_CHANGE_TYPE_NOTE
+	HISTORY_CHANGE_TYPE_DIFF
 	)
 
 // to store multiple changement contents via JSON string

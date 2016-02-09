@@ -46,10 +46,12 @@ func (c TestCases) makeMessage(historyUnit *[]models.HistoryTestCaseUnit){
 				msg = fmt.Sprintf(`"%s" is changed from %d to %d.`, 
 				(*historyUnit)[i].What, (*historyUnit)[i].From, (*historyUnit)[i].To)
 			}
-			
 		}else if(*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_SET{
 			msg = fmt.Sprintf(`"%s" is set to "%s".`, 
 				(*historyUnit)[i].What, (*historyUnit)[i].Set)
+		}else if(*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_DIFF{
+			msg = fmt.Sprintf(`"%s" is changed(diff).`, 
+				(*historyUnit)[i].What)
 		}else if(*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_NOTE{
 			revel.INFO.Println("INFO : ", (*historyUnit)[i])
 			msg = fmt.Sprintf("%s added a note.", (*historyUnit)[i].What)
@@ -234,8 +236,8 @@ func (c TestCases) Update(project string, id int, testcase models.TestCase, note
 		return c.Redirect(routes.TestCases.Edit(project, id))
 	}
 	
-	exist_case := models.TestCase{}
-	r := c.Tx.Where("id = ?", testcase.ID).First(&exist_case)
+	existCase := models.TestCase{}
+	r := c.Tx.Where("id = ?", testcase.ID).First(&existCase)
 
 	if r.Error != nil {
 		revel.ERROR.Println("An error while select exist testcase operation", r.Error)
@@ -245,19 +247,19 @@ func (c TestCases) Update(project string, id int, testcase models.TestCase, note
 
 	}
 	
-	c.findDiff(&exist_case, &testcase, note)
+	c.findDiff(&existCase, &testcase, note)
 	
-	exist_case.Title = testcase.Title
-	exist_case.Description = testcase.Description
-	exist_case.Seq = testcase.Seq
-	exist_case.Status = testcase.Status
-	exist_case.Prefix = testcase.Prefix
-	exist_case.Precondition = testcase.Precondition
-	exist_case.Steps = testcase.Steps
-	exist_case.Expected = testcase.Expected
-	exist_case.Priority = testcase.Priority
+	existCase.Title = testcase.Title
+	existCase.Description = testcase.Description
+	existCase.Seq = testcase.Seq
+	existCase.Status = testcase.Status
+	existCase.Prefix = testcase.Prefix
+	existCase.Precondition = testcase.Precondition
+	existCase.Steps = testcase.Steps
+	existCase.Expected = testcase.Expected
+	existCase.Priority = testcase.Priority
 
-	r = c.Tx.Save(&exist_case)
+	r = c.Tx.Save(&existCase)
 
 	if r.Error != nil {
 		revel.ERROR.Println("An error while SAVE operation on TestCases.Update")
@@ -273,7 +275,7 @@ func (c TestCases) Update(project string, id int, testcase models.TestCase, note
 
 // findDiff compares between two models.TestCase and create 
 // HistoryTestCaseUnit to database. Used in Update
-func (c TestCases) findDiff(exist_case, testcase *models.TestCase, note string){
+func (c TestCases) findDiff(existCase, newCase *models.TestCase, note string){
 	user := c.connected()
 	if user == nil {
 		c.Flash.Error("Please log in first")
@@ -282,7 +284,7 @@ func (c TestCases) findDiff(exist_case, testcase *models.TestCase, note string){
 	
 	var changes []models.HistoryTestCaseUnit
 	his := models.History{Category : models.HISTORY_TYPE_TC,
-			TargetID : exist_case.ID, UserID : user.ID,
+			TargetID : existCase.ID, UserID : user.ID,
 	}
 	
 	// check note
@@ -297,50 +299,101 @@ func (c TestCases) findDiff(exist_case, testcase *models.TestCase, note string){
 	}
 	
 	// check title
-	if exist_case.Title != testcase.Title {
+	if existCase.Title != newCase.Title {
 		unit := models.HistoryTestCaseUnit{
 			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, What : "Title",
-			FromStr : exist_case.Title, ToStr : testcase.Title,
+			FromStr : existCase.Title, ToStr : newCase.Title,
 		}
 		changes = append(changes, unit)
 	}
 	
 	// check priority
-	if exist_case.Priority != testcase.Priority {
+	if existCase.Priority != newCase.Priority {
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, What : "Priority",
-			FromStr : c.getStatusL10N(exist_case.Priority),
-			ToStr : c.getStatusL10N(testcase.Priority),
+			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, 
+			What : c.Message("testcase.priority"),
+			FromStr : c.getStatusL10N(existCase.Priority),
+			ToStr : c.getStatusL10N(newCase.Priority),
 		}
 		changes = append(changes, unit)
 	}
 	
 	// check execution type
-	if exist_case.ExecutionType != testcase.ExecutionType {
+	if existCase.ExecutionType != newCase.ExecutionType {
 		arr := [2]string{"Manual", "Automated"}
 		unit := models.HistoryTestCaseUnit{
 			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, What : "Execution type",
-			FromStr : arr[exist_case.ExecutionType], ToStr : arr[testcase.ExecutionType],
+			FromStr : arr[existCase.ExecutionType], ToStr : arr[newCase.ExecutionType],
 		}
 		changes = append(changes, unit)
 	}
 	
-	// check execution type
-	if exist_case.ExecutionType != testcase.ExecutionType {
-		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, What : "Execution type",
-			FromStr : exist_case.Title, ToStr : testcase.Title,
-		}
-		changes = append(changes, unit)
-	}
+	// TODO check Status
 	
-	// check Status
 	// check Description
+	if existCase.Description != newCase.Description {
+		unit := models.HistoryTestCaseUnit{
+			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, 
+			What : c.Message("description"),
+			DiffID : 2,
+		}
+		changes = append(changes, unit)
+	}
+	
 	// check Precondition
+	if existCase.Precondition != newCase.Precondition {
+		unit := models.HistoryTestCaseUnit{
+			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, 
+			What : c.Message("priority.precondition"),
+			DiffID : 2,//TODO should be implemnted DIFF
+		}
+		changes = append(changes, unit)
+	}
+	
 	// check Estimated
+	if existCase.Estimated != newCase.Estimated {
+		unit := models.HistoryTestCaseUnit{
+			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, What : "Estimated Time",
+			DiffID : 2,	//TODO should be implemnted DIFF
+		}
+		changes = append(changes, unit)
+	}
+	
 	// check Steps
+	if existCase.Steps != newCase.Steps {
+		unit := models.HistoryTestCaseUnit{
+			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, What : "Steps",
+			DiffID : 2,	//TODO should be implemnted DIFF
+		}
+		changes = append(changes, unit)
+	}
+	
 	// check Expected
+	if existCase.Expected != newCase.Expected {
+		unit := models.HistoryTestCaseUnit{
+			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, 
+			What : c.Message("priority.expected"),
+			DiffID : 2,	//TODO should be implemnted DIFF
+		}
+		changes = append(changes, unit)
+	}
+	
+	var existCategory models.Category
+	var testcaseCategory models.Category
+	
+	c.Tx.Where("id = ?", existCase.CategoryID).Find(&existCategory)
+	c.Tx.Where("id = ?", newCase.CategoryID).Find(&testcaseCategory)
+	
 	// check CategoryID
+	if existCase.CategoryID != newCase.CategoryID {
+		unit := models.HistoryTestCaseUnit{
+			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, 
+			What : c.Message("priority.category"),
+			FromStr : "",
+			ToStr : "",
+		}
+		changes = append(changes, unit)
+	}
 	
 	result, _ := json.Marshal(changes)
 	his.ChangesJson = string(result)

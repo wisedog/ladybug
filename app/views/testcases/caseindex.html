@@ -63,7 +63,7 @@
             </div><!-- .row -->
             <div class="row">
               <div class="col-md-2">
-                <strong>Priority :</strong>
+                <strong>{{msg . "testcase.priority"}} :</strong>
               </div>
               <div class="col-md-3">
                 {{.tc.PriorityStr}}
@@ -87,8 +87,10 @@
                 {{.tc.Estimated}}
               </div>
               <div class="col-md-2">
+                <strong>{{msg . "testcase.category"}}</strong>
               </div>
               <div class="col-md-3">
+                {{.tc.CategoryID}}
               </div>
             </div> <!--.row -->
             <div class="row">
@@ -103,7 +105,7 @@
             </div><!-- .row -->
             <div class="row">
               <div class="col-md-5">
-                <h4><strong>Precondition</strong></h4>
+                <h4><strong>{{msg . "testcase.precondition"}}</strong></h4>
               </div>
             </div> <!--.row -->
             <div class="row">
@@ -123,7 +125,7 @@
             </div> <!--.row -->
             <div class="row">
               <div class="col-md-5">
-                <h4><strong>Expected</strong></h4>
+                <h4><strong>{{msg . "testcase.expected"}}</strong></h4>
               </div>
             </div> <!--.row -->
             <div class="row">
