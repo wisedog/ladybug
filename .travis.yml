@@ -27,4 +27,4 @@ install:
 script:
 - revel test github.com/wisedog/ladybug
 notifications:
-  slack: jonghakim:3MifSQNabecHhOm0h65QRHLj
+  slack: ladybugdev:dGWtXjXTstY63pMo2yLvvOHy

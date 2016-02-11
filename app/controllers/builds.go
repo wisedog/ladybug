@@ -1,25 +1,15 @@
 package controllers
 
 import (
-	"strconv"
-	"strings"
 	"time"
 	"fmt"
-	
-	"net/http"
-	"io/ioutil"
-	"encoding/json"
 	
 	"github.com/revel/revel"
 	"github.com/wisedog/ladybug/app/models"
 	"github.com/wisedog/ladybug/app/routes"
+	"github.com/wisedog/ladybug/app/controllers/buildtools"
 )
 
-const (
-	BUILD_FAIL = iota
-	BUILD_SUCCESS
-	
-	)
 
 type Builds struct {
 	Application
@@ -43,6 +33,7 @@ func (c Builds) Index(project string) revel.Result {
 
 	r := c.Tx.Order("id desc").Find(&builds)
 	if r.Error != nil {
+		revel.ERROR.Println("Error on Builds.Index")
 	}
 
 	return c.Render(project, builds)
@@ -207,194 +198,59 @@ func (c Builds) AddTool(url string, toolname string, project string) revel.Resul
 	   if there are too much builds only get last 10 builds? 
 	3. Iterate each builds and get information of artifacts, status(p/f)
 	*/
-	// TODO the code below only handle Jenkins
 	
-	if strings.HasSuffix(url, "/api/json") == false{
-    	url = url + "/api/json"
-    }
-    
-    body, err := c.getJenkinsJobInfo(url)
-    if err != nil {
-    	return c.RenderJson(res{Status:501, Msg:"problem"})//TEMP
-    }
-    var dat map[string]interface{}
-    if err := json.Unmarshal(body, &dat); err != nil {
-      return c.RenderJson(res{Status:502, Msg:"Problem"})	//TEMP
-    }
-    
-    name := dat["name"].(string)
-    nextBuildNum := int(dat["nextBuildNumber"].(float64))
-    lastSuccessfulBuild := dat["lastSuccessfulBuild"].(map[string]interface{})
-    lastSucessfulBuildNum := int(lastSuccessfulBuild["number"].(float64))
-    
-    
-    // get status for building. it may be successful or failed
-    status := 0
-    if nextBuildNum -1 == lastSucessfulBuildNum {
-    	status = BUILD_SUCCESS
-    } else{
-    	status = BUILD_FAIL
-    }
-
-    builds := dat["builds"].([]interface{})
-    
-    job := models.Build{
-    	Name : name,
-    	Description : dat["description"].(string),
-    	Project_id : prj.ID,
-    	BuildUrl : dat["url"].(string),
-    	Status : status,
-    	ToolName : "jenkins",
-    	BuildItemNum : len(builds),
-    }
-    r = c.Tx.Save(&job)
-    if r.Error != nil{
-    	return c.RenderJson(res{Status:503, Msg:"Error while Saving "})	//TEMP
-    }
-    
-    
-    for idx, b := range builds {
-    	if idx > 10 {
-    		break
-    	}
-    	
-    	k := b.(map[string]interface{})
-    	
-    	targetURL := k["url"].(string) + "/api/json"
-    	info, err := c.getJenkinsJobInfo(targetURL)
-    	if err != nil{
-    		continue
-    	}
-    	
-    	var data map[string]interface{}
-	    if err := json.Unmarshal(info, &data); err != nil {
-	      return c.RenderJson(res{Status:502, Msg:"Problem"})	//TEMP
-	    }
-    	
-    	timestamp := int64(data["timestamp"].(float64))
-    	displayname := data["displayName"].(string)
-    	idbytool := data["id"].(string)
-    	result := data["result"].(string)
-    	url := data["url"].(string)
-    	
-    	
-    	artifacts := data["artifacts"].([]interface{})
-    	
-    	num := len(artifacts)
-    	var artifactsname string
-    	var artifactsurl	string
-    	
-    	if num > 1 {
-    		// TODO It is not supported to link multiple artifacts now
-    		artifactsurl = url
-    		artifactsname = "Multiple"
-    	}else if num == 1 {
-    		a := artifacts[0].(map[string]interface{})
-    		artifactsname = a["fileName"].(string)
-    		artifactsurl = url + "artifact/" + a["relativePath"].(string)
-    	}else {
-    		artifactsurl = ""
-    		artifactsname = ""
-    	}
-    	
-    	// timestamp of jenkins build item represents in millisecond.
-    	// so divide by 1000 (1 second = 1000 milliseconds)
-    	buildat := time.Unix(int64(timestamp/1000),0)
-    	
-    	var rv int 
-    	if result == "SUCCESS"{
-    		rv = BUILD_SUCCESS
-    	}else {
-    		rv = BUILD_FAIL
-    	}
-    	
-    	
-    	elem := models.BuildItem{
-    		BuildProjectID : job.ID,
-    		IdByTool : idbytool,
-    		DisplayName : displayname,
-    		FullDisplayName : name + " " + displayname,
-    		Url : url,
-    		ArtifactsUrl : artifactsurl,
-    		ArtifactsName : artifactsname,
-    		Result : result,
-    		Toolname : "jenkins",
-    		TimeStamp : timestamp,
-    		BuildAt : buildat,
-    		Status : rv,
-    	}
-    	
-    	// save to BuildItem
-    	r = c.Tx.Save(&elem)
-    	if r.Error != nil{
-    		return c.RenderJson(res{Status:504, Msg:"Error while saving"})
-    	}
-    }
+	if toolname == "jenkins"{
+		revel.INFO.Printf("Entering %s routine....\n",buildtools.TOOL_NAME)
+		var j buildtools.Jenkins
+		err := j.ConnectionTest(url)
+		if err != nil{
+			return c.RenderJson(res{Status:500, Msg:err.Error()})
+		}
+		
+		err = j.AddJenkinsBuilds(url, prj.ID, c.Tx)
+		if err != nil{
+			return c.RenderJson(res{Status:500, Msg : err.Error()})
+		}
+		
+	}else if toolname == "travis"{
+		
+	}else{
+		// TODO unsupported
+	}
 	
 	return c.RenderJson(res{Status:200, Msg:"OK"})
 }
+
 
 // ValidationTool function checks the given url is valid.
 // TODO Now this checks only jenkins connection without auth, we will add more
 // next target is travis CI
 func (c Builds) ValidateTool(url string, toolname string) revel.Result{
 	
-    // TODO the code below only handle Jenkins
-    if strings.HasSuffix(url, "/api/json") == false{
-    	url = url + "/api/json"
-    }
-	
-	body, err := c.getJenkinsJobInfo(url)
-	if err != nil {
-		return c.RenderJson(res{Status:501, Msg:"Internal server error"})
+	if toolname == "jenkins"{
+		// TODO now only support non-authorized type jenkins. 
+		// another certification method should be supported
+		revel.INFO.Printf("Entering %s routine....\n",buildtools.TOOL_NAME)
+		var j buildtools.Jenkins
+		err := j.ConnectionTest(url)
+		if err != nil{
+			return c.RenderJson(res{Status:500, Msg:err.Error()})
+		}
+		return c.RenderJson(res{Status:200, Msg:"OK"})
+	}else if toolname == "travis"{
+		
+	}else{
+		// fall through
 	}
 	
-	var dat map[string]interface{}
-	var msg string
-	
-    if err := json.Unmarshal(body, &dat); err != nil {
-      return c.RenderJson(res{Status:502, Msg:"Json Unmarshalling is failed"})
-    }
-    
-    msg += "Job name : "+ dat["name"].(string) + "\n"
-    msg += "URL : " + dat["url"].(string) + "\n"
-    
-    build := dat["lastBuild"].(map[string]interface{})
-    
-    // FIXME runtime error build["number"].(int).... why? 3 is float?
-    k := strconv.Itoa(int(build["number"].(float64)))
-    msg += "LastBuild Number : " + k + "\n"
-    
-    build = dat["lastSuccessfulBuild"].(map[string]interface{})
-    k = strconv.Itoa(int(build["number"].(float64)))
-    msg += "Last Successful Build : " + k + "\n"
-	
-	r := res{Status:200, Msg:msg}
-	
-	return c.RenderJson(r)
+	return c.RenderJson(res{Status:501, Msg:"Not supported tool"})
 }
 
-func (c Builds) getJenkinsJobInfo(url string) ([]byte, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		revel.ERROR.Println("An error while GET", err)
-		return nil, err
-	}
-	defer resp.Body.Close()
-	
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil{
-		revel.ERROR.Println("An error while readall", err)
-		return nil, err
-	}
-	return body, nil
-}
-
+// GetBuildItems returns BuildItem matched with given "id"
 func (c Builds) GetBuildItems(id int) revel.Result {
 	var items []models.BuildItem
 	
 	c.Tx.Where("build_project_id = ?", id).Find(&items)
 	
 	return c.RenderJson(items)
-	
 }
