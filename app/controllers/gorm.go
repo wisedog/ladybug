@@ -302,7 +302,7 @@ func (c *GormController) Begin() revel.Result {
 		panic(txn.Error)
 	}
 	c.Tx = txn
-	revel.INFO.Println("c.Tx init", c.Tx)
+	//revel.INFO.Println("c.Tx init", c.Tx)
 	return nil
 }
 
@@ -315,7 +315,7 @@ func (c *GormController) Commit() revel.Result {
 		panic(err)
 	}
 	c.Tx = nil
-	revel.INFO.Println("c.Tx commited (nil)")
+	//revel.INFO.Println("c.Tx commited (nil)")
 	return nil
 }
 

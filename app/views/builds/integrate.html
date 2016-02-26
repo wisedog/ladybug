@@ -1,5 +1,5 @@
 {{set . "title" "Builds"}}
-{{set . "showsidebar" "true"}}
+{{set . "active_index" "builds"}}
 
 {{template "header.html" .}}
 <!-- Content Wrapper. Contains page content -->
@@ -11,8 +11,9 @@
       <small>Setting tools like Jenkins, Teamcity...</small>
     </h1>
     <ol class="breadcrumb">
-      <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
-      <li class="active">Here</li>
+      <li><a href="{{url "Projects.Dashboard" .project}}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+      <li><a href="{{url "Builds.Index" .project}}"> Builds</a></li>
+      <li class="active">Integrate</li>
     </ol>
   </section>
 
@@ -20,22 +21,21 @@
   <section class="content">
     <div class="row bottom10">
       <div class="col-md-3">
-        <select class="form-control">
+        <select class="form-control" id="toolname">
           <option value="jenkins">Jenkins</option>
+          <option value="travis">Travis</option>
         </select> 
       </div>
     </div> <!-- .row -->
     
         <div class="box box-primary">
           <div class="box-body">
-            <div class="row bottom17">
+            <div class="row bottom17 vertical-align">
               <div class="col-md-1">
-                <label>
-                  Job URL
-                </label>
+                <label id="build-label">Job URL</label>
               </div>
               <div class="col-md-6">
-                <input id="jenkins-url" class="form-control" placeholder="ex) http://&lt;your jenkins server's IP&gt;/job/sample"></input>
+                <input id="build-url" class="form-control" placeholder="ex) http://<your jenkins server's IP>/job/sample"></input>
               </div>
               <div class="col-md-5">
                 <button id="btn-validate" type="button" class="btn btn-primary btn-sm btn-flat">Check</button>
@@ -63,10 +63,20 @@
 
 <script>
   $(document).ready(function(){
+    $("#toolname").change(function(){
+      var toolname = $(this).val();
+      if( toolname == "jenkins"){
+        $("#build-url").attr("placeholder", "ex) http://<your jenkins server's IP>/job/sample");
+      }
+      else if(toolname == "travis"){
+        $("#build-url").attr("placeholder", "ex) https://travis-ci.org/wisedog/ladybug");
+        $("#build-label").text("Repo URL");
+      }
+    });
     $("#btn-validate").click(function(){
       var data={
-        url : $('#jenkins-url').val(),
-        toolname : "jenkins"
+        url : $('#build-url').val(),
+        toolname : $("#toolname").val()
       };
       
       $.post('/project/{{.project}}/build/tool/validate', data).done(function(r){
@@ -84,8 +94,8 @@
     });
     $('#btn-add').click(function(){
       var data={
-        url : $('#jenkins-url').val(),
-        toolname : "jenkins",
+        url : $('#build-url').val(),
+        toolname : $("#toolname").val(),
         project : "{{.project}}"
       };
       

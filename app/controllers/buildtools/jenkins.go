@@ -15,8 +15,6 @@ import (
 	"github.com/wisedog/ladybug/app/models"
 )
 
-const TOOL_NAME = "jenkins"
-
 const (
 	BUILD_FAIL = iota
 	BUILD_SUCCESS
@@ -26,11 +24,6 @@ const (
 type Jenkins struct {
     
 }
-
-func (j Jenkins) GetBuild(){
-  
-}
-
 
 func (j Jenkins) AddJenkinsBuilds(url string, projectID int, db *gorm.DB) error{
   if db == nil{
@@ -77,8 +70,7 @@ func (j Jenkins) AddJenkinsBuilds(url string, projectID int, db *gorm.DB) error{
   }
   r := db.Save(&job)
   if r.Error != nil{
-  	return nil
-  	//return c.RenderJson(res{Status:503, Msg:"Error while Saving "})	//TEMP
+  	return r.Error
   }
   
   
@@ -163,20 +155,20 @@ func (j Jenkins) AddJenkinsBuilds(url string, projectID int, db *gorm.DB) error{
   return nil
 }
 
-func (j Jenkins) ConnectionTest(url string) error {
+func (j Jenkins) ConnectionTest(url string) (string, error) {
   if strings.HasSuffix(url, "/api/json") == false{
   	url = url + "/api/json"
   }
   body, err := j.getJenkinsJobInfo(url)
 	if err != nil {
-	  return errors.New("Fail to get Jenkins job information")
+	  return "", errors.New("Fail to get Jenkins job information")
 	}
 	
 	var dat map[string]interface{}
 	var msg string
 	
   if err := json.Unmarshal(body, &dat); err != nil {
-    return errors.New("Json Unmarshalling is failed")
+    return "", errors.New("Json Unmarshalling is failed")
   }
   
   msg += "Job name : "+ dat["name"].(string) + "\n"
@@ -192,7 +184,7 @@ func (j Jenkins) ConnectionTest(url string) error {
   k = strconv.Itoa(int(build["number"].(float64)))
   msg += "Last Successful Build : " + k + "\n"
 	
-	return nil
+	return msg, nil
 }
 
 // getJenkinsJobInfo verifies given url.

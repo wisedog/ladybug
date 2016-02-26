@@ -12,6 +12,7 @@ type BuildItem struct {
 	BuildProjectID	int			// id for build.  TODO index? 
 	Toolname		string		// jenkins, .....
 	IdByTool		string		// for example, jenkins builds id is string
+	IdByToolInt		int			
 	DisplayName		string		// for example in jenkins : "#3"
 	
 	/* for example in jenkins : "cJson #3". 

@@ -39,7 +39,7 @@
               </div>
               {{with $field := field "testcase.Title" .}}
               <div class="col-md-8 {{if $field.Error}}has-error{{end}}">
-                <input id="tc-title" class="form-control" name="{{$field.Name}}" value="{{$field.Flash}}">
+                <input id="tc-title" class="form-control" name="{{$field.Name}}" value="{{if $field.Flash}}{{$field.Flash}}{{else}}{{$field.Value}}{{end}}">
               </div>
               {{end}}
             </div>

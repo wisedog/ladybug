@@ -151,11 +151,13 @@ func (c Builds) View(project string, id int) revel.Result {
 	}
 	
 	var builds []models.BuildItem
-	r = c.Tx.Where("build_project_id = ?", build.ID).Find(&builds)
+	r = c.Tx.Order("id_by_tool_int desc").Where("build_project_id = ?", build.ID).Find(&builds)
 	if r.Error != nil{
 		c.Response.Status = 500
 		return c.Render()
 	}
+	
+	revel.INFO.Println("itemsA : ", builds)
 
 	return c.Render(project, build, builds)
 }
@@ -200,9 +202,9 @@ func (c Builds) AddTool(url string, toolname string, project string) revel.Resul
 	*/
 	
 	if toolname == "jenkins"{
-		revel.INFO.Printf("Entering %s routine....\n",buildtools.TOOL_NAME)
+		revel.INFO.Printf("Entering Jenkins routine....\n",)
 		var j buildtools.Jenkins
-		err := j.ConnectionTest(url)
+		_, err := j.ConnectionTest(url)
 		if err != nil{
 			return c.RenderJson(res{Status:500, Msg:err.Error()})
 		}
@@ -213,9 +215,15 @@ func (c Builds) AddTool(url string, toolname string, project string) revel.Resul
 		}
 		
 	}else if toolname == "travis"{
+		revel.INFO.Printf("Entering Travis routine....\n",)
+		var t buildtools.Travis
+		err := t.AddTravisBuilds(url, prj.ID, c.Tx)
+		if err != nil{
+			return c.RenderJson(res{Status:500, Msg : err.Error()})
+		}
 		
 	}else{
-		// TODO unsupported
+		return c.RenderJson(res{Status:501, Msg : "Not support CI tool"})
 	}
 	
 	return c.RenderJson(res{Status:200, Msg:"OK"})
@@ -230,15 +238,29 @@ func (c Builds) ValidateTool(url string, toolname string) revel.Result{
 	if toolname == "jenkins"{
 		// TODO now only support non-authorized type jenkins. 
 		// another certification method should be supported
-		revel.INFO.Printf("Entering %s routine....\n",buildtools.TOOL_NAME)
+		revel.INFO.Printf("Entering Jenkins routine....\n")
 		var j buildtools.Jenkins
-		err := j.ConnectionTest(url)
+		msg, err := j.ConnectionTest(url)
 		if err != nil{
 			return c.RenderJson(res{Status:500, Msg:err.Error()})
 		}
-		return c.RenderJson(res{Status:200, Msg:"OK"})
+		return c.RenderJson(res{Status:200, Msg:msg})
 	}else if toolname == "travis"{
+		revel.INFO.Printf("Entering Travis routine....\n")
+		var t buildtools.Travis
+		resp, err, _ := t.ConnectionTest(url)
+		if err != nil{
+			return c.RenderJson(res{Status:500, Msg:err.Error()})
+		}
 		
+		var msg string
+		msg += "Slug : " + resp.Repo.Slug + "\n"
+		msg += "Description : " + resp.Repo.Description + "\n"
+		msg += "Last Build Number : " + resp.Repo.LastBuildNumber + "\n"
+		msg += "Last Build State : " + resp.Repo.LastBuildStarted + "\n"
+		msg += "Last Build Finished at : " + resp.Repo.LastBuildFinish + "\n"
+		
+		return c.RenderJson(res{Status:200, Msg:msg})
 	}else{
 		// fall through
 	}
@@ -250,7 +272,9 @@ func (c Builds) ValidateTool(url string, toolname string) revel.Result{
 func (c Builds) GetBuildItems(id int) revel.Result {
 	var items []models.BuildItem
 	
-	c.Tx.Where("build_project_id = ?", id).Find(&items)
+	c.Tx.Where("build_project_id = ?", id).Order("id_by_tool_int desc").Find(&items)
+	
+	revel.INFO.Println("items", items)
 	
 	return c.RenderJson(items)
 }
