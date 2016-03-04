@@ -1,8 +1,7 @@
 package controllers
 
 import (
-	"github.com/revel/revel"
-	"github.com/wisedog/ladybug/app/models"
+	"github.com/wisedog/ladybug/models"
 	"github.com/wisedog/ladybug/app/routes"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"

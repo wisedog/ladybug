@@ -1,0 +1,86 @@
+{{define "title"}}Dashboard{{ end }}
+{{define "more_style"}}{{end}}
+{{$project_name := .prj.Name}}  
+{{define "content"}}
+<div class="content-wrapper">
+	<section class="content-header">
+	  <h1>
+	    Dashboard
+	    <small>Project {{.Project.Name}}</small>
+	  </h1>
+	  <ol class="breadcrumb">
+	    <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+	    <li class="active">Dashboard</li>
+	  </ol>
+	</section>
+  <!-- Main content -->
+  <section class="content">
+    <div class="row">
+      <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-aqua">
+          <div class="inner">
+            <h3>{{.TestCaseCount}}</h3>
+            <p>Test Cases</p>
+          </div><!-- .inner -->
+          <div class="icon">
+            <i class="fa fa-check-square-o"></i>
+          </div>
+          <a href="#" class="small-box-footer">
+            More Info
+            <i class="fa fa-arrow-circle-right"></i>
+          </a>
+        </div>
+      </div> <!-- .col -->
+      <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-green">
+          <div class="inner">
+            <h3>{{.TaskCount}}</h3>
+            <p>Task(s)</p>
+          </div><!-- .inner -->
+          <div class="icon">
+            <i class="fa fa-tasks"></i>
+          </div>
+          <a href="#" class="small-box-footer">
+            More Info
+            <i class="fa fa-arrow-circle-right"></i>
+          </a>
+        </div>
+      </div> <!-- .col -->
+      <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-yellow">
+          <div class="inner">
+            <h3>{{.ExecCount}}</h3>
+            <p>Now On Executing</p>
+          </div><!-- .inner -->
+          <div class="icon">
+            <i class="glyphicon glyphicon-fire"></i>
+          </div>
+          <a href="#" class="small-box-footer">
+            More Info
+            <i class="fa fa-arrow-circle-right"></i>
+          </a>
+        </div>
+      </div> <!-- .col -->
+      <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-red">
+          <div class="inner">
+            <h3>0</h3>
+            <p>Review Requested!</p>
+          </div><!-- .inner -->
+          <div class="icon">
+            <i class="glyphicon glyphicon-search"></i>
+          </div>
+          <a href="#" class="small-box-footer">
+            More Info
+            <i class="fa fa-arrow-circle-right"></i>
+          </a>
+        </div>
+      </div> <!-- .col -->
+      
+    </div> <!-- .row -->
+  </section><!-- /.content -->
+</div><!-- /.content-wrapper -->
+{{end}}
+{{define "more_scripts"}}{{end}}
+
+

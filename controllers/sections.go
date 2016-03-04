@@ -1,18 +1,18 @@
 package controllers
 
 import (
-	"github.com/revel/revel"
-	"github.com/wisedog/ladybug/app/models"
-	"github.com/wisedog/ladybug/app/routes"
+	"net/http"
+
+  "github.com/wisedog/ladybug/interfacer"
 )
 
-type Sections struct {
-	Application
-}
 
 //TODO template first
-func (c Sections) Save(project string, section models.Section) revel.Result {
-	if user := c.connected(); user == nil {
+//Save(project string, section models.Section) error {
+//
+func Save(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+  return nil
+	/*if user := c.connected(); user == nil {
 		c.Flash.Error("Please log in first")
 		return c.Redirect(routes.Application.Index())
 	}
@@ -37,12 +37,14 @@ func (c Sections) Save(project string, section models.Section) revel.Result {
 		revel.ERROR.Println("An error while insert operation Sections.Save", r.Error)
 	}
 
-	return c.Render(project) //c.Redirect(routes.TestDesign.Index(project))
+	return c.Render(project) //c.Redirect(routes.TestDesign.Index(project))*/
 
 }
 
-func (c Sections) Insert(project string, id int, parent_id int, title string, edit bool) revel.Result {
-
+//(project string, id int, parent_id int, title string, edit bool) revel.Result {
+func  SectionAdd(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+  return nil
+/*
 	type Reply struct {
 		Status int    `json:"status"`
 		Msg    string `json:"msg"`
@@ -78,5 +80,5 @@ func (c Sections) Insert(project string, id int, parent_id int, title string, ed
 		e = Reply{Status: 200, Msg: "OK"}
 	}
 
-	return c.RenderJson(e)
+	return c.RenderJson(e)*/
 }

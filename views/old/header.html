@@ -45,7 +45,7 @@
   <header class="main-header">
 
     <!-- Logo -->
-    <a href="{{url "Hello.Welcome" }}" class="logo">
+    <a href="/hello" class="logo">
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini"><b>L</b>ady</span>
       <!-- logo for regular state and mobile devices -->
@@ -89,10 +89,10 @@
               <!-- Menu Footer-->
               <li class="user-footer">
                 <div class="pull-left">
-                  <a href="{{url "Users.Profile" .user.ID}}" class="btn btn-default btn-flat">Profile</a>
+                  <a href="#" class="btn btn-default btn-flat">Profile</a>
                 </div>
                 <div class="pull-right">
-                  <a href="{{url "Application.Logout" }}" class="btn btn-default btn-flat">Sign out</a>
+                  <a href="#" class="btn btn-default btn-flat">Sign out</a>
                 </div>
               </li>
             </ul>
@@ -141,37 +141,37 @@
         <li class="header">Main Navigation</li>
         <!-- Optionally, you can add icons to the links -->
         <li {{if eq .active_index "dashboard"}}class="active"{{end}}>
-          <a href='{{url "Projects.Dashboard" .project}}'>
+          <a href='#'>
             <i class="fa fa-dashboard"></i>
             <span>Dashboard</span>
           </a>
         </li>
         <li {{if eq .active_index "testdesign"}}class="active"{{end}}>
-          <a href='{{url "TestDesign.DesignIndex" .project}}'>
+          <a href='#'>
             <i class="glyphicon glyphicon-pencil"></i>
             <span>Test Design</span>
           </a>
         </li>
         <li {{if eq .active_index "builds"}}class="active"{{end}}>
-          <a href='{{url "Builds.Index" .project}}'>
+          <a href='#'>
             <i class="fa fa-gears"></i>
             <span>Builds</span>
           </a>
         </li>
         <li {{if eq .active_index "testplan"}}class="active"{{end}}>
-          <a href='{{url "TestPlans.Index" .project}}'>
+          <a href='#'>
             <i class="fa fa-table"></i>
             <span>Test Plan</span>
           </a>
         </li>
         <li {{if eq .active_index "testexecution"}}class="active"{{end}}>
-          <a href='{{url "TestExecs.Index" .project}}'>
+          <a href='#'>
             <i class="glyphicon glyphicon-fire"></i>
             <span>Test Execution</span>
           </a>
         </li>
         <li {{if eq .active_index "spec"}}class="active"{{end}}>
-          <a href='{{url "Specifications.Spec" .project}}'>
+          <a href='#'>
             <i class="fa fa-list-alt"></i>
             <span>Specification</span>
           </a>

@@ -1,71 +1,61 @@
-package controllers
+package database
 
 import (
-	"database/sql"
+
+	log "github.com/Sirupsen/logrus"
+  //"database/sql"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
-	"github.com/revel/revel"
-	"github.com/wisedog/ladybug/app/models"
+	"github.com/wisedog/ladybug/models"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
-type GormController struct {
-	*revel.Controller
-	Tx *gorm.DB
-}
+var Database gorm.DB
 
-var Db gorm.DB
-
-func InitDB() {
+func InitDB() error{
 	var err error
-	Db, err = gorm.Open("postgres", "user=postgres dbname=ladybug sslmode=disable")
+	Database, err = gorm.Open("postgres", "user=ladybug dbname=ladybug port=15432 sslmode=disable")
 	if err != nil {
-		revel.ERROR.Println("FATAL", err)
-		panic(err)
+		log.Info(err)
+		return err
 	}
 
-	if revel.Config.BoolDefault("Ladybug.droptable", true) == false {
-		Db.AutoMigrate(&models.User{})
-		Db.AutoMigrate(&models.TestCase{})
-		Db.AutoMigrate(&models.TestPlan{})
-		Db.AutoMigrate(&models.Build{})
-		Db.AutoMigrate(&models.BuildItem{})
-		Db.AutoMigrate(&models.Section{})
-		Db.AutoMigrate(&models.Execution{})
-		Db.AutoMigrate(&models.TestResult{})
-		Db.AutoMigrate(&models.Review{})
-		Db.AutoMigrate(&models.Category{})
-		Db.AutoMigrate(&models.Specification{})
-
-		revel.INFO.Println("All tables are not dropped!")
-	} else {
-		revel.INFO.Println("All tables are DROPPED!")
-		createDummy()
-	}
-
+  Database.AutoMigrate(&models.User{})
+  Database.AutoMigrate(&models.TestCase{})
+  Database.AutoMigrate(&models.TestPlan{})
+  Database.AutoMigrate(&models.Build{})
+  Database.AutoMigrate(&models.BuildItem{})
+  Database.AutoMigrate(&models.Section{})
+  Database.AutoMigrate(&models.Execution{})
+  Database.AutoMigrate(&models.TestResult{})
+  Database.AutoMigrate(&models.Review{})
+  Database.AutoMigrate(&models.Category{})
+  Database.AutoMigrate(&models.Specification{})
+  createDummy()
+  return nil
 }
 
 func createDummy() {
 
 	// drop all table while on development phase
-	Db.DropTable(&models.User{})
-	Db.DropTable(&models.Project{})
-	Db.DropTable(&models.TestCase{})
-	Db.DropTable(&models.TestPlan{})
-	Db.DropTable(&models.Build{})
-	Db.DropTable(&models.BuildItem{})
-	Db.DropTable(&models.Section{})
-	Db.DropTable(&models.Execution{})
-	Db.DropTable(&models.Review{})
-	Db.DropTable(&models.TestResult{})
-	Db.DropTable(&models.Category{})
-	Db.DropTable(&models.Specification{})
-	Db.DropTable(&models.Activity{})
-	Db.DropTable(&models.History{})
+	Database.DropTable(&models.User{})
+	Database.DropTable(&models.Project{})
+	Database.DropTable(&models.TestCase{})
+	Database.DropTable(&models.TestPlan{})
+	Database.DropTable(&models.Build{})
+	Database.DropTable(&models.BuildItem{})
+	Database.DropTable(&models.Section{})
+	Database.DropTable(&models.Execution{})
+	Database.DropTable(&models.Review{})
+	Database.DropTable(&models.TestResult{})
+	Database.DropTable(&models.Category{})
+	Database.DropTable(&models.Specification{})
+	Database.DropTable(&models.Activity{})
+	Database.DropTable(&models.History{})
 
 	// Create dummy users
-	Db.AutoMigrate(&models.User{})
+	Database.AutoMigrate(&models.User{})
 
 	bcryptPassword, _ := bcrypt.GenerateFromPassword(
 		[]byte("demo"), bcrypt.DefaultCost)
@@ -77,8 +67,8 @@ func createDummy() {
 		Photo : "rey_160x160", Location : "Jakku",
 		Notes : "I know all about waiting. For my family. They'll be back, one day.",
 	}
-	Db.NewRecord(demoUser) // => returns `true` if primary key is blank
-	Db.Create(&demoUser)
+	Database.NewRecord(demoUser) // => returns `true` if primary key is blank
+	Database.Create(&demoUser)
 
 	demoUser1 := &models.User{Name: "Poe Dameron", Email: "wisedog@demo.com", Password: "demo",
 		HashedPassword: bcryptPassword, Language: "en", Region: "US", LastLoginAt : time.Now(),
@@ -86,14 +76,14 @@ func createDummy() {
 		Location : "D'Qar", Notes : "Red squad, blue squad, take my lead.",
 		
 	}
-	Db.NewRecord(demoUser1)
-	Db.Create(&demoUser1)
+	Database.NewRecord(demoUser1)
+	Database.Create(&demoUser1)
 
-	//Db.Model(tab).AddUniqueIndex("idx_user__gmail", "gmail")
-	//Db.Model(tab).AddUniqueIndex("idx_user__pu_mail", "pu_mail")
+	//Database.Model(tab).AddUniqueIndex("idx_user__gmail", "gmail")
+	//Database.Model(tab).AddUniqueIndex("idx_user__pu_mail", "pu_mail")
 	
 	// Create dummy project
-	Db.AutoMigrate(&models.Project{})
+	Database.AutoMigrate(&models.Project{})
 
 	prj := models.Project{
 			Name:        "Koblentz",
@@ -110,13 +100,13 @@ func createDummy() {
 			Users:       []models.User{*demoUser, *demoUser1},
 	}
 
-	Db.NewRecord(prj)
-	Db.Create(&prj)
-	Db.NewRecord(prj1)
-	Db.Create(&prj1)
+	Database.NewRecord(prj)
+	Database.Create(&prj)
+	Database.NewRecord(prj1)
+	Database.Create(&prj1)
 
 	// Create dummy testcases
-	Db.AutoMigrate(&models.TestCase{})
+	Database.AutoMigrate(&models.TestCase{})
 
 /*
 1. Drag some texts on web browser to select text and CTRL + C 
@@ -164,21 +154,21 @@ func createDummy() {
 	}
 
 	for _, tc := range testcases {
-		Db.NewRecord(tc)
-		Db.Create(&tc)
+		Database.NewRecord(tc)
+		Database.Create(&tc)
 	}
 
 	// Create dummy testplan
-	Db.AutoMigrate(&models.TestPlan{})
+	Database.AutoMigrate(&models.TestPlan{})
 	
 	// Create dummy test execution
-	Db.AutoMigrate(&models.Execution{})
+	Database.AutoMigrate(&models.Execution{})
 	
 	// Create dummy test result
-	Db.AutoMigrate(&models.TestResult{})
+	Database.AutoMigrate(&models.TestResult{})
 
 	// Create dummy build
-	Db.AutoMigrate(&models.Build{})
+	Database.AutoMigrate(&models.Build{})
 	b := []*models.Build{
 		&models.Build{Name:"Millenium Falcon", 
 			Description : "Modeling files for Millenium Falcon", 
@@ -187,20 +177,20 @@ func createDummy() {
 	}
 	
 	for _, bi := range b {
-		Db.NewRecord(bi)
-		Db.Create(&bi)
+		Database.NewRecord(bi)
+		Database.Create(&bi)
 	}
 	
 	
 	// Create dummy build items
-	Db.AutoMigrate(&models.BuildItem{})
+	Database.AutoMigrate(&models.BuildItem{})
 	
 	// Create dummy Review
-	Db.AutoMigrate(&models.Review{})
+	Database.AutoMigrate(&models.Review{})
 	
 	
 	// Create dummy section
-	Db.AutoMigrate(&models.Section{})
+	Database.AutoMigrate(&models.Section{})
 	sections := []*models.Section{
 		&models.Section{Seq: 1, Title: "Coding Conventions", Status: 0, RootNode: true, 
 			Prefix: prj.Prefix, ProjectID : prj.ID, ForTestCase : true,},
@@ -237,11 +227,11 @@ func createDummy() {
 	}
 
 	for _, section := range sections {
-		Db.NewRecord(section)
-		Db.Create(&section)
+		Database.NewRecord(section)
+		Database.Create(&section)
 	}
 	
-	Db.AutoMigrate(&models.Category{})
+	Database.AutoMigrate(&models.Category{})
 	cate := []*models.Category{
 		&models.Category{Name : "Funtionality"},
 		&models.Category{Name : "Performance"},
@@ -254,11 +244,11 @@ func createDummy() {
 	}
 	
 	for _, ct := range cate {
-		Db.NewRecord(ct)
-		Db.Create(&ct)
+		Database.NewRecord(ct)
+		Database.Create(&ct)
 	}
 	
-	Db.AutoMigrate(&models.Specification{})
+	Database.AutoMigrate(&models.Specification{})
 	
 	specs := []*models.Specification{
 		&models.Specification{Name:"Hello, world", SectionID : 13, 
@@ -273,13 +263,13 @@ func createDummy() {
 	}
 	
 	for _, sp := range specs {
-		Db.NewRecord(sp)
-		Db.Create(&sp)
+		Database.NewRecord(sp)
+		Database.Create(&sp)
 	}
 	
 	
 	// for creating dummy for Activity
-	Db.AutoMigrate(&models.Activity{})
+	Database.AutoMigrate(&models.Activity{})
 	
 	activities := []*models.Activity{
 		&models.Activity{UserID : demoUser.ID, Content : "Rey finished Test Execution #1"},
@@ -288,16 +278,16 @@ func createDummy() {
 	}
 	
 	for _, ac := range activities {
-		Db.NewRecord(ac)
-		Db.Create(&ac)
+		Database.NewRecord(ac)
+		Database.Create(&ac)
 	}
 	
 	// for creating dummy for History
-	Db.AutoMigrate(&models.History{})
+	Database.AutoMigrate(&models.History{})
 }
-
+/*
 func (c *GormController) Begin() revel.Result {
-	txn := Db.Begin()
+	txn := Database.Begin()
 	if txn.Error != nil {
 		panic(txn.Error)
 	}
@@ -330,3 +320,4 @@ func (c *GormController) Rollback() revel.Result {
 	c.Tx = nil
 	return nil
 }
+*/
