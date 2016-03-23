@@ -1,11 +1,41 @@
 package buildtools
 
-import(
-	"testing"
+import (
+  "fmt"
+  "testing"
+  "os"
 
+  "github.com/jinzhu/gorm"
   "github.com/wisedog/ladybug/database"
   "github.com/wisedog/ladybug/models"
-)
+
+  )
+
+var Database *gorm.DB
+
+func setup(){
+  fmt.Println("Setup Testing for package buildtools...")
+  var err error
+  Database, err = database.InitDB() 
+  if err != nil{
+    fmt.Println("Database initialization is failed.")
+    return
+  }
+  //defer Database.Close()
+}
+
+func tearDown(){
+  fmt.Println("Tear Down Testing for package buildtools...")
+}
+
+func TestMain(m *testing.M) { 
+  fmt.Println("TestMain for package buildtools...")
+  setup()
+  retCode := m.Run()
+  tearDown()
+  os.Exit(retCode)
+}
+
 
 func TestGetApiUrlTravis(t *testing.T) {
   cases := []struct{
@@ -64,22 +94,15 @@ func TestGetTravisRepoInfo(t *testing.T){
 }
 
 func TestAddTravisBuilds(t *testing.T){
-  if err := database.InitDB(); err != nil{
-    t.Log("Database initialization is failed.")
-    return
-  }
-  //AddTravisBuilds(url string, projectID int, db *gorm.DB) error{
 
   var travis Travis
-  db := &database.Database
   // project id 1 depends on createDummy() script. 
-  if err := travis.AddTravisBuilds("https://travis-ci.org/wisedog/ladybug", 1, db ); err != nil{
+  if err := travis.AddTravisBuilds("https://travis-ci.org/wisedog/ladybug", 1, Database ); err != nil{
     t.Fail()
     t.Log("AddTravisBuilds returns error : ", err.Error())
   }
   var items []models.BuildItem
-  if err := db.Find(&items); err.Error != nil{
+  if err := Database.Find(&items); err.Error != nil{
     t.Error("Nothing inserted", err.Error)
   }
-  
 }

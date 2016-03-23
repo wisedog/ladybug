@@ -11,14 +11,14 @@ import (
   log "gopkg.in/inconshreveable/log15.v2" 
 )
 
-var Database gorm.DB
+var Database *gorm.DB
 
-func InitDB() error{
-	var err error
-	Database, err = gorm.Open("postgres", "user=ladybug dbname=ladybug sslmode=disable")
+func InitDB() (*gorm.DB, error){
+  var err error
+	Database, err = gorm.Open("postgres", "user=ladybug dbname=ladybug port=5432 sslmode=disable")
 	if err != nil {
 		log.Info("Database", "msg", err.Error())
-		return err
+		return Database, err
 	}
 
   Database.AutoMigrate(&models.User{})
@@ -33,7 +33,7 @@ func InitDB() error{
   Database.AutoMigrate(&models.Category{})
   Database.AutoMigrate(&models.Specification{})
   createDummy()
-  return nil
+  return Database, nil
 }
 
 func createDummy() {

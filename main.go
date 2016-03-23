@@ -92,12 +92,13 @@ func main() {
 
   ctx := &interfacer.AppContext{}
   log.Info("Initialize Database...")
-  if err := database.InitDB(); err != nil{
+  if db, err := database.InitDB(); err != nil{
     log.Crit("Database initialization is failed.")
     return
+  }else{
+    ctx.Db = db
   }
 
-  ctx.Db = &database.Database
   ctx.Store = sessions.NewCookieStore([]byte("ladybug"))
   ctx.Decoder = schema.NewDecoder()
 

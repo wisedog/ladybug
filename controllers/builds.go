@@ -8,7 +8,6 @@ import (
 
   "github.com/gorilla/mux"
   "github.com/gorilla/sessions"
-  "github.com/jinzhu/gorm"
   "github.com/wisedog/ladybug/models"
   "github.com/wisedog/ladybug/interfacer"
   "github.com/wisedog/ladybug/errors"
@@ -247,12 +246,7 @@ func BuildsSaveItem(c *interfacer.AppContext, w http.ResponseWriter, r *http.Req
   
   //get largest number
   var largest models.BuildItem
-  if err := c.Db.Where("build_project_id = ?", build.ID).Order("seq desc").First(&largest).Error; err != nil{
-    if err != gorm.RecordNotFound{
-      log.Error("Build", "type", "database", "msg ", err )
-      return errors.HttpError{http.StatusInternalServerError, "Could not find builditem project"}  
-    }
-  }
+  c.Db.Where("build_project_id = ?", build.ID).Order("seq desc").First(&largest)
   
   idByTool := fmt.Sprintf("%d", largest.Seq + 1)
   displayName := "#" + idByTool

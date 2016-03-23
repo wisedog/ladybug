@@ -6,10 +6,9 @@ services:
 - memcache
 - redis-server
 - postgresql
-addons:
-  postgresql: '9.3'
 before_script:
-- psql -c 'create database ladybug;' -U postgres
+- psql -c 'create user ladybug;' -U postgres
+- psql -c 'create database ladybug;' -U ladybug
 install:
 - export PATH=$PATH:$HOME/gopath/bin
 - go get -v gopkg.in/fsnotify.v1
