@@ -20,6 +20,8 @@ install:
 - go get -v github.com/lib/pq
 - go get -v golang.org/x/crypto/bcrypt
 - go get -v gopkg.in/inconshreveable/log15.v2
+- go get -v github.com/robfig/config
+
 
 notifications:
   slack: ladybugdev:dGWtXjXTstY63pMo2yLvvOHy

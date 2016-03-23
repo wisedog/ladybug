@@ -1,9 +1,6 @@
 package models
 
 import (
-	"fmt"
-	"github.com/revel/revel"
-	"regexp"
 	"time"
 )
 
@@ -15,7 +12,7 @@ const (
 )
 
 type User struct {
-	ID             int
+	BaseModel
 	Name           string
 	Email          string `sql:"not null;unique"`
 	Password       string
@@ -31,14 +28,11 @@ type User struct {
 	//TODO Roles          []Role
 	//TODO link of email, homepage, FB, TW, G+ ....
 
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
-	DeletedAt         time.Time
 	LastLoginAt       time.Time
 	PasswordUpdatedAt time.Time
 }
 
-func (u *User) String() string {
+/*func (u *User) String() string {
 	return fmt.Sprintf("User(%s)", u.Email)
 }
 
@@ -63,3 +57,4 @@ func ValidatePassword(v *revel.Validation, password string) *revel.ValidationRes
 		revel.MinSize{2},
 	)
 }
+*/

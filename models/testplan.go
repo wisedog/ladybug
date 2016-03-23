@@ -1,9 +1,5 @@
 package models
 
-import (
-	"github.com/revel/revel"
-)
-
 type TestPlan struct {
 	BaseModel
 	Title         string
@@ -21,7 +17,7 @@ type TestPlan struct {
 	TargetBuild   BuildItem
 	TargetBuildId int
 }
-
+/*
 func (testplan *TestPlan) Validate(v *revel.Validation) {
 	v.Check(testplan.Title,
 		revel.Required{},
@@ -33,3 +29,4 @@ func (testplan *TestPlan) Validate(v *revel.Validation) {
 	)
 
 }
+*/

@@ -1,12 +1,7 @@
 package models
 
-import (
-	"github.com/revel/revel"
-	"time"
-)
-
 type Section struct {
-	ID          int
+	BaseModel
 	Prefix      string
 	Seq         int // may use...
 	Title       string
@@ -16,12 +11,8 @@ type Section struct {
 	ProjectID   int
 	RootNode    bool
 	ForTestCase	bool	//TestCase or Specification
-
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
 }
-
+/*
 func (section *Section) Validate(v *revel.Validation) {
 	v.Check(section.Title,
 		revel.Required{},
@@ -33,3 +24,4 @@ func (section *Section) Validate(v *revel.Validation) {
 		revel.MaxSize{16},
 	)
 }
+*/
