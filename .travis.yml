@@ -20,7 +20,6 @@ install:
 - go get -v github.com/lib/pq
 - go get -v golang.org/x/crypto/bcrypt
 - go get -v gopkg.in/inconshreveable/log15.v2
-script:
-- revel test github.com/wisedog/ladybug
+
 notifications:
   slack: ladybugdev:dGWtXjXTstY63pMo2yLvvOHy
