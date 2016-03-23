@@ -2,11 +2,10 @@ package models
 
 import (
 	"github.com/revel/revel"
-	"time"
 )
 
 type TestPlan struct {
-	ID            int
+	BaseModel
 	Title         string
 	Description   string
 	Status        int		//Active , In Review 
@@ -21,10 +20,6 @@ type TestPlan struct {
 	ExecuteCases  string	// ',' joined string like 1,2,3.... 
 	TargetBuild   BuildItem
 	TargetBuildId int
-
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
 }
 
 func (testplan *TestPlan) Validate(v *revel.Validation) {

@@ -2,13 +2,10 @@ package controllers
 
 import (
 	"fmt"
-
-  "html/template"
   "net/http"
 
 	"github.com/wisedog/ladybug/models"
   "github.com/wisedog/ladybug/interfacer"
-  "github.com/wisedog/ladybug/errors"
   log "gopkg.in/inconshreveable/log15.v2"
 	)
 
@@ -59,6 +56,7 @@ func Welcome(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
   
   if err.Error != nil{
     fmt.Println("Failed to select operation in Hello2")
+    log.Error("Hello")
   }
   
   // Find Test executions for the user
@@ -70,16 +68,6 @@ func Welcome(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
   }
   
   exec_count := len(execs)
-
-  t, er := template.ParseFiles(
-    "views/base.tmpl",
-    "views/hello.tmpl",
-    )
-
-  if er != nil{
-    log.Error("Error ", er )
-    return errors.HttpError{http.StatusInternalServerError, "Template ParseFiles error"}
-  }
 
   items := struct {
     User models.User
@@ -95,13 +83,7 @@ func Welcome(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
     Active_idx : 0,
   }
 
-  
-  er = t.Execute(w, items)
-  if er != nil{
-    log.Error("Template Execution Error ", er )
-    return errors.HttpError{http.StatusInternalServerError, "Template Exection Error"}
-  }
   // TODO Find review for the user
 
-  return nil
+  return Render(w, items, "views/base.tmpl", "views/hello.tmpl")
 }

@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/revel/revel"
 	"time"
 )
 
@@ -28,48 +27,3 @@ type Issue struct {
 	Attachment  int // TODO change to ....
 
 }
-
-func (issue *Issue) Validate(v *revel.Validation) {
-	v.Check(issue.Summary,
-		revel.Required{},
-		revel.MaxSize{400},
-	)
-
-	v.Check(issue.Description,
-		revel.Required{},
-		revel.MaxSize{4000},
-	)
-
-}
-
-/*func (hotel *Hotel) Validate(v *revel.Validation) {
-	v.Check(hotel.Name,
-		revel.Required{},
-		revel.MaxSize{50},
-	)
-
-	v.MaxSize(hotel.Address, 100)
-
-	v.Check(hotel.City,
-		revel.Required{},
-		revel.MaxSize{40},
-	)
-
-	v.Check(hotel.State,
-		revel.Required{},
-		revel.MaxSize{6},
-		revel.MinSize{2},
-	)
-
-	v.Check(hotel.Zip,
-		revel.Required{},
-		revel.MaxSize{6},
-		revel.MinSize{5},
-	)
-
-	v.Check(hotel.Country,
-		revel.Required{},
-		revel.MaxSize{40},
-		revel.MinSize{2},
-	)
-}*/

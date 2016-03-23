@@ -140,37 +140,37 @@
           <li class="header">Main Navigation</li>
           <!-- Optionally, you can add icons to the links -->
           <li {{if eq .Active_idx 1}}class="active"{{end}}>
-            <a href='/project/{{.Project.Name}}'>
+            <a href='/project/{{.ProjectName}}'>
               <i class="fa fa-dashboard"></i>
               <span>Dashboard</span>
             </a>
           </li>
           <li {{if eq .Active_idx 2}}class="active"{{end}}>
-            <a href='/project/{{.Project.Name}}/design'>
+            <a href='/project/{{.ProjectName}}/design'>
               <i class="glyphicon glyphicon-pencil"></i>
               <span>Test Design</span>
             </a>
           </li>
           <li {{if eq .Active_idx 3}}class="active"{{end}}>
-            <a href='#'>
+            <a href='/project/{{.ProjectName}}/build'>
               <i class="fa fa-gears"></i>
               <span>Builds</span>
             </a>
           </li>
           <li {{if eq .Active_idx 4}}class="active"{{end}}>
-            <a href='#'>
+            <a href='/project/{{.ProjectName}}/testplan'>
               <i class="fa fa-table"></i>
               <span>Test Plan</span>
             </a>
           </li>
           <li {{if eq .Active_idx 5}}class="active"{{end}}>
-            <a href='#'>
+            <a href='/project/{{.ProjectName}}/exec'>
               <i class="glyphicon glyphicon-fire"></i>
               <span>Test Execution</span>
             </a>
           </li>
           <li {{if eq .Active_idx 6}}class="active"{{end}}>
-            <a href='#'>
+            <a href='/project/{{.ProjectName}}/spec'>
               <i class="fa fa-list-alt"></i>
               <span>Specification</span>
             </a>

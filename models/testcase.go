@@ -1,9 +1,7 @@
 package models
 
 import (
-	"time"
-	
-	"github.com/revel/revel"
+	"errors"
 )
 
 const (
@@ -24,7 +22,7 @@ const (
 
 // TestCase model represents a test case
 type TestCase struct {
-	ID            int
+	BaseModel
 	
 	// Prefix is a unique characters that each project has
 	// The prefix is used when Human-friendly testcase name is created
@@ -42,13 +40,20 @@ type TestCase struct {
 	
 	// Title of the test case
 	Title         string `sql:"size:400"`
+
+	// A section which this test case belongs to
 	Section       Section
 	SectionID     int    `sql:"index"`
+
+	// ExecutionType indicates manual execution or automated one.
 	ExecutionType int    //Manual, Automated
+	// ExTypeStr is string of execution type
 	ExTypeStr			string
-	Status        int    // Activation, Deactivation, closed
+
+	// Status indicates status of testcase. This should be one of following :  Activation, Deactivation, closed
+	Status        int
 	Description   string `sql:"size:2000"` // description of the issue
-	Precondition  string `sql:"size:1000"`
+	Precondition  string `sql:"size:1000" `
 	Priority      int    // 1 to 5. 1 is highest priority
 	PriorityStr		string	`sql:"-"`
 	Estimated     int    // unit : min(s)
@@ -64,13 +69,18 @@ type TestCase struct {
 	// need many-to-many releationship between specification and testcase. 
 	// Specifications       []Specification `gorm:"many2many:spec_cases;"`
 
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
+}
+
+func (testcase *TestCase) Validate() error{
+	rv := testcase.Required(testcase.Title)
+	if rv{
+		return nil
+	}
+	return errors.New("Testcase Title is empty")
 }
 
 // Validation will check validation of the input form
-func (testcase *TestCase) Validate(v *revel.Validation) {
+/*func (testcase *TestCase) Validate(v *revel.Validation) {
 	v.Required(testcase.Title)
 	v.Check(testcase.Title,
 		revel.Required{},
@@ -78,3 +88,4 @@ func (testcase *TestCase) Validate(v *revel.Validation) {
 		revel.MaxSize{400},
 	)
 }
+*/

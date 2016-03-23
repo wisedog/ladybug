@@ -1,8 +1,4 @@
 package models
-
-import (
-	"time"
-)
 	
 const (
     HISTORY_TYPE_TC = 1 + iota
@@ -31,7 +27,8 @@ type HistoryTestCaseUnit struct{
 // History is a model for history of test cases or something stuff.
 // 
 type History struct {
-	ID              int
+	BaseModel
+
 	ChangesJson		string	`sql:"size:1000"`
 	Changes			[]HistoryTestCaseUnit
 	User            User
@@ -49,8 +46,4 @@ type History struct {
 	DiffID			int
 	Note			string	`sql:"size:512"`
 
-
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
 }

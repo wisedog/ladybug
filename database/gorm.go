@@ -1,23 +1,23 @@
 package database
 
 import (
+  "time"
 
-	log "github.com/Sirupsen/logrus"
-  //"database/sql"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 	"github.com/wisedog/ladybug/models"
 	"golang.org/x/crypto/bcrypt"
-	"time"
+	
+  log "gopkg.in/inconshreveable/log15.v2" 
 )
 
 var Database gorm.DB
 
 func InitDB() error{
 	var err error
-	Database, err = gorm.Open("postgres", "user=ladybug dbname=ladybug port=15432 sslmode=disable")
+	Database, err = gorm.Open("postgres", "user=ladybug dbname=ladybug sslmode=disable")
 	if err != nil {
-		log.Info(err)
+		log.Info("Database", "msg", err.Error())
 		return err
 	}
 
@@ -89,7 +89,7 @@ func createDummy() {
 			Name:        "Koblentz",
 			Status:      1,
 			Description: "A test project",
-			Prefix:      "tc",
+			Prefix:      "TC",
 			Users:       []models.User{*demoUser, *demoUser1},
 	}
 	prj1 := models.Project{
@@ -132,7 +132,7 @@ func createDummy() {
 			DisplayID : prj.Prefix + "-3",Estimated : 4,
 		},
 		&models.TestCase{
-			Prefix: prj.Prefix, Seq: 4, Status: models.TC_STATUS_DRAFT, SectionID: 4, CategoryID : 2,
+			Prefix: prj.Prefix, Seq: 4, Status: models.TC_STATUS_ACTIVATE, SectionID: 4, CategoryID : 2,
 			Title: "Copy operation should be supported", 
 			Description: "Copy operation is essential feature for text editing.",
 			Precondition : "None",
@@ -142,7 +142,7 @@ func createDummy() {
 			DisplayID : prj.Prefix + "-4",Estimated : 5,
 		},
 		&models.TestCase{
-			Prefix: prj.Prefix, Seq: 5, Status: models.TC_STATUS_INACTIVE, SectionID: 4, CategoryID : 1,
+			Prefix: prj.Prefix, Seq: 5, Status: models.TC_STATUS_ACTIVATE, SectionID: 4, CategoryID : 1,
 			Title: "Paste operation should be supported", 
 			Description: "Paste operation is essential feature for text editing.",
 			Precondition : "None",

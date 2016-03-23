@@ -33,7 +33,17 @@
   </div>
   <!-- /.login-logo -->
   <div class="login-box-body">
-    <p class="login-box-msg">Sign in to start your session</p>
+    <p class="login-box-msg">
+    {{if .Messages}}
+      {{if .IsLogout}}
+      <span style="color:#3c8dbc;">{{.Messages}}</span>
+      {{else}}
+      <span style="color:#f39c12;">{{.Messages}}</span>
+      {{end}}
+    {{else}}
+      Sign in to start your session
+    {{end}}
+    </p>
 
     <form id="formLogin" method="post" action="/login">
       <div class="form-group has-feedback">

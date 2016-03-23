@@ -3,40 +3,63 @@ package controllers
 import (
   "fmt"
   "os"
+  "strings"
 
   "net/http"
   "html/template"
   "path/filepath"
+  "encoding/gob"
 
   "golang.org/x/crypto/bcrypt"
+  "github.com/robfig/config"
+  "github.com/gorilla/sessions"
   "github.com/wisedog/ladybug/models"
   "github.com/wisedog/ladybug/interfacer"
-  //"github.com/wisedog/ladybug/errors"
-  "github.com/gorilla/securecookie"
-  "github.com/gorilla/sessions"
-  //"github.com/jinzhu/gorm"	
-   log "gopkg.in/inconshreveable/log15.v2"
+  
+  log "gopkg.in/inconshreveable/log15.v2"
 )
 
 const (
   LADYBUG_SESSION = "ladybug_session"
+  FLASH_AUTH_MESSAGE = "flash_auth_msg"
 )
 
-funcMap := template.FuncMap {
-  "nl2br": func (str string) string { return strings.Replace(str, "\n", "<br />", -1) },
-  "msg" : func (str string) string{
-      // TODO. much to do
-      return str
+
+// function map used in template files
+var(
+  funcMap = template.FuncMap {
+    "nl2br": func (str string) string { return strings.Replace(str, "\n", "<br />", -1) },
+    "msg" : func (key string) string{
+       if messages == nil{
+        messages = LoadI18nMessage()
+      }
+      s, _ := messages.String("", key)
+      return s
     },
+    "categoryi18n" : func(key string) string{
+        return ""
+    },  
   }
+  messages *config.Config
+)
+
+func init(){
+
+  // for flash messages
+  gob.Register(&models.Build{})
+  gob.Register(&map[string]string{})
+
+  // TODO store category map to static variable. 
+  // in funcMap - categorui18n function refers the var.
+}
 
 //@deprecated
-var store = sessions.NewCookieStore([]byte("something-very-secret"))
+//var store = sessions.NewCookieStore([]byte("something-very-secret"))
 
-var cookieHandler = securecookie.New(
+/*var cookieHandler = securecookie.New(
   securecookie.GenerateRandomKey(64),
   securecookie.GenerateRandomKey(32),
-  )
+  )*/
 
 // connected is private utilitiy function for checking 
 // this user id now on connected or not.
@@ -53,83 +76,49 @@ func connected(c *interfacer.AppContext, r *http.Request) *models.User{
   c.Db.Where("email = ? and id = ?", email, uid ).First(&u)
 
   if u.ID == 0{
-    return nil  //TODO return unauth
+    return nil
   }
   return &u
 }
 
-//@deprecated
-func getUserId(request *http.Request) (userName string) {
-  if cookie, err := request.Cookie(LADYBUG_SESSION); err == nil {
-    cookieValue := make(map[string]string)
-    if err = cookieHandler.Decode(LADYBUG_SESSION, cookie.Value, &cookieValue); err == nil {
-      userName = cookieValue["name"]
-    }
-  }
-  return userName
-}
-
-func clearSession(response http.ResponseWriter){
-  cookie := &http.Cookie{
-    Name:   LADYBUG_SESSION,
-    Value:  "",
-    Path:   "/",
-    MaxAge: -1,
-  }
-  http.SetCookie(response, cookie)
-}
-
-//@deprecated
-func setSession(userId string, response http.ResponseWriter){
-  value := map[string]string{
-    "name": userId,
-  }
-  if encoded, err := cookieHandler.Encode("session", value); err == nil {
-    cookie := &http.Cookie{
-      Name:  "session",
-      Value: encoded,
-      Path:  "/",
-    }
-    http.SetCookie(response, cookie)
-  }
-}
-
-func renderTemplate(w http.ResponseWriter, tmpl string, Msg string) {
+func renderTemplate(w http.ResponseWriter, tmpl string, msg string, isLogout bool ) {
   dir, _ := os.Getwd()
   target := filepath.Join(dir, "views", "application", tmpl )
-  fmt.Println(target)
-  t, _ := template.ParseFiles(target)
-  
-  t.Execute(w, Msg)
-}
+  t, err := template.ParseFiles(target)
 
-//@deprecated
-func getUser(c *interfacer.AppContext, email string) *models.User{
-  var u models.User
-  err := c.Db.Where("email = ?", email).First(&u)
-  if err.Error != nil{
-      // TODO
+  if err != nil{
+    log.Error("App", "msg", "Template parse files error", "err", err)
   }
-  return &u
+
+  items := map[string]interface{}{
+    "Messages": msg,
+    "IsLogout" : isLogout,
+  }
+
+  fmt.Println("items", items)
+  
+  if err := t.Execute(w, items); err != nil{
+    log.Error("App", "msg", "Template Execute error","err", err)
+  }
 }
 
 // Login checks user email, password 
 func Login(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
 
-  fmt.Println("login Processing")
   session, err := c.Store.Get(r, "ladybug")
   if err != nil {
-
       http.Error(w, err.Error(), 500)
       return nil
   }
 
   email := r.FormValue("email")
   passwd := r.FormValue("password")
-  user := getUser(c, email)
-  if user != nil {
-    err := bcrypt.CompareHashAndPassword(user.HashedPassword, []byte(passwd))
-    if err == nil {
+
+  var user models.User
+  
+  if err := c.Db.Where("email = ?", email).First(&user); err != nil {
+    
+    if err := bcrypt.CompareHashAndPassword(user.HashedPassword, []byte(passwd)); err == nil {
       session.Values["user"] = email
       session.Values["uid"] = user.ID
 
@@ -142,6 +131,11 @@ func Login(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) err
       http.Redirect(w, r, "/hello", http.StatusFound)
     }
   }
+
+  // not exist account or incorrect password
+  session.AddFlash("Not exist account or incorrect password", FLASH_AUTH_MESSAGE)
+  session.Save(r, w)
+  http.Redirect(w, r, "/", http.StatusFound)
   return nil
 }
 
@@ -155,9 +149,7 @@ func LoginPage(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
 
   // if already logged in, redirect to Hello
   if session.Values["user"] != nil && session.Values["uid"] != nil {
-    fmt.Println("Already logged in")
-    fmt.Println("in Loginpage user", session.Values["user"])
-    fmt.Println("in Loginpage uid ", session.Values["uid"])
+    fmt.Println("Already logged in. Loginpage user/uid", session.Values["user"], session.Values["uid"])
     email := session.Values["user"]
     uid := session.Values["uid"]
 
@@ -171,23 +163,19 @@ func LoginPage(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
     http.Redirect(w, r, "/hello", http.StatusFound)
 
   }else{
-    fmt.Println("not login, rendering login page")
-    // Get the previously flashes, if any.
+    log.Debug("App", "msg", "not login, rendering login page")
 
+    // Get the previously flashes, if any.
     var s string
-    /* gorilla/session's flash is not working now FIXME
-    fmt.Println("flashes : ", session.Flashes("msg"))
-    
-    if msg := session.Flashes(); len(msg) > 0{
-      fmt.Println("Flash : ", msg)
+    var logoutFlag bool
+
+    if msg := session.Flashes(FLASH_AUTH_MESSAGE); len(msg) > 0{
       v, ok := msg[0].(string)
       if ok {
         s = v
       }
-    }*/
-    
-    renderTemplate(w, "index.html", s)
-    return nil
+    }
+    renderTemplate(w, "index.html", s, logoutFlag)
   }
   
   return nil
@@ -206,42 +194,14 @@ func LogOut(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) er
     Path:     "/",
     MaxAge:   -1,
   }
-
-  // Set a new flash.... is not working.. FIXME
-  // session.AddFlash("You just logged out.", "msg")
+  log.Debug("App", "msg", "logout")
+  session.AddFlash("You just logged out.", FLASH_AUTH_MESSAGE)
 
   session.Save(r, w)
-  http.Redirect(w, r, "/login", http.StatusFound)
+  http.Redirect(w, r, "/", http.StatusFound)
   return nil
 }
 
-/*
-func (c App) LoginPage(w http.ResponseWriter, r *http.Request) {
-  fmt.Println("login page")
-  u := &models.User{}
-  c.renderTemplate(w, "index.html", u)
-
-}
-
-
-func (c App) Logout(w http.ResponseWriter, r *http.Request) {
-  clearSession(w)
-  http.Redirect(w, r, "/", 302)
-}
-
-/*
-func (c Application) Index() revel.Result {
-	if c.connected() != nil {
-		return c.Redirect(routes.Hello.Welcome())
-	}
-	c.Flash.Error("Please log in first")
-	return c.Render()
-}
-
-func (c Application) Register(){
-	return nil
-}
-*/
 /*
 func (c Application) SaveUser(user models.User, verifyPassword string) revel.Result {
 	c.Validation.Required(verifyPassword)

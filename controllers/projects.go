@@ -34,7 +34,7 @@ func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
 
   vars := mux.Vars(r)
   name := vars["projectName"]
-  log.Debug("In Project : ", "Name", name)
+  log.Debug("Project", "Name", name)
 
   var prj models.Project
   err := c.Db.Where("name = ?", name).First(&prj)
@@ -65,6 +65,7 @@ func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
   items := struct {
     User *models.User
     Project *models.Project
+    ProjectName string
     TestCaseCount int
     ExecCount   int
     TaskCount   int
@@ -72,6 +73,7 @@ func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
   }{
     User: user,
     Project : &prj,
+    ProjectName : prj.Name,
     TestCaseCount : tc_count,
     ExecCount : exec_count,
     TaskCount : task_count,
@@ -84,17 +86,16 @@ func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
     )
 
   if er != nil{
-    log.Error("Error ", er )
+    log.Error("Project", "Error ", er )
     return errors.HttpError{http.StatusInternalServerError, "Template ParseFiles error"}
   }
   
-  er = t.Execute(w, items)
-  if er != nil{
-    log.Error("Template Execution Error ", er )
+  
+  if err := t.Execute(w, items); err != nil{
+    log.Error("Project", "Template Execution Error ", err )
     return errors.HttpError{http.StatusInternalServerError, "Template Exection Error"}
   }
   
-  //return c.Render(user, prj, project, tc_count, exec_count, task_count)
   return nil
 }
 

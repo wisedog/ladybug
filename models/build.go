@@ -1,13 +1,12 @@
 package models
 
 import (
-	"github.com/revel/revel"
 	"time"
 )
 
-// A build may have several BuildItem
+// BuildItem is unit of a build. A build may have several BuildItem.
 type BuildItem struct {
-	ID				int
+	BaseModel
 	BuildProject	Build		// TODO index.. or something else
 	BuildProjectID	int			// id for build.  TODO index? 
 	Toolname		string		// jenkins, .....
@@ -18,19 +17,19 @@ type BuildItem struct {
 	/* for example in jenkins : "cJson #3". 
 	  This is the text what user see in test execution, testplan pages */
 	FullDisplayName	string		
-	Url				string
+	ItemUrl			string
 	ArtifactsUrl	string
 	ArtifactsName	string
 	Result			string		// for example in jenkins "SUCCESS"
 	Status			int			// 0: failed 1: successful
 	Seq				int			// for adding manual build. start from 1
 	TimeStamp		int64
-	BuildAt			time.Time
-	
+	BuildAt			time.Time	
 }
 
+// Build is a set of several BuildItems.  
 type Build struct {
-	ID           	int
+	BaseModel
 	Name         	string
 	Description  	string
 	Project      	Project
@@ -42,15 +41,31 @@ type Build struct {
 	BuildItemNum	int		// total build items of this build project
 	BuildItems		[]BuildItem
 
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
 }
 
-func (build *Build) Validate(v *revel.Validation) {
-	v.Check(build.Name,
-		revel.Required{},
-		revel.MaxSize{200},
-	)
+func (build *Build) Validate() map[string]string {
+	errorMap := make(map[string]string)
+	if build.Required(build.Name) == false {
+		errorMap["Name"] = "Name is required."
+	}
 
+	if build.MaxSize(build.Name, 200) == false{
+		errorMap["Name"] = errorMap["Name"] + " Size of Name exceeds 200 characters."
+	}
+	return errorMap
 }
+
+
+func (builditem *BuildItem) Validate() map[string]string {
+	errorMap := make(map[string]string)
+	/*if builditem.Required(builditem.Name) == false {
+		errorMap["Name"] = "Name is required."
+	}
+
+	if build.MaxSize(build.Name, 200) == false{
+		errorMap["Name"] = errorMap["Name"] + " Size of Name exceeds 200 characters."
+	}*/
+
+	return errorMap
+}
+

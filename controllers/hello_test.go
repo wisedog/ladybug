@@ -22,3 +22,12 @@ func TestMain(m *testing.M) {
   os.Exit(retCode)
 }
 
+
+
+func TestTemp1(t *testing.T) {}
+
+func TestTemp2(t *testing.T) {}
+func TestTemp3(t *testing.T) {}
+func TestTemp4(t *testing.T) {}
+func TestTemp5(t *testing.T) {}
+func TestTemp6(t *testing.T) {}

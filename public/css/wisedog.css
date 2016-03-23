@@ -68,9 +68,120 @@
     min-height:200px;
 }
 
+.tabs-container .panel-body {
+  background: #fff;
+  border: 1px solid #e7eaec;
+  border-radius: 2px;
+  padding: 20px;
+  position: relative;
+}
+.tabs-container .nav-tabs > li.active > a,
+.tabs-container .nav-tabs > li.active > a:hover,
+.tabs-container .nav-tabs > li.active > a:focus {
+  border: 1px solid #e7eaec;
+  border-bottom-color: transparent;
+  background-color: #fff;
+}
+.tabs-container .nav-tabs > li {
+  float: left;
+  margin-bottom: -1px;
+}
+.tabs-container .tab-pane .panel-body {
+  border-top: none;
+}
+.tabs-container .nav-tabs > li.active > a,
+.tabs-container .nav-tabs > li.active > a:hover,
+.tabs-container .nav-tabs > li.active > a:focus {
+  border: 1px solid #e7eaec;
+  border-bottom-color: transparent;
+}
+.tabs-container .nav-tabs {
+  border-bottom: 1px solid #e7eaec;
+}
+.tabs-container .tab-pane .panel-body {
+  border-top: none;
+}
+.tabs-container .tabs-left .tab-pane .panel-body,
+.tabs-container .tabs-right .tab-pane .panel-body {
+  border-top: 1px solid #e7eaec;
+}
+.tabs-container .nav-tabs > li a:hover {
+  background: transparent;
+  border-color: transparent;
+}
+.tabs-container .tabs-below > .nav-tabs,
+.tabs-container .tabs-right > .nav-tabs,
+.tabs-container .tabs-left > .nav-tabs {
+  border-bottom: 0;
+}
+.tabs-container .tabs-left .panel-body {
+  position: static;
+}
+
+.tabs-container .tabs-left > .nav-tabs {
+  width: 20%;
+}
+
+.tabs-container .tabs-left .panel-body {
+  width: 80%;
+  margin-left: 20%;
+}
+
+.tabs-container .tab-content > .tab-pane,
+.tabs-container .pill-content > .pill-pane {
+  display: none;
+}
+
+.tabs-container .tab-content > .active,
+.tabs-container .pill-content > .active {
+  display: block;
+}
+
+
+.tabs-container .tabs-left > .nav-tabs > li {
+  float: none;
+}
+.tabs-container .tabs-left > .nav-tabs > li > a {
+  min-width: 74px;
+  margin-right: 0;
+  margin-bottom: 3px;
+}
+
+.tabs-container .tabs-left > .nav-tabs {
+  float: left;
+  margin-right: 19px;
+}
+.tabs-container .tabs-left > .nav-tabs > li > a {
+  margin-right: -1px;
+  -webkit-border-radius: 4px 0 0 4px;
+  -moz-border-radius: 4px 0 0 4px;
+  border-radius: 4px 0 0 4px;
+}
+.tabs-container .tabs-left > .nav-tabs .active > a,
+.tabs-container .tabs-left > .nav-tabs .active > a:hover,
+.tabs-container .tabs-left > .nav-tabs .active > a:focus {
+  border-color: #e7eaec transparent #e7eaec #e7eaec;
+  *border-right-color: #ffffff;
+}
+
+@media (max-width: 767px) {
+  .tabs-container .nav-tabs > li {
+    float: none !important;
+  }
+  .tabs-container .nav-tabs > li.active > a {
+    border-bottom: 1px solid #e7eaec !important;
+    margin: 0;
+  }
+}
+
+.tabitem-pass{color : #00A65A;}
+.tabitem-fail{color : #DD4B39;}
+
+
 /* TestExecution.Run*/
 .board-pass {color : #5CB85C;}
 .board-fail {color : #D9534F;}
+.label-normal {background : #CCCCCC;}
 
 /* blue and red circle for general purpose */
 .green-circle20{
@@ -101,45 +212,3 @@
   font-size:18px;
   padding:5px 0px 5px 0px;
 }
-
-
-
-/*
-see http://uniondesign.ca/simple-accordion-without-jquery-ui/
-*/
-.accordion-toggle {
-  cursor: pointer;
-  border-top:3px solid #DDD;
-  border-bottom:1px solid #F4F4F4;
-  border-top-color:#DDD;
-  padding : 10px;
-  margin-bottom:5px;
-}
-.accordion-content {
-  padding:7px;
-  display: none;
-  
-  
-}
-.accordion-content.default {display: block;}
-
-/* below are custom css for accordion */
-.accordion-header-normal{
-  border-top:3px solid #DDD;
-  border-bottom:1px solid #F4F4F4;
-  border-top-color:#DDD;
-  background:#F5F5F5;
-  
-}
-.accordion-header-pass{
-  border-top:3px solid #DDD; 
-  border-bottom:1px solid #F4F4F4;
-  border-top-color:#00a65a;
-  
-}
-.accordion-header-fail{
-  border-top:3px solid #DDD;
-  border-bottom:1px solid #F4F4F4;
-  border-top-color:#dd4b39;
-}
-

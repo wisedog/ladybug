@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-  "strings"
   "net/http"
   "html/template"
 
@@ -10,10 +9,12 @@ import (
   "github.com/wisedog/ladybug/models"
   "github.com/wisedog/ladybug/interfacer"
   "github.com/wisedog/ladybug/errors"
+
+  log "gopkg.in/inconshreveable/log15.v2"
 )
 
 func UserProfile(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
-  fmt.Println("in UserProfile")
+  log.Debug("User", "msg", "in UserProfile")
   vars := mux.Vars(r)
   id := vars["id"]
 
@@ -25,8 +26,7 @@ func UserProfile(c *interfacer.AppContext, w http.ResponseWriter, r *http.Reques
   }
 
   var activities []models.Activity
-  err = c.Db.Where("user_id = ?", user.ID).Preload("User").Find(&activities)
-  if err.Error != nil{
+  if err := c.Db.Where("user_id = ?", user.ID).Preload("User").Find(&activities); err.Error != nil{
     return errors.HttpError{http.StatusInternalServerError, "An error is occurred while get activities."}
   }
 
@@ -42,7 +42,7 @@ func UserProfile(c *interfacer.AppContext, w http.ResponseWriter, r *http.Reques
 
   t, er := template.New("base.tmpl").Funcs(funcMap).ParseFiles(
     "views/base.tmpl",
-    "views/profile.tmpl",
+    "views/users/profile.tmpl",
     )
 
 
@@ -51,10 +51,9 @@ func UserProfile(c *interfacer.AppContext, w http.ResponseWriter, r *http.Reques
     return er
   }
   
-  er = t.Execute(w, items)
-  if er != nil{
-    fmt.Println("Execution failed : ", er)
-    return er
+  if err := t.Execute(w, items); err != nil{
+    fmt.Println("Execution failed : ", err)
+    return err
   }
   
   return nil

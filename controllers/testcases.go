@@ -2,13 +2,13 @@ package controllers
 
 import (
   "fmt"
-  //"strconv"
+  "strconv"
 
   "net/http"
 	"encoding/json"
-  "html/template"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
   "github.com/wisedog/ladybug/models"
   "github.com/wisedog/ladybug/interfacer"
 	"github.com/wisedog/ladybug/errors"
@@ -27,7 +27,7 @@ func makeHistoryMessage(historyUnit *[]models.HistoryTestCaseUnit){
 	
 	var msg string
 	
-	// TODO L10N with using c.Message format string
+	// TODO L10N with using GetI18nMessage format string
 	for i := 0; i < len(*historyUnit); i++{
 		if (*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_CHANGED{
 			if((*historyUnit)[i].From == 0 && (*historyUnit)[i].To == 0 ){
@@ -54,7 +54,6 @@ func makeHistoryMessage(historyUnit *[]models.HistoryTestCaseUnit){
 
 
 // CaseView renders a page to show testcase's information
-//func  CaseIndex(project string, id int) revel.Result {
 func CaseView(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
   var user *models.User
   if user = connected(c, r); user == nil{
@@ -67,12 +66,12 @@ func CaseView(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
   id := vars["id"]
 
 	var tc models.TestCase
-  if err := c.Db.Where("id = ?", id).First(&tc); err.Error != nil{
-    log.Error("bbb", "Error on Select-ID query in TestCases.Index", err.Error)
+  if err := c.Db.Where("id = ?", id).Preload("Category").First(&tc); err.Error != nil{
+    log.Error("testcases", "Error on Select-ID query in TestCases.Index", err.Error)
     return errors.HttpError{http.StatusInternalServerError, "DB error"}
   }
 	
-	tc.PriorityStr = getPriorityL10N(tc.Priority)
+	tc.PriorityStr = getPriorityI18n(tc.Priority)
 	
 	var histories []models.History
 	c.Db.Where("category = ?", models.HISTORY_TYPE_TC).Where("target_id = ?", tc.ID).Preload("User").Find(&histories)
@@ -87,7 +86,7 @@ func CaseView(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 		makeHistoryMessage(&res)
 		
 		histories[i].Changes = res
-		log.Debug("bbb", "res", histories[i].Changes)
+		log.Debug("testcases", "res", histories[i].Changes)
 	}
 	
   items := struct {
@@ -103,214 +102,224 @@ func CaseView(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
     Histories : histories,
     Active_idx : 2,
   }
+  return Render(w, items, "views/base.tmpl", "views/testcases/caseindex.tmpl")
+}
 
-  t, er := template.ParseFiles(
-    "views/base.tmpl",
-    "views/designindex.tmpl",
-    )
 
-  if er != nil{
-    log.Error("Error ", "type", "Template ParseFiles error", "msg", er )
-    return errors.HttpError{http.StatusInternalServerError, "Template ParseFiles error"}
+// renderAddEdit renders ADD and EDIT pages
+func renderAddEdit(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request, isEdit bool) error{
+  var user *models.User
+  if user = connected(c, r); user == nil{
+    log.Debug("Not found login information")
+    http.Redirect(w, r, "/", http.StatusFound)
+  }
+
+  vars := mux.Vars(r)
+  projectName := vars["projectName"]
+  id := vars["id"]
+
+  // valid when rendering Add 
+  section_id :=  r.URL.Query().Get("sectionid")
+  if section_id == "" && isEdit == false {
+    log.Error("testcase", "type" , "general", "msg", "invalid condition. Add rendering requires section id")
+    return errors.HttpError{http.StatusBadRequest, "invalid condition. Add rendering requires section id"}
+  }
+
+  var category []models.Category
+  c.Db.Find(&category)
+  
+  // TODO when validation failed, do something like below code. 
+  // belows are revel's code
+  /*if c.Validation.HasErrors(){
+    c.Validation.Keep()
+    c.FlashParams()
+  
+    return c.Render(project, id, category)
+  }*/
+  
+  var testcase models.TestCase
+  if isEdit{
+    if err := c.Db.Where("id = ?", id).First(&testcase); err.Error != nil{
+      log.Error("testcase", "type" , "database", "msg", err.Error)
+      return errors.HttpError{http.StatusInternalServerError, "An Error while SELECT operation for TestCase.Edit"}
+    }
+  }else{
+    var prj models.Project
+    if err := c.Db.Where("name = ?", projectName).First(&prj); err.Error != nil{
+      log.Error("testcase", "type" , "database", "msg", err.Error)
+      return errors.HttpError{http.StatusInternalServerError, "An Error while SELECT operation for TestCase.Edit"}
+    }
+
+    testcase.SectionID, _ = strconv.Atoi(section_id)
+    testcase.Prefix = prj.Prefix
   }
   
-  er = t.Execute(w, items)
-  if er != nil{
-    log.Error("Template Execution Error ", "type", "Template Exection Error", "msg", er )
-    return errors.HttpError{http.StatusInternalServerError, "Template Exection Error"}
+  
+  //TODO change section here.
+
+  items := struct {
+    Id string
+    User *models.User
+    ProjectName string
+    SectionID string
+    TestCase models.TestCase
+    Category []models.Category
+    IsEdit bool
+    Active_idx  int
+  }{
+    Id : id,
+    User: user,
+    ProjectName : projectName,
+    SectionID : section_id,
+    TestCase : testcase,
+    Category : category,
+    IsEdit : isEdit,
+    Active_idx : 2,
   }
 
-  return nil
-	//return c.Render(project, tc, histories)
-
+  return Render(w, items, "views/base.tmpl", "views/testcases/caseaddedit.tmpl")
 }
 
-// CaseSave is a POST handler from Add page.
-//func  Save(project string, testcase models.TestCase, reviewerID int) revel.Result {
-/*func CaseSave(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
-
-	if user := c.connected(); user == nil {
-		c.Flash.Error("Please log in first")
-		return c.Redirect(routes.Application.Index())
-	}
-
-	//Validate input testcase
-	testcase.Validate(c.Validation)
-
-	if c.Validation.HasErrors() {
-		c.Flash.Error("invalid!")
-		c.Validation.Keep()
-		c.FlashParams()
-
-		return c.Redirect(routes.TestCases.Add(project, testcase.SectionID))
-	}
-
-	var largest_seq_tc models.TestCase
-	r := c.Db.Where("prefix=?", testcase.Prefix).Order("seq desc").First(&largest_seq_tc)
-
-	if r.Error != nil {
-		log.Error.Println("An error while SELECT operation to find largest seq")
-	} else {
-		testcase.Seq = largest_seq_tc.Seq + 1
-		log.Info("bbb", "Largest number is : ", largest_seq_tc.Seq+1)
-	}
-
-	c.Db.NewRecord(testcase)
-	r = c.Db.Create(&testcase)
-
-	if r.Error != nil {
-		log.Error("Insert operation failed in TestCase.Save")
-	}
-	
-	display_id := testcase.Prefix + "-" + strconv.Itoa(testcase.ID)
-	testcase.DisplayID = display_id
-	r = c.Db.Save(&testcase)
-	
-	if r.Error != nil{
-		log.Error("bbb", "Update operation failed in TestCase.Save", r.Error)
-	}
-
-	return c.Redirect(routes.TestDesign.DesignIndex(project))
+// CaseEdit just renders a EDIT page. Add and Edit pages are integrated. see renderAddEdit
+func CaseEdit(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
+	return renderAddEdit(c, w, r, true)
 }
 
-//	CaseAdd just renders a page too add a testcase
-//func Add(project string, section_id int) revel.Result {
+// CaseAdd just renders a Add page. Add and Edit pages are integrated. see renderAddEdit
 func CaseAdd(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
-	var testcase models.TestCase
-	var section models.Section
 
-	// validate test suite
-	r := c.Db.Where("id = ?", section_id).First(&section)
+  return renderAddEdit(c, w, r, false)
+}
 
-	if r.Error != nil {
-		log.Error.Println("An error while SELECT testsuite operation in TestCases.Add. section_id is ", section_id)
-		c.Response.Status = 500
-		return c.Render()
-	}
+// handleSaveUpdate handles POST request from save and update
+func handleSaveUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request, isUpdate bool) error{
+  var user *models.User
+  if user = connected(c, r); user == nil{
+    log.Debug("Not found login information")
+    http.Redirect(w, r, "/", http.StatusFound)
+  }
+  
+  var testcase models.TestCase
+  vars := mux.Vars(r)
+  projectName := vars["projectName"]
+  id := vars["id"]
 
-	testcase.SectionID = section_id
-	testcase.Prefix = section.Prefix
-	
-	var category []models.Category
-	c.Db.Find(&category)
-	
-	var reviewerID int
+  if err := r.ParseForm(); err != nil {
+    log.Error("Testcase", "Error ", err )
+    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+  }
 
-	return c.Render(testcase, project, category, reviewerID)
+  //fmt.Printf("After ParseForm : %+v\n", r)
+
+  decoder := schema.NewDecoder()
+  
+  if err := decoder.Decode(&testcase, r.PostForm); err != nil {
+    log.Warn("Testcase", "Error", err, "msg", "Decode failed but go ahead")
+  }
+
+  // TODO : Validate input testcase
+  //testcase.Validate()
+
+  redirectionTarget := fmt.Sprintf("/project/%s/design", projectName)
+
+  if isUpdate == false{
+
+    var largest_seq_tc models.TestCase
+
+    if err := c.Db.Where("prefix=?", testcase.Prefix).Order("seq desc").First(&largest_seq_tc); err.Error != nil {
+      log.Error("An error while SELECT operation to find largest seq")
+    } else {
+      testcase.Seq = largest_seq_tc.Seq + 1
+      log.Debug("testcase", "Largest number is : ", largest_seq_tc.Seq+1)
+    }
+
+    c.Db.NewRecord(testcase)
+
+    if err := c.Db.Create(&testcase); err.Error != nil {
+      log.Error("testcase", "type" , "database", "msg", err.Error)
+      return errors.HttpError{http.StatusInternalServerError, "Insert operation failed in TestCase.Save"}
+    }
+    
+    display_id := testcase.Prefix + "-" + strconv.Itoa(testcase.ID)
+    testcase.DisplayID = display_id
+    
+    
+    if err := c.Db.Save(&testcase); err.Error != nil{
+      log.Error("testcase", "type" , "database", "msg", err.Error)
+      return errors.HttpError{http.StatusInternalServerError, "Update operation failed in TestCase.Save"}
+    }
+
+    http.Redirect(w, r, redirectionTarget, http.StatusFound)
+  }
+  
+  var existCase models.TestCase
+
+  if err := c.Db.Where("id = ?", id).First(&existCase); err.Error != nil {
+    log.Error("testcase", "type", "database", "msg", err.Error)
+    return errors.HttpError{http.StatusInternalServerError, "An error while select exist testcase operation"}
+  }
+  note := r.FormValue("Note")
+  findDiff(c, &existCase, &testcase, note, user)
+  
+  existCase.Title = testcase.Title
+  existCase.Description = testcase.Description
+  existCase.Seq = testcase.Seq
+  existCase.Status = testcase.Status
+  existCase.Prefix = testcase.Prefix
+  existCase.Precondition = testcase.Precondition
+  existCase.Steps = testcase.Steps
+  existCase.Expected = testcase.Expected
+  existCase.Priority = testcase.Priority
+
+  if err := c.Db.Save(&existCase); err.Error != nil {
+    log.Error("testcase", "type", "database", "msg", err.Error)
+    return errors.HttpError{http.StatusInternalServerError, "An error while SAVE operation on TestCases.Update"}
+  }
+  
+  //c.Flash.Success("Update Success!")
+  
+  http.Redirect(w, r, redirectionTarget, http.StatusFound)
+  return nil 
+}
+
+// CaseSave handles POST request from CaseAdd. Save and Update handlers are integrated. see handleSaveUpdate
+func CaseSave(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
+  return handleSaveUpdate(c, w, r, false)
+}
+
+// CaseUpdate POST handler for Testcase Edit
+func CaseUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
+	return handleSaveUpdate(c, w, r, true)
 }
 
 // CaseDelete is a POST handler for DELETE request
-//func  Delete(project string, id int) revel.Result {
 func CaseDelete(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
+    var user *models.User
+  if user = connected(c, r); user == nil{
+    log.Debug("Not found login information")
+    http.Redirect(w, r, "/", http.StatusFound)
+  }
 
-	// Delete the testcase  permanently for sequence
-	r := c.Db.Unscoped().Where("id = ?", id).Delete(&models.TestCase{})
-	if r.Error != nil {
-		log.Error.Println("An error while delete testcase ", r.Error)
-		c.Response.Status = 500
-		return c.Render()
-	}
+  if err := r.ParseForm(); err != nil {
+    log.Error("Testcase", "Error ", err )
+    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+  }
 
-	return c.Redirect(routes.TestDesign.DesignIndex(project))
-}
+  id := r.FormValue("id")
 
-// Edit just renders a EDIT page.
-func  Edit(project string, id int) revel.Result {
-	
-	var category []models.Category
-	c.Db.Find(&category)
-	
-	if c.Validation.HasErrors(){
-		//c.Flash.Success("Update Success!")
-		c.Validation.Keep()
-		c.FlashParams()
-	
-		return c.Render(project, id, category)
-	}
-	
-	testcase := models.TestCase{}
+  // Delete the testcase  permanently for sequence
+  if err := c.Db.Unscoped().Where("id = ?", id).Delete(&models.TestCase{}); err.Error != nil{
+    log.Error("testcase", "An error while delete testcase ", err.Error)
+    return errors.HttpError{http.StatusInternalServerError, "testcase delete failed"} 
+  }
 
-	r := c.Db.Where("id = ?", id).First(&testcase)
-
-	if r.Error != nil {
-		log.Error.Println("An Error while SELECT operation for TestCase.Edit", r.Error)
-		c.Response.Status = 500
-		return c.Render(routes.TestDesign.DesignIndex(project))
-	}
-	
-	flash := map[string]string{
-	    "testcase.Priority": strconv.Itoa(testcase.Priority),
-	    "testcase.Category": strconv.Itoa(testcase.CategoryID),
-	    "testcase.Status" : strconv.Itoa(testcase.Status),
-	}
-	
-	//TODO change section here.
-	
-	var note string
-
-	return c.Render(project, id, testcase, category, flash, note)
-}
-
-
-// Update POST handler for Testcase Edit
-//func  Update(project string, id int, testcase models.TestCase, note string) revel.Result {
-func CaseUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
-	//Validate input testcase
-	testcase.Validate(c.Validation)
-
-	if c.Validation.HasErrors() {
-		c.Flash.Error("invalid!")
-		c.Validation.Keep()
-		c.FlashParams()
-
-		return c.Redirect(routes.TestCases.Edit(project, id))
-	}
-	
-	existCase := models.TestCase{}
-	r := c.Db.Where("id = ?", testcase.ID).First(&existCase)
-
-	if r.Error != nil {
-		log.Error.Println("An error while select exist testcase operation", r.Error)
-		c.Flash.Error("Invalid!")
-		c.Response.Status = 400
-		return c.Redirect(TestCases.Edit)
-
-	}
-	
-	c.findDiff(&existCase, &testcase, note)
-	
-	existCase.Title = testcase.Title
-	existCase.Description = testcase.Description
-	existCase.Seq = testcase.Seq
-	existCase.Status = testcase.Status
-	existCase.Prefix = testcase.Prefix
-	existCase.Precondition = testcase.Precondition
-	existCase.Steps = testcase.Steps
-	existCase.Expected = testcase.Expected
-	existCase.Priority = testcase.Priority
-
-	r = c.Db.Save(&existCase)
-
-	if r.Error != nil {
-		log.Error.Println("An error while SAVE operation on TestCases.Update")
-		c.Response.Status = 500
-		return c.Render()
-	}
-	
-	c.Flash.Success("Update Success!")
-
-
-	return c.Redirect(routes.TestDesign.DesignIndex(project))
+  // the client do redirect or refresh. 
+  return nil
 }
 
 // findDiff compares between two models.TestCase and create 
 // HistoryTestCaseUnit to database. Used in Update
-func  findDiff(existCase, newCase *models.TestCase, note string){
-	user := c.connected()
-	if user == nil {
-		c.Flash.Error("Please log in first")
-		return
-	}
+func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, note string, user *models.User){
 	
 	var changes []models.HistoryTestCaseUnit
 	his := models.History{Category : models.HISTORY_TYPE_TC,
@@ -341,9 +350,9 @@ func  findDiff(existCase, newCase *models.TestCase, note string){
 	if existCase.Priority != newCase.Priority {
 		unit := models.HistoryTestCaseUnit{
 			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, 
-			What : c.Message("testcase.priority"),
-			FromStr : c.getStatusL10N(existCase.Priority),
-			ToStr : c.getStatusL10N(newCase.Priority),
+			What : GetI18nMessage("testcase.priority"),
+			FromStr : getPriorityI18n(existCase.Priority),
+			ToStr : getPriorityI18n(newCase.Priority),
 		}
 		changes = append(changes, unit)
 	}
@@ -364,7 +373,7 @@ func  findDiff(existCase, newCase *models.TestCase, note string){
 	if existCase.Description != newCase.Description {
 		unit := models.HistoryTestCaseUnit{
 			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, 
-			What : c.Message("description"),
+			What : GetI18nMessage("description"),
 			DiffID : 2,
 		}
 		changes = append(changes, unit)
@@ -374,7 +383,7 @@ func  findDiff(existCase, newCase *models.TestCase, note string){
 	if existCase.Precondition != newCase.Precondition {
 		unit := models.HistoryTestCaseUnit{
 			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, 
-			What : c.Message("priority.precondition"),
+			What : GetI18nMessage("priority.precondition"),
 			DiffID : 2,//TODO should be implemnted DIFF
 		}
 		changes = append(changes, unit)
@@ -391,6 +400,7 @@ func  findDiff(existCase, newCase *models.TestCase, note string){
 	
 	// check Steps
 	if existCase.Steps != newCase.Steps {
+    // FIXME A bug : those strings are same, but,,,, 
 		unit := models.HistoryTestCaseUnit{
 			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, What : "Steps",
 			DiffID : 2,	//TODO should be implemnted DIFF
@@ -402,7 +412,7 @@ func  findDiff(existCase, newCase *models.TestCase, note string){
 	if existCase.Expected != newCase.Expected {
 		unit := models.HistoryTestCaseUnit{
 			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, 
-			What : c.Message("priority.expected"),
+			What : GetI18nMessage("priority.expected"),
 			DiffID : 2,	//TODO should be implemnted DIFF
 		}
 		changes = append(changes, unit)
@@ -418,7 +428,7 @@ func  findDiff(existCase, newCase *models.TestCase, note string){
 	if existCase.CategoryID != newCase.CategoryID {
 		unit := models.HistoryTestCaseUnit{
 			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, 
-			What : c.Message("priority.category"),
+			What : GetI18nMessage("priority.category"),
 			FromStr : "",
 			ToStr : "",
 		}
@@ -431,19 +441,4 @@ func  findDiff(existCase, newCase *models.TestCase, note string){
 	c.Db.NewRecord(his)
 	c.Db.Create(&his)
 }
-*/
 
-// getPriorityL10N function returns localization string 
-func  getPriorityL10N(priority int) string{
-/*	s := ""
-	switch priority{
-		case 1: s = c.Message("priority.highest")
-		case 2: s = c.Message("priority.high")
-		case 3: s = c.Message("priority.medium")
-		case 4: s = c.Message("priority.low")
-		case 5: s = c.Message("priority.lowest")
-		default : s = "Unknown"
-	}
-	*/
-	return "not fixed"
-}
