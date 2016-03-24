@@ -8,7 +8,8 @@ services:
 - postgresql
 before_script:
 - psql -c 'create user ladybug;' -U postgres
-- psql -c 'create database ladybug;' -U ladybug
+- psql -c 'create database ladybug;' -U postgres
+- psql -c 'ALTER DATABASE ladybug OWNER TO ladybug;' -U postgres
 install:
 - export PATH=$PATH:$HOME/gopath/bin
 - go get -v gopkg.in/fsnotify.v1
