@@ -1,0 +1,273 @@
+{{define "title"}}Test Execution{{ end }}
+{{define "more_style"}}
+<link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.css">
+<link rel="stylesheet" type="text/css" href="/public/plugins/ladda/ladda-themeless.min.css">
+{{end}}
+{{define "content"}}
+<div class="content-wrapper">
+  <!-- Content header -->
+  <section class="content-header">
+    <h1>
+      Running test
+      <small>Run a test plan</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="/project/{{.ProjectName}}/dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li><a href="/project/{{.ProjectName}}/exec"> Test Execution</a></li>
+      <li class="active">Run</li>
+    </ol>
+  </section>
+
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="box box-primary">
+      <div class="box-body">
+        <div class="row vertical-align bottom10">
+          <div class="col-md-1">
+            <h4><strong>{{msg "title"}}</strong></h4>
+          </div>
+          <div class="col-md-8">
+            <h4><strong>{{.TestExec.Plan.Title}}</strong></h4>
+          </div>
+        </div> <!-- .row -->
+        <div class="row">
+          <div class="col-md-4">
+            <label class="right10">Build/Release</label>
+            <a href='/project/{{.ProjectName}}/build/view/{{.TestExec.TargetBuild.BuildProjectID}}'>
+              {{.TestExec.TargetBuild.FullDisplayName}}
+            </a>
+          </div>
+        </div> <!-- .row -->
+        <div class="row form-group padleft15">
+          <h4>{{msg "description"}}</h4>
+          <div><span>{{nl2br .TestExec.Plan.Description}}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="tabs-container">
+          <div class="tabs-left">
+            <ul class="nav nav-tabs">
+              {{range $idx, $element := .Cases}}
+              <li class="tab-item {{if eq $idx 0}}active{{end}}">
+                <a id="tabitem-{{.ID}}" data-toggle="tab" href="#tab-{{.ID}}" aria-expanded="true">{{.DisplayID}}</a>
+              </li>
+              <!-- <li class=""><a data-toggle="tab" href="#tab-7" aria-expanded="false">This is second tab</a></li>-->
+              {{end}}
+            </ul>
+            <div class="tab-content ">
+              {{range $idx, $element := .Cases}}
+              <div id="tab-{{.ID}}" class="tab-pane {{if eq $idx 0 }}active{{end}}">
+                <div class="panel-body">
+                  <p>
+                    <strong class="font25 right5">{{.Title}}</strong>
+                    <span id="tablabel-{{.ID}}" class="label label-normal">Not yet</span>
+                  </p>
+
+                  <label>Description</label>
+                  <p>{{nl2br .Description}}</p>
+                  <label>Precondition</label>
+                  <p>{{nl2br .Precondition}}</p>
+                  <label>Steps</label>
+                  <p>{{nl2br .Steps}}</p>
+                  <label>Expected</label>
+                  <p>{{nl2br .Expected}}</p>
+                  <div class="form-group">
+                    <label>Actual Result</label>
+                    <textarea id="textarea-{{.ID}}" class="form-control bottom10" rows="4"></textarea>
+                  </div><!-- .accordion-content -->
+                  <button id="{{.ID}}" class="btn btn-success btn-xs padright10 padleft10 right7 btn-passfail ladda-button" data-style="zoom-in">Pass</button>
+                  <button id="{{.ID}}" class="btn btn-danger btn-xs padright10 padleft10 right7 btn-passfail ladda-button" data-style="zoom-in">Fail</button>
+                  <button class="btn btn-default btn-xs padright10 padleft10 right7 btn-skip">Skip</button>
+                </div> <!-- panel-body -->
+              </div> <!-- tab-pane -->
+              {{end}}
+            </div> <!-- .tab-content -->
+          </div> <!-- .tabs-left -->
+        </div> <!-- .tabs-container -->
+      </div> <!-- .col-md-12 -->
+    </div> <!-- .row -->
+  
+    <div class="row" style="font-size:30px;">
+      <div class="col-md-6">
+        <span class="board-pass right7">Pass</span>
+        <span id="pass-score" class="board-pass right17">{{.PassCounter}}</span>
+        <span class="board-fail righ7">Fail</span>
+        <span id="fail-score" class="board-fail right17">{{.FailCounter}}</span>
+      </div>
+    </div> <!-- .row -->
+    
+    <div class="row bottom17">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label>Comment(Optional)</label>
+          <textarea id="exec-comment" class="form-control bottom10" rows="2"></textarea>
+        </div>
+      </div>
+    </div> <!-- .row -->
+    
+    <div class="row">
+      <div class="col-md-6">
+        <button id="done-btn" class="btn btn-primary btn-sm btn-flat">Done</button>
+        {{if eq .TestExec.Status 3}}
+        <a href="javascript:history.back();">
+          <button id="temp" class="btn btn-secondary btn-xs">Back</button>
+        </a>
+        {{end}}
+      </div>
+    </div> <!-- .row -->
+
+  </section><!-- /.content -->
+</div><!-- /.content-wrapper -->
+{{end}}
+{{define "more_scripts"}}
+<script src="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"> </script>
+<script src="/public/plugins/ladda/spin.min.js"></script>
+<script src="/public/plugins/ladda/ladda.min.js"></script>
+
+<script>
+toastr.options = {
+  "closeButton": false,
+  "debug": false,
+  "newestOnTop": false,
+  "progressBar": false,
+  "positionClass": "toast-top-center",
+  "preventDuplicates": true,
+  "onclick": null,
+  "showDuration": "300",
+  "hideDuration": "1000",
+  "timeOut": "3000",
+  "extendedTimeOut": "1000",
+  "showEasing": "swing",
+  "hideEasing": "linear",
+  "showMethod": "fadeIn",
+  "hideMethod": "fadeOut"
+}
+
+function goNext(){
+  $('.tab-item.active').next().children("a").trigger("click");
+}
+
+function addScore(didPass){
+  var score = 0;
+  if(didPass){
+    score = parseInt($('#pass-score').text(), 10);
+  }else{
+    score = parseInt($('#fail-score').text(), 10);
+  }
+  
+  score++;
+  
+  if(didPass){
+    $('#pass-score').text(score);
+  }else{
+    $('#fail-score').text(score);
+  }
+  
+}
+
+$(document).ready(function(){
+
+  var arr = [
+    {{range .Results}}{"id" : {{.TestCaseId}}, "result" : {{.Status}} },
+    {{end}}];
+
+  //TODO iterate tabitem and change color, adjust active class
+  for(i = 0; i < arr.length; i++){
+    if(arr[i].result == true){
+      $('#tabitem-' + arr[i].id).addClass('tabitem-pass');
+      $('#tablabel-' + arr[i].id).removeClass('label-normal');
+      $('#tablabel-' + arr[i].id).addClass('label-success');
+      $('#tablabel-' + arr[i].id).text('Pass');
+      
+    }else{
+      $('#tabitem-' + arr[i].id).addClass('tabitem-fail');
+      $('#tablabel-' + arr[i].id).removeClass('label-normal');
+      $('#tablabel-' + arr[i].id).addClass('label-danger');
+      $('#tablabel-' + arr[i].id).text('Failed');
+    }
+  }
+
+  $('.btn-skip').click(function(){
+      goNext();
+    });
+    
+  $('#done-btn').click(function(){
+    // verify that all test cases are executed
+    // -> check accordion-header-normal
+    if($('.accordion-header-normal').length > 0){
+      alert("Execute all test cases!");
+      return;
+    }
+    
+    var cmt = $('#exec-comment').val();
+    var data = {
+      comment : cmt,
+      exec_id: parseInt("{{.TestExec.ID}}", 10)
+    };
+    
+    $.post("/project/{{.ProjectName}}/exec/done", data).done(function(data){
+      if(data.status == 200){
+        window.location.href='/project/{{.ProjectName}}/exec';
+      }else{
+        alert("Error!" + data.msg);
+      }
+    });
+  });
+    
+  $('.btn-passfail').click(function(){
+    // when the button is clicked, update pass/fail counter and move next
+    var id = $(this).attr('id');
+    var exec_id = parseInt("{{.TestExec.ID}}", 10);
+    var txt = $("#textarea-" + id).val();
+    var didPass = $(this).hasClass('btn-success');
+
+    
+    // if the testcase is failed, actual result should be filled.
+    if(!didPass && txt == ''){
+      $("#textarea-" + id).parent().addClass("has-error");
+      return;
+    }
+    
+    var data = {
+      case_id: id,
+      exec_id: exec_id,
+      result: didPass,
+      actual: txt,
+      case_ver:1
+    };
+
+    var l = Ladda.create(this);
+    l.start();
+    
+    $.post("/project/{{.ProjectName}}/exec/update", data).done(function(data){
+      l.stop();
+      if(data.status == 200){
+        if(didPass){
+          // TODO change color of tab
+          addScore(true);
+          $('#tabitem-' + id).addClass('tabitem-pass');
+        }else{
+          addScore(false);
+          $('#tabitem-' + id).addClass('tabitem-fail');
+        }
+        if(didPass){
+          toastr["success"]("The test case is passed!", "Pass");
+        }else{
+          toastr["error"]("The test case is failed!", "Fail");
+        }
+        
+        goNext();
+      }else{
+        console.log("Done, but an error while on POST AJAX", data.msg);
+      }
+    });
+  });
+    
+}); // end of $(document).ready
+</script>
+
+{{end}}

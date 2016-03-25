@@ -1,0 +1,135 @@
+{{define "title"}}Testcase Edit{{ end }}
+{{define "more_style"}}{{end}}
+{{define "content"}}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+  <!-- Content header -->
+  <section class="content-header">
+    <h1>
+      {{if eq .IsEdit true}}Edit Test Case{{else}}Add Test Case{{end}}
+      <small></small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="/project/{{.ProjectName}}/dashboard}}"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li><a href="/project/{{.ProjectName}}/design">Test Design</a></li>
+      <li class="active">Here</li>
+    </ol>
+  </section>
+  <!-- Main content -->
+  <section class="content">
+    <form method="POST" action="/project/{{.ProjectName}}/case/{{if eq .IsEdit true}}update/{{.Id}}{{else}}save{{end}}">
+      <div class="row">
+        <input type="hidden" name="SectionID" value="{{.TestCase.SectionID}}"></input>
+        <input type="hidden" name="ID" value="{{.TestCase.ID}}"></input>
+        <input type="hidden" name="Seq" value="{{.TestCase.Seq}}"></input>
+        <input type="hidden" name="Prefix" value="{{.TestCase.Prefix}}"></input>
+        <div class="col-md-12 top10">
+          <div class="row vertical-align bottom10">
+            <div class="col-md-1"><strong>Title</strong></div>
+            <div class="col-md-8">
+              <input class="form-control" name="Title" value="{{.TestCase.Title}}">
+            </div>
+          </div> <!-- .row -->
+          <div class="row vertical-align bottom10">
+            <div class="col-md-1"><label>Priority</label></div>
+            <div class="col-md-2">
+              <select class="form-control" name="Priority" value="{{.TestCase.Priority}}">
+                <option value="1" {{if eq .TestCase.Priority 1}}selected{{end}}>{{msg "priority.highest"}}</option>
+                <option value="2" {{if eq .TestCase.Priority 2}}selected{{end}}>{{msg "priority.high"}}</option>
+                <option value="3" {{if eq .TestCase.Priority 3}}selected{{end}}>{{msg "priority.medium"}}</option>
+                <option value="4" {{if eq .TestCase.Priority 4}}selected{{end}}>{{msg "priority.low"}}</option>
+                <option value="5" {{if eq .TestCase.Priority 5}}selected{{end}}>{{msg "priority.lowest"}}</option>
+              </select>
+            </div>
+            <div class="col-md-1">
+              <label>Type</label>
+            </div>
+            <div class="col-md-2">
+              <select class="form-control" name="CategoryID">
+                {{$category_idx := .TestCase.CategoryID}}
+                {{range $cate := .Category}}
+                <option value="{{$cate.ID}}" {{if eq $cate.ID $.TestCase.CategoryID}}selected{{end}}>{{.Name}}</option>
+                {{end}}
+              </select>
+            </div> <!-- col-md-2 -->
+            <div class="col-md-1">
+              <label>Estimate Time</label>
+            </div>
+            <div class="col-md-2">
+              <input class="form-control" name="Estimated" value="{{.TestCase.Estimated}}">
+            </div>
+          </div> <!-- .row -->
+
+          <div class="row vertical-align bottom10">
+            <div class="col-md-1">
+              <strong>Status</strong>
+            </div>
+            <div class="col-md-3">
+              <select class="form-control" name="Status">
+                <option value="1" {{if eq .TestCase.Status 1}}selected{{end}}>{{msg "testcase.status.active"}}</option>
+                <option value="2" {{if eq .TestCase.Status 2}}selected{{end}}>{{msg "testcase.status.inactive"}}</option>
+                <option value="3" {{if eq .TestCase.Status 3}}selected{{end}}>{{msg "testcase.status.close"}}</option>
+              </select>
+            </div>
+          </div> <!-- .row -->
+
+          <div class="row form-group bottom10">
+            <div class="col-md-12">
+              <label>{{msg "description"}}</label>
+              <textarea class="form-control" rows="4" name="Description">{{.TestCase.Description}}</textarea>
+            </div>
+          </div> <!-- .row -->
+
+          <div class="row form-group bottom10">
+            <div class="col-md-12">
+              <label>Precondition</label>
+              <textarea class="form-control" rows="4" name="Precondition">{{.TestCase.Precondition}}</textarea>
+            </div>
+          </div><!-- .row -->
+
+          <div class="row form-group bottom10">
+            <div class="col-md-12">
+              <label>Steps</label>
+              <textarea class="form-control" rows="4" name="Steps">{{.TestCase.Steps}}</textarea>
+            </div>
+          </div>
+
+          <div class="row form-group bottom10">
+            <div class="col-md-12">
+              <label>Expected Result</label>
+              <textarea class="form-control" rows="4" name="Expected">{{.TestCase.Expected}}</textarea>
+            </div>
+          </div>
+          {{if eq .IsEdit true}}
+          <div class="row col-md-12">
+            <div class="box box-primary">
+              <div class="box-header with-border">
+                <h3 class="box-title">Add a note</h3>
+              </div>
+              <div class="box-body">
+                <textarea class="form-control" rows=3 name="Note"></textarea>
+              </div>
+            </div>
+          </div>
+          {{end}}
+        
+          <div class="row col-md-12">
+            <button type="submit" class="btn btn-primary btn-flat btn-sm">
+              {{if eq .IsEdit true}}Update{{else}}Add{{end}}
+            </button>
+            <button type="button" class="btn btn-danger btn-flat btn-sm">Cancel</button>
+          </div>
+        </div> <!-- .col-md -->
+      </div> <!-- .row -->
+    </form>
+  </section><!-- /.content -->
+</div><!-- /.content-wrapper -->
+{{end}}
+{{define "more_scripts"}}
+<script>
+  $(".btn-danger").click(function(){
+    //TODO scan dirty
+    window.history.back();
+  });
+</script>
+{{end}}

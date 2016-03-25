@@ -29,7 +29,7 @@ Since I'm new to Go language, not familiar with code convention, documentation, 
 
 The Project Ladybug uses below... 
 
-* [revel](https://github.com/revel/revel) web framework.
+* [gorilla toolkits](http://www.gorillatoolkit.org)
 * [gorm](https://github.com/jinzhu/gorm) database driver. 
 
 ### Installation
@@ -51,8 +51,7 @@ This app uses now only Postgresql. Various databases(MySQL, MarinaDB ....) will 
 * Test coverage
 
 ### Open Sources
-
-* revel
-* gorm
+* Gorilla toolkits : http://www.gorillatoolkit.org
+* gorm : https://github.com/jinzhu/gorm
 * AdminLTE : https://github.com/almasaeed2010/AdminLTE
 * Icon : http://www.freestockphotos.biz/stockphoto/10655

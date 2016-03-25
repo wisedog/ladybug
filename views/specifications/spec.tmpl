@@ -1,0 +1,239 @@
+{{define "title"}}Specification{{ end }}
+{{define "more_style"}}
+<link rel="stylesheet" href="/public/jstree/themes/default/style.min.css">
+{{end}}
+{{define "content"}}
+<div class="content-wrapper">
+  <!-- Content header -->
+    <section class="content-header">
+    <h1>
+      Specification
+      <small>Manage specifications</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="/project/{{.ProjectName}}/dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li class="active">Here</li>
+    </ol>
+  </section>
+
+  <!-- Main content -->
+<section class="content">
+  <form id="form_tc_del" method="POST">
+  </form>
+  <div class="row">
+    <div class="col-md-12">
+      <!-- Button trigger modal -->
+      <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal">
+        <i class='fa fa-plus right7'></i>Root Section
+      </button>
+      <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#editSectionModal"><!-- TODO edit modal dialog -->
+        <i class='glyphicon glyphicon-edit right7'></i>Edit
+      </button>
+      <button class="btn btn-danger btn-xs" data-toggle="modal" data-target="#delConfirm">
+        <i class="glyphicon glyphicon-remove right7"></i>Delete
+      </button>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="addSectionModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="myModalLabel">Add a section</h4>
+          </div>
+          <div class="modal-body">
+            <label>Title</label>
+          <input class="form-control" id="section-title">
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="close-section-btn" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" id="add-section-btn" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+        <!-- /.modal-content -->
+      </div>
+      <!-- /.modal-dialog -->
+    </div>
+     <!-- /.modal -->
+    </div><!-- .row -->
+    <div class="row">
+     <div class="col-lg-3" >
+       <div id="testtree" class="top10" style="overflow:auto; border:1px solid silver; min-height:300px;">
+       </div>
+     </div>
+     <div class="col-lg-9 top10" >
+       <div id="tc_list">
+         Please select a section to show test cases.
+       </div>
+     </div>
+    </div><!-- .row -->
+
+  </section>
+</div><!-- /.content-wrapper -->
+{{end}}
+{{define "more_scripts"}}
+
+<script src="/public/jstree/jstree.min.js"></script>
+
+<script>
+var ts_id = -1;
+var parent_id = -1;
+var node_id = -1;
+var from_subsection = false;
+
+function del_suite(){
+  if(ts_id == -1){
+    alert("select testsuite");
+    return;
+  }
+
+  var r = confirm("Delete the testsuite?");
+  if(r == true){
+    $('#form_ts_del').attr('action', "/project/{{.project}}/suite/" + ts_id + "/delete").submit();
+  }
+}
+
+function edit_suite(){
+  if(ts_id == -1){
+    alert("select testsuite");
+    return;
+  }
+  $(location).attr("href", "/project/{{.project}}/suite/" + ts_id + "/edit");
+
+}
+
+$(document).ready(function() {
+    $('#testtree').jstree({
+      "core" : {
+      "multiple": false,
+      "animation" : 0,
+      "check_callback" : true,
+      'data' : function(obj, cb){
+      cb.call(this, JSON.parse("{{.TreeData}}"));
+      }// end of data
+      }, // end of core
+      "types" : {
+      "#" : {
+      "max_children" : 100, 
+      "max_depth" : 3, 
+      "valid_children" : ["root"]
+      },
+      "root" : {"valid_children" : ["default"]},
+      "default" : {"valid_children" : ["default", "spec"]},
+      "spec" : {"icon" : "fa fa-file-text-o"},
+      },//end of types
+      "plugins" : ["dnd", "search","state", "types", "wholerow"]
+    }); // end of jstree initialization
+
+
+    //handle click(select) action on node
+    $("#testtree").bind("select_node.jstree", function(event, data){
+        node_id = data.node.id;
+        parent_id = data.node.parent;
+        var level = data.node.parents.length;
+
+        // run AJAX and render
+        $.getJSON('/project/{{.ProjectName}}/spec/list/'+ node_id, function(data){
+          $('#tc_list').html('');
+          var items = [];
+          if(level < 3){
+          items.push("<button class='btn btn-primary btn-xs right10' id='subsection-btn' data-toggle='modal' data-target='#addSectionModal'>" + 
+            "<i class='fa fa-plus right7'></i>Subsection</button>");
+          }
+          items.push("<a href='/project/{{.project}}/section/"+ node_id +"/add'><button class='btn btn-primary btn-xs'>" +
+            "<i class='fa fa-plus right7'></i>Test Case</button></a>");
+
+          if(data.length == 0){
+            items.push("<div>No Data</div>");
+            $('#tc_list').html(items.join(""));
+          }
+          else{
+            items.push("<div class='table-responsive'><table class='table table-striped'>");
+            items.push("<thead><tr><th>#</th><th>Title</th><th>Status</th><th>Priority</th><th>Action</th></tr></thead>");
+            items.push("<tbody>");
+            $.each(data, function(key, val){
+              var priority = ["Unknown", "Highest", "High", "Medium", "Low", "Lowest"];
+              var status=["Unknown", "Active", "Inactive", "Close"];
+                items.push("<tr>"+ 
+                  "<td>"+ val.ID + "</td>" + 
+                  "<td><a href='/project/{{.project}}/case/"+ val.ID + "'>" + 
+                     val.Name + "</a></td>" + 
+                  "<td>" + status[val.Status] + "</td>" + 
+                  "<td>" + priority[val.Priority] + "</td>" +
+                  "<td>" + 
+                  "<span class='glyphicon glyphicon-edit fa-fw right7 tc-edit' id='"+ val.ID
+                  +"' style='cursor:pointer;'></span>"+
+                  "<span class='glyphicon glyphicon-remove tc-del' id='"+val.ID + 
+                  "' style='cursor:pointer;'></span>"+
+                  "</td>" +
+                  "</tr>");
+            $('#tc_list').html(items.join(""));
+            });
+            items.push("</tbody></table></div>");
+          }
+        }); // end of testtree click event binding
+    });
+
+    $('body').on('click','.tc-edit',function(){
+      var id = $(this).attr('id');
+      $(location).attr("href", "/project/{{.project}}/case/" + id + "/edit");
+    });
+
+    $('body').on('click', '.tc-del', function(){
+        var id = $(this).attr('id');
+        var r = confirm("Delete the testcase?");
+        if(r == true){
+          $('#form_tc_del').attr('action', "/project/{{.project}}/case/" + id + "/delete").submit();
+        }
+    });
+
+    // handler for root section add button
+    $('#add-root-btn').click(function(){
+        $('#section-title').val('');
+      $(location).attr("href", "/project/{{.project}}/section/add?parent_id=0");
+        });
+
+    // handler for subsection add button
+    $('body').on('click', '#subsection-btn', function(event){
+        $('#section-title').val('');
+        from_subsection = true;
+        });
+
+    // handler for modal-save button
+    $('body').on('click', '#add-section-btn', function(){
+        var title = $('#section-title').val();
+        var pid = 0;
+        if(parent_id == -1 || node_id == -1){
+            return;
+        }
+        if(from_subsection){
+            pid = node_id;
+        }
+        else{
+            pid = 0;
+        }
+
+        $.post('/project/{{.ProjectName}}/section/insert'
+          , {id: node_id, parent_id:pid, title:title})
+        .done(function(data){
+          console.log("Result : ", data);
+          //TODO check return code(status) and handle it! 
+
+          // initialize from flag
+          from_subsection = false;
+          // send an event(click) to close btn
+          $('#close-section-btn').trigger('click');
+
+          location.reload();
+          ///////
+          // TODO Make only jstree reload 
+          //$('#testtree').jstree(true).settings.core.data = { 'url': 'put/the/url/here.json' };
+          //$('#testtree').jstree(true).refresh();
+          });
+        });
+
+});
+</script>
+{{end}}
