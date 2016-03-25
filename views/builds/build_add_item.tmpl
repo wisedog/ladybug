@@ -1,0 +1,64 @@
+{{define "title"}}Builds{{ end }}
+{{define "more_style"}}{{end}}
+{{define "content"}}
+<div class="content-wrapper">
+  <!-- Content header -->
+  <section class="content-header">
+    <h1>
+      Build Item
+      <small>Add a build item</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="/project/{{.ProjectName}}/dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li><a href="/project/{{.ProjectName}}/build"> Build</a></li>
+      <li><a href="/project/{{.ProjectName}}/build/{{.Build.ID}}"> View</a></li>
+      <li class="active"> Here</li>
+    </ol>
+  </section>
+  <!-- Main content -->
+  <section class="content">
+    <form method="POST" action="/project/{{.ProjectName}}/build/saveitem">
+      <input type="hidden" name="BuildProjectID" value="{{.Build.ID}}"></input>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="row vertical-align bottom10">
+            <div class="col-md-1"><strong>Name</strong></div>
+            <!-- TODO haserror-->
+            <div class="col-md-8">
+              <input class="form-control" name="Name" value="">
+            </div>
+          </div><!-- .row -->
+          <div class="row form-group bottom10">
+            <div class="col-md-12">
+              <label>{{msg "description"}}</label>
+              <textarea class="form-control" rows="4" name="Description"></textarea>
+            </div>
+          </div>
+        </div> <!-- .col-md -->
+      </div> <!-- .row -->
+      <div class="row bottom10">
+        <div class="col-md-1">
+          <label for="exampleInputFile">Target Binary</label>
+        </div>
+        <div class="col-md-6">
+          <input type="file" id="exampleInputFile">
+        </div>
+      </div><!-- .row -->
+      <div class="row bottom10 vertical-align">
+        <div class="col-md-1">
+          <label>or URL</label>
+        </div>
+        <div class="col-md-8">
+          <input class="form-control"></input>
+        </div>
+      </div>
+      <div class="row bottom10">
+        <div class="col-md-6">
+          <button type="submit" class="btn btn-primary btn-flat btm-sm">Create</button>
+        </div>
+      </div> <!-- .row -->
+    </form>
+  </section><!-- /.content -->
+</div><!-- /.content-wrapper -->
+{{end}}
+{{define "more_scripts"}}{{end}}

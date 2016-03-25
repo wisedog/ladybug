@@ -51,7 +51,7 @@ func ExecDone(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
     return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
   }
 
-  exec_id := r.FormValue("exec_id")
+  execId := r.FormValue("exec_id")
   //comment := r.FormValue("comment")
 
 	var prj models.Project
@@ -62,7 +62,7 @@ func ExecDone(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 	}
 
 	var testexec models.Execution
-	if err := c.Db.Preload("Plan").Where("id = ?", exec_id).First(&testexec); err.Error != nil{
+	if err := c.Db.Preload("Plan").Where("id = ?", execId).First(&testexec); err.Error != nil{
     log.Error("TestExec", "type", "database", "msg ", err.Error )
 		return RenderJson(w, Resp{Status:500, Msg : "Find Test Execution entity failed in TestExecs.Done"})
 	}

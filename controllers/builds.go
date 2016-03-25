@@ -21,7 +21,8 @@ const(
   ERROR_MSG = "LADUBUG_ERROR_MSG"
 )
 
-// struct for response form 
+// Resp struct is for response form 
+// TODO will remove Status and make http header response to represent response status
 type Resp struct{
   Status int  `json:"status"`
   Msg   string  `json:"msg"`
@@ -109,7 +110,7 @@ func handleAddEditPage(c *interfacer.AppContext, w http.ResponseWriter, r *http.
   return Render2(c, w, items, "views/base.tmpl","views/builds/build_add_project.tmpl")
 }
 
-//BuildsSave handles a save request via POST
+//BuildsSaveProject handles a save request via POST
 func BuildsSaveProject(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
 	var user *models.User
   if user = connected(c, r); user == nil{
