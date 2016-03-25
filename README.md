@@ -42,6 +42,15 @@ The Project Ladybug uses below...
 
 This app uses now only Postgresql. Various databases(MySQL, MarinaDB ....) will be supported. 
 
+### Run
+
+```
+$ go build
+$ ./ladybug 
+```
+
+Try to connect http://localhost:8000
+
 ### Features Next
 
 * Requirements management

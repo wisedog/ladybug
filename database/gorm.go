@@ -13,6 +13,7 @@ import (
 
 var Database *gorm.DB
 
+// InitDB initialize the database and create dummies if it needs
 func InitDB() (*gorm.DB, error){
   var err error
 	Database, err = gorm.Open("postgres", "user=ladybug dbname=ladybug port=5432 sslmode=disable")
@@ -36,6 +37,8 @@ func InitDB() (*gorm.DB, error){
   return Database, nil
 }
 
+
+// createDummy creates dummy data for database
 func createDummy() {
 
 	// drop all table while on development phase

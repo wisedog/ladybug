@@ -2,9 +2,7 @@ package controllers
 
 import (
   "net/http"
-  "html/template"
 
-  "github.com/gorilla/mux"
   "github.com/wisedog/ladybug/models"
   "github.com/wisedog/ladybug/interfacer"
   "github.com/wisedog/ladybug/errors"
@@ -23,80 +21,45 @@ const(
   EXEC_STATUS_FAIL
   )
 
-
+// Dashboard renders a dashboard page
 func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
-  var user *models.User
-
-  if user = connected(c, r); user == nil {
-    log.Info("Not found login information")
-    http.Redirect(w, r, "/", http.StatusFound)
-  }
-
-  vars := mux.Vars(r)
-  name := vars["projectName"]
-  log.Debug("Project", "Name", name)
 
   var prj models.Project
-  err := c.Db.Where("name = ?", name).First(&prj)
+  err := c.Db.Where("name = ?", c.ProjectName).First(&prj)
   
   if err.Error != nil{
+    log.Error("Projects", "msg", err.Error)
     return errors.HttpError{http.StatusInternalServerError, "Not found project"}
   }
   
   // counting testcases
-  tc_count := 0
-  c.Db.Model(models.TestCase{}).Where("project_id = ?", prj.ID).Count(&tc_count)
+  tcCount := 0
+  c.Db.Model(models.TestCase{}).Where("project_id = ?", prj.ID).Count(&tcCount)
   
   
   var execs []models.Execution
   
   c.Db.Where("project_id = ?", prj.ID).Find(&execs)
   
-  exec_count := 0
-  task_count := 0
+  execCount := 0
+  taskCount := 0
   for _, k := range execs{
     if k.Status == EXEC_STATUS_READY{
-      task_count++
+      taskCount++
     } else if k.Status == EXEC_STATUS_IN_PROGRESS{
-      exec_count++
+      execCount++
     }
   }
 
-  items := struct {
-    User *models.User
-    Project *models.Project
-    ProjectName string
-    TestCaseCount int
-    ExecCount   int
-    TaskCount   int
-    Active_idx  int
-  }{
-    User: user,
-    Project : &prj,
-    ProjectName : prj.Name,
-    TestCaseCount : tc_count,
-    ExecCount : exec_count,
-    TaskCount : task_count,
-    Active_idx : 1,
+  items := map[string]interface{}{
+    "Project" : prj,
+    "TestCaseCount" : tcCount,
+    "ExecCount" : execCount,
+    "TaskCount"  : taskCount,
+    "Active_idx" : 1,
   }
 
-  t, er := template.ParseFiles(
-    "views/base.tmpl",
-    "views/dashboard.tmpl",
-    )
-
-  if er != nil{
-    log.Error("Project", "Error ", er )
-    return errors.HttpError{http.StatusInternalServerError, "Template ParseFiles error"}
-  }
-  
-  
-  if err := t.Execute(w, items); err != nil{
-    log.Error("Project", "Template Execution Error ", err )
-    return errors.HttpError{http.StatusInternalServerError, "Template Exection Error"}
-  }
-  
-  return nil
+  return Render2(c, w, items, "views/base.tmpl","views/dashboard.tmpl")
 }
 
 //(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {

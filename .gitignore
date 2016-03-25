@@ -1,7 +1,2 @@
-test-results/
-tmp/
-routes/
-builds/
 *.swp
 *.exe
-app/controllers/core

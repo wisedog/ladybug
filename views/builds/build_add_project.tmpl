@@ -1,0 +1,53 @@
+{{define "title"}}Add Build/Release{{ end }}
+{{define "more_style"}}{{end}}
+{{define "content"}}
+<div class="content-wrapper">
+  <!-- Content header -->
+  <section class="content-header">
+    <h1>
+      Add a build/release artifact
+      <small>Add a build manually</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="/project/{{.ProjectName}}/dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li><a href="/project/{{.ProjectName}}/build"> Builds</a></li>
+      <li class="active">Here</li>
+    </ol>
+  </section>
+  <!-- Main content -->
+  <section class="content">
+    <form method="POST" action="/project/{{.ProjectName}}/build/{{if .IsEdit}}update{{else}}save{{end}}">
+      <input type="hidden" name="ID" value="{{.ID}}"></input>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group {{$val := index .ErrorMap "Name"}} {{if ne $val ""}}has-error{{end}}">
+            <div class="row vertical-align bottom10">
+              <div class="col-md-1"><strong>Name</strong></div>
+              <div class="col-md-6">
+                <input class="form-control" name="Name" value="{{.Build.Name}}">
+              </div>
+              <div class="col-md-3">
+                <label>{{$val}}</label>
+              </div>
+            </div><!-- .row -->
+          </div>
+          <div class="row form-group bottom10">
+            <div class="col-md-12">
+              <label>{{msg "description"}}</label>
+              <textarea class="form-control" rows="4" name="Description">{{.Build.Description}}</textarea>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <button type="submit" class="btn btn-primary btn-flat btm-sm">
+              {{if .IsEdit}}Update{{else}}Create{{end}}
+              </button>
+            </div>
+          </div> <!-- .row -->
+        </div> <!-- .col-md -->
+      </div> <!-- .row -->
+    </form>
+  </section><!-- /.content -->
+</div><!-- /.content-wrapper -->
+{{end}}
+{{define "more_scripts"}}{{end}}
