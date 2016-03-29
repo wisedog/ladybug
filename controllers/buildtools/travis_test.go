@@ -6,6 +6,7 @@ import (
   "os"
 
   "github.com/jinzhu/gorm"
+  "github.com/wisedog/ladybug/interfacer"
   "github.com/wisedog/ladybug/database"
   "github.com/wisedog/ladybug/models"
 
@@ -15,11 +16,12 @@ var Database *gorm.DB
 
 func setup(){
   fmt.Println("Setup Testing for package buildtools...")
+  cf := interfacer.LoadConfig()
+
   var err error
-  Database, err = database.InitDB() 
+  Database, err = database.InitDB(cf) 
   if err != nil{
     fmt.Println("Database initialization is failed.")
-    return
   }
   //defer Database.Close()
 }

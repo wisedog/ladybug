@@ -32,7 +32,7 @@ func TestBindAddress(t *testing.T){
     t.Error("config load failed")
   }
 
-  if cf.GetGetBindAddress() != "localhost:8000"{
+  if cf.GetBindAddress() != "localhost:8000"{
     t.Error("Config value is not property")
   }
 }
