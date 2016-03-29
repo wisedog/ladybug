@@ -86,13 +86,13 @@ func main() {
   // create router with gorilla/mux
   r := mux.NewRouter()
 
-
-  // load i18n resources
-  controllers.LoadI18nMessage()
-
   ctx := &interfacer.AppContext{}
+
+  // load config
+  ctx.Config = interfacer.LoadConfig()
+  
   log.Info("Initialize Database...")
-  if db, err := database.InitDB(); err != nil{
+  if db, err := database.InitDB(ctx.Config); err != nil{
     log.Crit("Database initialization is failed.")
     return
   }else{
@@ -101,6 +101,9 @@ func main() {
 
   ctx.Store = sessions.NewCookieStore([]byte("ladybug"))
   ctx.Decoder = schema.NewDecoder()
+
+  // load i18n resources
+  controllers.LoadI18nMessage()
 
   //// Routes consist of a path and a handler function.
 
@@ -189,6 +192,7 @@ func main() {
       http.FileServer(http.Dir("public/"))))
   r.NotFoundHandler = http.HandlerFunc(notFound)
 
+  log.Info("APP", "Binding Address", ctx.Config.GetBindAddress())
   // Bind to a port and pass our router in
-  http.ListenAndServe(":8000", r)
+  http.ListenAndServe(ctx.Config.GetBindAddress(), r)
 }

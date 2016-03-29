@@ -4,8 +4,8 @@ import (
   "github.com/jinzhu/gorm"
   "github.com/gorilla/sessions"
   "github.com/gorilla/schema"
-  //"github.com/gorilla/securecookie"
   "github.com/wisedog/ladybug/models"
+  //"github.com/robfig/config"
 )
 
 
@@ -14,6 +14,7 @@ type AppContext struct {
   Db        *gorm.DB
   Store     *sessions.CookieStore
   Decoder   *schema.Decoder
+  Config    *AppConfig
 
   // project-specific fields
   User      *models.User

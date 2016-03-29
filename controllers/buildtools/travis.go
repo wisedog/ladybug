@@ -17,19 +17,19 @@ type Travis struct {
 }
 
 
-type TravisBuildInfo struct{
+type travisBuildInfo struct{
   State   string  `json:"state"`
-  Id      int     `json:"id"`
+  ID      int     `json:"id"`
   Number  string  `json:"number"`
   FinishedAt  string  `json:"finished_at"`
 }
 
-type TravisBuildBunch struct{
-  Builds    []TravisBuildInfo   `json:"builds"`
+type travisBuildBunch struct{
+  Builds    []travisBuildInfo   `json:"builds"`
 }
 
-type TravisRepoInfo struct{
-  Id      int     `json:"id"`
+type travisRepoInfo struct{
+  ID      int     `json:"id"`
   Slug    string  `json:"slug"`
   Active  bool    `json:"active"`
   Description string  `json:"description"`
@@ -39,15 +39,15 @@ type TravisRepoInfo struct{
   LastBuildFinish   string  `json:"last_build_finished_at"`
 }
 
-type TravisRepo struct{
-  Repo  TravisRepoInfo  `json:"repo"`
+type travisRepo struct{
+  Repo  travisRepoInfo  `json:"repo"`
 }
 
 
 // AddTravisBuilds is main routine of adding travis build items.
 func (t Travis) AddTravisBuilds(url string, projectID int, db *gorm.DB) error{
   
-  repo, err, u := t.ConnectionTest(url)
+  repo, u, err := t.ConnectionTest(url)
   if err != nil {
     return errors.New("Fail to get Travis repo information")
   }
@@ -70,9 +70,9 @@ func (t Travis) AddTravisBuilds(url string, projectID int, db *gorm.DB) error{
   
   status := 0
   if repo.Repo.LastBuildState == "passed"{
-  	status = BUILD_SUCCESS
+  	status = BuildSuccess
   } else{
-  	status = BUILD_FAIL
+  	status = BuildFail
   }
   
   // save Build project
@@ -92,30 +92,30 @@ func (t Travis) AddTravisBuilds(url string, projectID int, db *gorm.DB) error{
   }
   
   for _, build := range buildsNum{
-    reqUrl := u + "/builds?number=" + strconv.Itoa(build)
-    body, err := t.getTravisRepoInfo(reqUrl)
+    reqURL := u + "/builds?number=" + strconv.Itoa(build)
+    body, err := t.getTravisRepoInfo(reqURL)
     if err != nil{
       return errors.New("Fail to get builds")
     }
     
-    b := TravisBuildBunch{}
+    b := travisBuildBunch{}
     if err := json.Unmarshal(body, &b); err != nil{
       return errors.New("Json Unmarshalling is failed")
     }
     
     var rv int 
   	if b.Builds[0].State == "passed"{
-  		rv = BUILD_SUCCESS
+  		rv = BuildSuccess
   	}else {
-  		rv = BUILD_FAIL
+  		rv = BuildFail
   	}
     
-    buildid := strconv.Itoa(b.Builds[0].Id)
+    buildid := strconv.Itoa(b.Builds[0].ID)
     displayName := "#" + b.Builds[0].Number
     elem := models.BuildItem{
   		BuildProjectID : job.ID,
   		IdByTool : buildid,
-  		IdByToolInt : b.Builds[0].Id,
+  		IdByToolInt : b.Builds[0].ID,
   		DisplayName : displayName,
   		FullDisplayName : job.Name + " " + displayName,
   		ItemUrl : url+"/builds/" + buildid,
@@ -139,21 +139,21 @@ func (t Travis) AddTravisBuilds(url string, projectID int, db *gorm.DB) error{
 
 
 // ConnectionTest verifies the given repo's URL
-func (t Travis) ConnectionTest(url string) (*TravisRepo, error, string){
+func (t Travis) ConnectionTest(url string) (*travisRepo, string, error){
 	u := t.getApiUrl(url)
 
-	res := TravisRepo{}
+	res := travisRepo{}
   body, err := t.getTravisRepoInfo(u)
 	if err != nil {
-	  return &res, errors.New("Fail to get Travis repo information"), u
+	  return &res, u, errors.New("Fail to get Travis repo information")
 	}
 	
 	
   if err := json.Unmarshal(body, &res); err != nil{
-    return &res, errors.New("Json Unmarshalling is failed"), u
+    return &res, u, errors.New("Json Unmarshalling is failed")
   }
 	
-	return &res, nil, u
+	return &res, u, nil
 }
 
 // getApiUrl manipulates from repo URL to API-url

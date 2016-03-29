@@ -2,11 +2,11 @@ package controllers
 
 import (
   "strings"
-	"strconv"
+  "strconv"
   "net/http"
 
   "github.com/gorilla/mux"
-	"github.com/wisedog/ladybug/models"
+  "github.com/wisedog/ladybug/models"
   "github.com/wisedog/ladybug/interfacer"
   "github.com/wisedog/ladybug/errors"
 	
@@ -78,16 +78,16 @@ func ExecDone(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 	f, _ := calculatePassFail(c, &testexec)
 	
 	if f > 0{
-		testexec.Status = EXEC_STATUS_FAIL
+		testexec.Status = ExecStatusFail
 	}else{
-		testexec.Status = EXEC_STATUS_PASS
+		testexec.Status = ExecStatusPass
 	}
 	
-	//testexec.Status = EXEC_STATUS_DONE
+	//testexec.Status = ExecStatusDone
 	//TODO add param pass_cnt, fail_cnt. 
 	//TODO validation pass_cnt+fail_cnt == total count
-	// if true, choose EXEC_STATUS_PASS or EXEC_STATUS_FAIL
-	// else EXEC_STATUS_DONE
+	// if true, choose ExecStatusPass or ExecStatusFail
+	// else ExecStatusDone
 	
 	if err := c.Db.Save(&testexec); err.Error != nil{
     log.Error("TestExec", "type", "database", "msg ", err.Error )
@@ -103,7 +103,7 @@ func ExecDone(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 //func (c TestExecs) UpdateResult(case_id int, exec_id int, result bool, actual string, case_ver int) revel.Result{
 func ExecUpdateResult(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
 	var rv models.TestResult
-	var rv_tmp []models.TestResult
+	var rvTmp []models.TestResult
 	var count int64
 
   if err := r.ParseForm(); err != nil {
@@ -111,21 +111,21 @@ func ExecUpdateResult(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
     return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
   }
 
-  execIdStr := r.FormValue("exec_id")
-  execId, _ := strconv.Atoi(execIdStr)
-  caseIdStr := r.FormValue("case_id")
-  caseId, _ := strconv.Atoi(caseIdStr)
+  execIDStr := r.FormValue("exec_id")
+  execID, _ := strconv.Atoi(execIDStr)
+  caseIDStr := r.FormValue("case_id")
+  caseID, _ := strconv.Atoi(caseIDStr)
   resultStr := r.FormValue("result")
   result, _ := strconv.ParseBool(resultStr)
   actual := r.FormValue("actual")
   caseVerStr := r.FormValue("case_ver")
   caseVer, _ := strconv.Atoi(caseVerStr)
 
-	c.Db.Where("exec_id = ? and test_case_id = ?", execId, caseId).Find(&rv_tmp).Count(&count)
+	c.Db.Where("exec_id = ? and test_case_id = ?", execID, caseID).Find(&rvTmp).Count(&count)
 	
 	if count == 0 {
-		rv.TestCaseId = caseId
-		rv.ExecId = execId
+		rv.TestCaseId = caseID
+		rv.ExecId = execID
 		rv.Status = result
 		rv.Actual = actual
 		rv.TestCaseVer = caseVer
@@ -139,7 +139,7 @@ func ExecUpdateResult(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
 			return RenderJson(w, Resp{Status:500, Msg : "Insert operation failed in TestExecs.UpdateResult"})
 		}
 	} else{
-		if err := c.Db.Where("exec_id = ? and test_case_id = ?", execId, caseId).First(&rv); err.Error != nil{
+		if err := c.Db.Where("exec_id = ? and test_case_id = ?", execID, caseID).First(&rv); err.Error != nil{
 			log.Error("Select operation failed in TestExecs.UpdateResult")
 			return RenderJson(w, Resp{Status:500, Msg : "Select operation failed in TestExecs.UpdateResult"})
 		}
@@ -156,8 +156,8 @@ func ExecUpdateResult(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
 	//set exec's status ready to in progress
 	var exec models.Execution
 	
-	if err := c.Db.Where("id = ?", execId).First(&exec); err.Error == nil {
-		exec.Status = EXEC_STATUS_IN_PROGRESS
+	if err := c.Db.Where("id = ?", execID).First(&exec); err.Error == nil {
+		exec.Status = ExecStatusInProgress
 		c.Db.Save(&exec)
 	}else{
 		log.Error("An error while on finding test result in TestExecs.calculateProgress")
@@ -256,13 +256,13 @@ func ExecRun(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
 	var results []models.TestResult
 	c.Db.Order("test_case_id").Where("exec_id = ?", id).Find(&results)
 	
-	pass_counter := 0
-	fail_counter := 0
+	passCounter := 0
+	failCounter := 0
 	for _, k := range results{
 		if k.Status == true{
-			pass_counter++
+			passCounter++
 		}else{
-			fail_counter++
+			failCounter++
 		}
 	}
 
@@ -270,8 +270,8 @@ func ExecRun(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
     "TestExec" : testexec,
     "Cases" : cases,
     "Results" : results,
-    "PassCounter" : pass_counter,
-    "FailCounter" : fail_counter,
+    "PassCounter" : passCounter,
+    "FailCounter" : failCounter,
     "Active_idx" : 5,
   }
 	
@@ -313,7 +313,7 @@ func ExecDeny(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 		return RenderJson(w, Resp{Status:500, Msg : "Not found Test Execution"})
 	}
 
-	testexec.Status = EXEC_STATUS_DENY
+	testexec.Status = ExecStatusDeny
 	testexec.Message = msg
 	if err := c.Db.Save(testexec); err.Error != nil{
 		return RenderJson(w, Resp{Status:500, Msg : "Error while saving"})

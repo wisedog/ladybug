@@ -16,15 +16,15 @@ import (
 func getPriorityI18n(priority int) string{
 	str := "Unknown Status"
 	switch priority{
-		case models.PRIORITY_HIGHEST:
+		case models.PriorityHighest:
 			str = GetI18nMessage("priority.highest")
-		case models.PRIORITY_HIGH:
+		case models.PriorityHigh:
       str = GetI18nMessage("priority.high")
-		case models.PRIORITY_MEDIUM:
+		case models.PriorityMedium:
 			str = GetI18nMessage("priority.medium")
-		case models.PRIORITY_LOW:
+		case models.PriorityLow:
 			str = GetI18nMessage("priority.low")
-		case models.PRIORITY_LOWEST:
+		case models.PriorityLowest:
 			str = GetI18nMessage("priority.lowest")
 	}
 	
@@ -32,10 +32,10 @@ func getPriorityI18n(priority int) string{
 }
 
 func getErrorMap(session *sessions.Session) *map[string]string{
-  if fm := session.Flashes(ERROR_MSG); fm != nil {
+  if fm := session.Flashes(ErrorMsg); fm != nil {
     b, ok := fm[0].(*map[string]string)
     if ok{
-      delete(session.Values, ERROR_MSG)
+      delete(session.Values, ErrorMsg)
       return b
     }else{
       log.Debug("Build", "msg", "flash type assertion failed")
@@ -44,6 +44,7 @@ func getErrorMap(session *sessions.Session) *map[string]string{
   return nil
 }
 
+// Render2 renders templates with structure-typed interface data
 func Render(w http.ResponseWriter, data interface{},  templates ...string) error{
   t, err := template.New("base.tmpl").Funcs(funcMap).ParseFiles(templates...)
 
@@ -60,6 +61,7 @@ func Render(w http.ResponseWriter, data interface{},  templates ...string) error
   return nil
 }
 
+// Render2 renders templates with map-typed interface data
 func Render2(c *interfacer.AppContext, w http.ResponseWriter, data interface{},  templates ...string) error{
   t, err := template.New("base.tmpl").Funcs(funcMap).ParseFiles(templates...)
 
@@ -80,6 +82,7 @@ func Render2(c *interfacer.AppContext, w http.ResponseWriter, data interface{}, 
   return nil
 }
 
+// RenderJson renders JSON 
 func RenderJson(w http.ResponseWriter, data interface{}) error{
   js, err := json.Marshal(data)
   if err != nil {

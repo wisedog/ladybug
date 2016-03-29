@@ -59,7 +59,7 @@ func TestGetApiUrlTravis(t *testing.T) {
 func TestTravisConnectionTest(t *testing.T){
   var travis Travis
 
-  _, err, _ := travis.ConnectionTest("https://travis-ci.org/wisedog/ladybug")
+  _, _ , err:= travis.ConnectionTest("https://travis-ci.org/wisedog/ladybug")
   if err != nil{
     t.Fail()
     t.Log("ConnectionTest Failed with URL : ", "https://travis-ci.org/wisedog/ladybug", " Msg : ", err.Error())
@@ -70,7 +70,7 @@ func TestTravisConnectionTest(t *testing.T){
 func TestConnectionTest_Failed(t *testing.T){
   var travis Travis
 
-  _, err, _ := travis.ConnectionTest("")
+  _, _, err := travis.ConnectionTest("")
   if err == nil{
     t.Fail()
     t.Log("ConnectionTest Failed with URL : \" \" should be failed")

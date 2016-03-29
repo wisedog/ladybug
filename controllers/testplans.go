@@ -230,14 +230,14 @@ func PlanRun(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
 
 	// mendatory : testplan ID,project ID
 	// advisory : if executor id is zero, make status N/A
-	exec := models.Execution{Status : EXEC_STATUS_READY, 
+	exec := models.Execution{Status : ExecStatusReady, 
     ProjectId: prj.ID, PlanId: id,
     ExecutorId: plan.ExecutorId, 
     TargetBuildId: plan.TargetBuildId,
   }
 
 	if plan.ExecutorId == 0 {
-		exec.Status = EXEC_STATUS_NOT_AVAILABLE
+		exec.Status = ExecStatusNotAvailable
 	}
 
 	c.Db.NewRecord(exec)

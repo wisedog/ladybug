@@ -17,8 +17,8 @@ import (
 )
 
 const(
-  BUILD_FLASH_KEY = "LADYBUG_BUILD"
-  ERROR_MSG = "LADUBUG_ERROR_MSG"
+  BuildFlashKey = "LADYBUG_BUILD"
+  ErrorMsg = "LADUBUG_ERROR_MSG"
 )
 
 // Resp struct is for response form 
@@ -77,7 +77,7 @@ func handleAddEditPage(c *interfacer.AppContext, w http.ResponseWriter, r *http.
   }
 
   // Check if there are invalid form values from SAVE/UPDATE
-  if fm := session.Flashes(BUILD_FLASH_KEY); fm != nil {
+  if fm := session.Flashes(BuildFlashKey); fm != nil {
     b, ok := fm[0].(*models.Build)
     if ok{
       build = *b
@@ -85,7 +85,7 @@ func handleAddEditPage(c *interfacer.AppContext, w http.ResponseWriter, r *http.
       log.Debug("Build", "msg", "flash type assertion failed")
     }    
 
-    delete(session.Values, BUILD_FLASH_KEY)
+    delete(session.Values, BuildFlashKey)
     errorMap = *getErrorMap(session)
     session.Save(r, w)
 
@@ -141,8 +141,8 @@ func BuildsSaveProject(c *interfacer.AppContext, w http.ResponseWriter, r *http.
       log.Warn("error ", "msg", e.Error)
     }
 
-    session.AddFlash(build, BUILD_FLASH_KEY)
-    session.AddFlash(errorMap, ERROR_MSG)
+    session.AddFlash(build, BuildFlashKey)
+    session.AddFlash(errorMap, ErrorMsg)
 
     session.Save(r, w)
     http.Redirect(w, r, "/project/" + projectName + "/build/add", http.StatusFound)
@@ -379,7 +379,7 @@ func  ValidateTool(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
 	}else if toolname == "travis"{
 		log.Info("Entering Travis routine....\n")
 		var t buildtools.Travis
-		resp, err, _ := t.ConnectionTest(url)
+		resp, _, err := t.ConnectionTest(url)
 		if err != nil{
       status = 500
 			msg = err.Error()

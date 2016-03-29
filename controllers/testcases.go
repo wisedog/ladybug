@@ -29,7 +29,7 @@ func makeHistoryMessage(historyUnit *[]models.HistoryTestCaseUnit){
 	
 	// TODO L10N with using GetI18nMessage format string
 	for i := 0; i < len(*historyUnit); i++{
-		if (*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_CHANGED{
+		if (*historyUnit)[i].ChangeType == models.HistoryChangeTypeChanged{
 			if((*historyUnit)[i].From == 0 && (*historyUnit)[i].To == 0 ){
 				msg = fmt.Sprintf(`"%s" is changed from "%s" to "%s".`, 
 				(*historyUnit)[i].What, (*historyUnit)[i].FromStr, (*historyUnit)[i].ToStr)
@@ -37,13 +37,13 @@ func makeHistoryMessage(historyUnit *[]models.HistoryTestCaseUnit){
 				msg = fmt.Sprintf(`"%s" is changed from %d to %d.`, 
 				(*historyUnit)[i].What, (*historyUnit)[i].From, (*historyUnit)[i].To)
 			}
-		}else if(*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_SET{
+		}else if(*historyUnit)[i].ChangeType == models.HistoryChangeTypeSet{
 			msg = fmt.Sprintf(`"%s" is set to "%s".`, 
 				(*historyUnit)[i].What, (*historyUnit)[i].Set)
-		}else if(*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_DIFF{
+		}else if(*historyUnit)[i].ChangeType == models.HistoryChangeTypeDiff{
 			msg = fmt.Sprintf(`"%s" is changed(diff).`, 
 				(*historyUnit)[i].What)
-		}else if(*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_NOTE{
+		}else if(*historyUnit)[i].ChangeType == models.HistoryChangeTypeNote{
 			msg = fmt.Sprintf("%s added a note.", (*historyUnit)[i].What)
 		}else{
 			msg = ""
@@ -330,7 +330,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	if note != ""{
 		// this means user add a note on this testcase
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_NOTE, What : user.Name,
+			ChangeType : models.HistoryChangeTypeNote, What : user.Name,
 		}
 		
 		his.Note = note
@@ -340,7 +340,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	// check title
 	if existCase.Title != newCase.Title {
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, What : "Title",
+			ChangeType : models.HistoryChangeTypeChanged, What : "Title",
 			FromStr : existCase.Title, ToStr : newCase.Title,
 		}
 		changes = append(changes, unit)
@@ -349,7 +349,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	// check priority
 	if existCase.Priority != newCase.Priority {
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, 
+			ChangeType : models.HistoryChangeTypeChanged, 
 			What : GetI18nMessage("testcase.priority"),
 			FromStr : getPriorityI18n(existCase.Priority),
 			ToStr : getPriorityI18n(newCase.Priority),
@@ -361,7 +361,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	if existCase.ExecutionType != newCase.ExecutionType {
 		arr := [2]string{"Manual", "Automated"}
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, What : "Execution type",
+			ChangeType : models.HistoryChangeTypeChanged, What : "Execution type",
 			FromStr : arr[existCase.ExecutionType], ToStr : arr[newCase.ExecutionType],
 		}
 		changes = append(changes, unit)
@@ -372,7 +372,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	// check Description
 	if existCase.Description != newCase.Description {
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, 
+			ChangeType : models.HistoryChangeTypeDiff, 
 			What : GetI18nMessage("description"),
 			DiffID : 2,
 		}
@@ -382,7 +382,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	// check Precondition
 	if existCase.Precondition != newCase.Precondition {
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, 
+			ChangeType : models.HistoryChangeTypeDiff, 
 			What : GetI18nMessage("priority.precondition"),
 			DiffID : 2,//TODO should be implemnted DIFF
 		}
@@ -392,7 +392,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	// check Estimated
 	if existCase.Estimated != newCase.Estimated {
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, What : "Estimated Time",
+			ChangeType : models.HistoryChangeTypeDiff, What : "Estimated Time",
 			DiffID : 2,	//TODO should be implemnted DIFF
 		}
 		changes = append(changes, unit)
@@ -402,7 +402,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	if existCase.Steps != newCase.Steps {
     // FIXME A bug : those strings are same, but,,,, 
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, What : "Steps",
+			ChangeType : models.HistoryChangeTypeDiff, What : "Steps",
 			DiffID : 2,	//TODO should be implemnted DIFF
 		}
 		changes = append(changes, unit)
@@ -411,7 +411,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	// check Expected
 	if existCase.Expected != newCase.Expected {
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, 
+			ChangeType : models.HistoryChangeTypeDiff, 
 			What : GetI18nMessage("priority.expected"),
 			DiffID : 2,	//TODO should be implemnted DIFF
 		}
@@ -427,7 +427,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	// check CategoryID
 	if existCase.CategoryID != newCase.CategoryID {
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, 
+			ChangeType : models.HistoryChangeTypeChanged, 
 			What : GetI18nMessage("priority.category"),
 			FromStr : "",
 			ToStr : "",

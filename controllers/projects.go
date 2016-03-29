@@ -12,13 +12,13 @@ import (
 
 //status for test execution
 const(
-  EXEC_STATUS_READY = 1 + iota
-  EXEC_STATUS_IN_PROGRESS
-  EXEC_STATUS_NOT_AVAILABLE
-  EXEC_STATUS_DONE
-  EXEC_STATUS_DENY
-  EXEC_STATUS_PASS
-  EXEC_STATUS_FAIL
+  ExecStatusReady = 1 + iota
+  ExecStatusInProgress
+  ExecStatusNotAvailable
+  ExecStatusDone
+  ExecStatusDeny
+  ExecStatusPass
+  ExecStatusFail
   )
 
 // Dashboard renders a dashboard page
@@ -44,9 +44,9 @@ func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
   execCount := 0
   taskCount := 0
   for _, k := range execs{
-    if k.Status == EXEC_STATUS_READY{
+    if k.Status == ExecStatusReady{
       taskCount++
-    } else if k.Status == EXEC_STATUS_IN_PROGRESS{
+    } else if k.Status == ExecStatusInProgress{
       execCount++
     }
   }

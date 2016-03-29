@@ -5,10 +5,10 @@ import (
 )
 
 const (
-	ROLE_ADMIN = 1 + iota
-	ROLE_MANAGER
-	ROLE_USER
-	ROLE_GUEST
+	RoleAdmin = 1 + iota
+	RoleManager
+	RoleUser
+	RoleGuest
 )
 
 type User struct {

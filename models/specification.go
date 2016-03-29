@@ -1,29 +1,16 @@
 package models
 
-
-import (
-	"time"
-)
-
-
 const (
-	SPEC_STATUS_ACTIVATE = 1 + iota
-	SPEC_STATUS_INACTIVE
-	SPEC_STATUS_DRAFT
+	SpecStatusActivate = 1 + iota
+	SpecStatusInactivate
+	SpecStatusDraft
 	)
 
-
-/*
-Specification
-*/
+// Specification Model
 type Specification struct {
-	ID              int
+  BaseModel
 	Name            string
 	Status			int
 	Priority		int
 	SectionID		int
-	
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
 }

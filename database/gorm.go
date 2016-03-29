@@ -1,12 +1,15 @@
 package database
 
 import (
+  "fmt"
   "time"
 
+  "golang.org/x/crypto/bcrypt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
+
 	"github.com/wisedog/ladybug/models"
-	"golang.org/x/crypto/bcrypt"
+  "github.com/wisedog/ladybug/interfacer"
 	
   log "gopkg.in/inconshreveable/log15.v2" 
 )
@@ -14,9 +17,12 @@ import (
 var Database *gorm.DB
 
 // InitDB initialize the database and create dummies if it needs
-func InitDB() (*gorm.DB, error){
+func InitDB(conf *interfacer.AppConfig) (*gorm.DB, error){
+
+  args := getDialectArgs(conf)
   var err error
-	Database, err = gorm.Open("postgres", "user=ladybug dbname=ladybug port=5432 sslmode=disable")
+	//Database, err = gorm.Open("postgres", "user=ladybug dbname=ladybug port=5432 sslmode=disable")
+  Database, err = gorm.Open("postgres", args)
 	if err != nil {
 		log.Info("Database", "msg", err.Error())
 		return Database, err
@@ -34,7 +40,33 @@ func InitDB() (*gorm.DB, error){
   Database.AutoMigrate(&models.Category{})
   Database.AutoMigrate(&models.Specification{})
   createDummy()
+
   return Database, nil
+}
+
+// getDialectArgs returns argument of dialect database. 
+func getDialectArgs(conf *interfacer.AppConfig) string{
+  driver := conf.GetValue("db.driver")
+
+  username := conf.GetValue("db.username")
+  pwd := conf.GetValue("db.password")
+  port := conf.GetValue("db.port")
+  address := conf.GetValue("db.address")
+  dbname := conf.GetValue("db.database_name")
+  //extraParam := conf.GetValue("db.extra_param")
+
+  var args string
+  switch driver{
+    case "postgres":
+      args = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", username, pwd, address, port, dbname)
+    case "mysql":
+      args="" //TODO
+
+    default:
+      args = ""
+  }
+
+  return args
 }
 
 
@@ -66,7 +98,7 @@ func createDummy() {
 	demoUser := &models.User{
 		Name: "Rey", Email: "demo@demo.com", Password: "demo", 
 		HashedPassword: bcryptPassword, Language: "en", Region: "US",
-		LastLoginAt : time.Now(), Roles : models.ROLE_ADMIN,
+		LastLoginAt : time.Now(), Roles : models.RoleAdmin,
 		Photo : "rey_160x160", Location : "Jakku",
 		Notes : "I know all about waiting. For my family. They'll be back, one day.",
 	}
@@ -75,7 +107,7 @@ func createDummy() {
 
 	demoUser1 := &models.User{Name: "Poe Dameron", Email: "wisedog@demo.com", Password: "demo",
 		HashedPassword: bcryptPassword, Language: "en", Region: "US", LastLoginAt : time.Now(),
-		Roles : models.ROLE_MANAGER, Photo : "poe_160x160",
+		Roles : models.RoleManager, Photo : "poe_160x160",
 		Location : "D'Qar", Notes : "Red squad, blue squad, take my lead.",
 		
 	}
@@ -118,40 +150,40 @@ func createDummy() {
 	testcases := []*models.TestCase{
 		&models.TestCase{
 			Prefix: prj.Prefix, Seq: 1, 
-			Title: "Do not go gentle", Status: models.TC_STATUS_ACTIVATE, Description: "Desc", SectionID: 2,
-			ProjectID : prj.ID, Priority : models.PRIORITY_HIGH, CategoryID : 1,
+			Title: "Do not go gentle", Status: models.TcStatusActivate, Description: "Desc", SectionID: 2,
+			ProjectID : prj.ID, Priority : models.PriorityHigh, CategoryID : 1,
 			DisplayID : prj.Prefix + "-1", Estimated : 10,
 		},
 		&models.TestCase{
 			Prefix: prj.Prefix, Seq: 2, Title: "The Mars rover should be tested", 
-			Status: models.TC_STATUS_ACTIVATE, Description: "Desc", SectionID: 3,
-			ProjectID : prj.ID, Priority : models.PRIORITY_HIGHEST,
+			Status: models.TcStatusActivate, Description: "Desc", SectionID: 3,
+			ProjectID : prj.ID, Priority : models.PriorityHighest,
 			CategoryID : 1, DisplayID : prj.Prefix + "-2",Estimated : 1,
 		},
 		&models.TestCase{
 			Prefix: prj.Prefix, Seq: 3, Title: "I'm still arive!",  CategoryID : 3,
-			Status: models.TC_STATUS_ACTIVATE, Description: "Desc", SectionID: 4,
-			ProjectID : prj.ID,Priority : models.PRIORITY_MEDIUM,
+			Status: models.TcStatusActivate, Description: "Desc", SectionID: 4,
+			ProjectID : prj.ID,Priority : models.PriorityMedium,
 			DisplayID : prj.Prefix + "-3",Estimated : 4,
 		},
 		&models.TestCase{
-			Prefix: prj.Prefix, Seq: 4, Status: models.TC_STATUS_ACTIVATE, SectionID: 4, CategoryID : 2,
+			Prefix: prj.Prefix, Seq: 4, Status: models.TcStatusActivate, SectionID: 4, CategoryID : 2,
 			Title: "Copy operation should be supported", 
 			Description: "Copy operation is essential feature for text editing.",
 			Precondition : "None",
 			Steps : "1. Drag some texts on web browser to select text and CTRL + C\n2. Click TextArea and CTRL + V",
 			Expected : "Selected text are copied in TextArea" ,
-			ProjectID : prj.ID, Priority : models.PRIORITY_HIGH,
+			ProjectID : prj.ID, Priority : models.PriorityHigh,
 			DisplayID : prj.Prefix + "-4",Estimated : 5,
 		},
 		&models.TestCase{
-			Prefix: prj.Prefix, Seq: 5, Status: models.TC_STATUS_ACTIVATE, SectionID: 4, CategoryID : 1,
+			Prefix: prj.Prefix, Seq: 5, Status: models.TcStatusActivate, SectionID: 4, CategoryID : 1,
 			Title: "Paste operation should be supported", 
 			Description: "Paste operation is essential feature for text editing.",
 			Precondition : "None",
 			Steps : "1. Drag some texts on web browser to select text and CTRL + C\n2. Click TextArea and CTRL + V",
 			Expected : "Selected text are copied in TextArea",
-			ProjectID : prj.ID, Priority : models.PRIORITY_LOW,
+			ProjectID : prj.ID, Priority : models.PriorityLow,
 			DisplayID : prj.Prefix + "-5",
 			},
 	}
@@ -255,13 +287,13 @@ func createDummy() {
 	
 	specs := []*models.Specification{
 		&models.Specification{Name:"Hello, world", SectionID : 13, 
-			Status : models.SPEC_STATUS_ACTIVATE, Priority: models.PRIORITY_HIGH,
+			Status : models.SpecStatusActivate, Priority: models.PriorityHigh,
 		},
 		&models.Specification{Name:"Hello, stranger", SectionID : 14,
-			Status : models.SPEC_STATUS_ACTIVATE, Priority: models.PRIORITY_MEDIUM,
+			Status : models.SpecStatusActivate, Priority: models.PriorityMedium,
 		},
 		&models.Specification{Name:"Good bye", SectionID : 14,
-			Status : models.SPEC_STATUS_ACTIVATE, Priority: models.PRIORITY_LOW,
+			Status : models.SpecStatusActivate, Priority: models.PriorityLow,
 		},
 	}
 	

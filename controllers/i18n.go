@@ -16,6 +16,7 @@ func LoadI18nMessage() *config.Config{
   return c
 }
 
+// GetI18nMessage returns i18n string correspond to given key
 func GetI18nMessage(key string) string{
   if messages == nil{
     messages = LoadI18nMessage()

@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	BUILD_FAIL = iota
-	BUILD_SUCCESS
+	BuildFail = iota
+	BuildSuccess
 	
 	)
 
@@ -52,9 +52,9 @@ func (j Jenkins) AddJenkinsBuilds(url string, projectID int, db *gorm.DB) error{
   // get status for building. it may be successful or failed
   status := 0
   if nextBuildNum -1 == lastSucessfulBuildNum {
-  	status = BUILD_SUCCESS
+  	status = BuildSuccess
   } else{
-  	status = BUILD_FAIL
+  	status = BuildFail
   }
 
   builds := dat["builds"].([]interface{})
@@ -125,9 +125,9 @@ func (j Jenkins) AddJenkinsBuilds(url string, projectID int, db *gorm.DB) error{
   	
   	var rv int 
   	if result == "SUCCESS"{
-  		rv = BUILD_SUCCESS
+  		rv = BuildSuccess
   	}else {
-  		rv = BUILD_FAIL
+  		rv = BuildFail
   	}
   	
   	

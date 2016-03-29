@@ -20,8 +20,8 @@ import (
 )
 
 const (
-  LADYBUG_SESSION = "ladybug_session"
-  FLASH_AUTH_MESSAGE = "flash_auth_msg"
+  LadybugSession = "ladybug_session"
+  FlashAuthMessage = "flash_auth_msg"
 )
 
 
@@ -133,7 +133,7 @@ func Login(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) err
   }
 
   // not exist account or incorrect password
-  session.AddFlash("Not exist account or incorrect password", FLASH_AUTH_MESSAGE)
+  session.AddFlash("Not exist account or incorrect password", FlashAuthMessage)
   session.Save(r, w)
   http.Redirect(w, r, "/", http.StatusFound)
   return nil
@@ -169,7 +169,7 @@ func LoginPage(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
     var s string
     var logoutFlag bool
 
-    if msg := session.Flashes(FLASH_AUTH_MESSAGE); len(msg) > 0{
+    if msg := session.Flashes(FlashAuthMessage); len(msg) > 0{
       v, ok := msg[0].(string)
       if ok {
         s = v
@@ -195,7 +195,7 @@ func LogOut(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) er
     MaxAge:   -1,
   }
   log.Debug("App", "msg", "logout")
-  session.AddFlash("You just logged out.", FLASH_AUTH_MESSAGE)
+  session.AddFlash("You just logged out.", FlashAuthMessage)
 
   session.Save(r, w)
   http.Redirect(w, r, "/", http.StatusFound)
