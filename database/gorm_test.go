@@ -10,8 +10,9 @@ func TestDialect(t *testing.T) {
 
   conf := interfacer.LoadConfig()
   rv := getDialectArgs(conf)
-  
-  if rv != "postgres://ladybug:@localhost:5432/ladybug?sslmode=false"{
-    t.Error("failed")
+
+  expected := "postgres://ladybug:@localhost:5432/ladybug?sslmode=disable"
+  if rv != expected{
+    t.Error("expected : ", expected, ", but ", rv)
   }
 }
