@@ -47,6 +47,7 @@ func init(){
 
   // for flash messages
   gob.Register(&models.Build{})
+  gob.Register(&models.Project{})
   gob.Register(&map[string]string{})
 
   // TODO store category map to static variable. 

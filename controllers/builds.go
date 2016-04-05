@@ -7,7 +7,6 @@ import (
   "encoding/json"
 
   "github.com/gorilla/mux"
-  "github.com/gorilla/sessions"
   "github.com/wisedog/ladybug/models"
   "github.com/wisedog/ladybug/interfacer"
   "github.com/wisedog/ladybug/errors"
@@ -27,9 +26,6 @@ type Resp struct{
   Status int  `json:"status"`
   Msg   string  `json:"msg"`
 }
-
-//TODO remove this line and user application context cookie
-var store = sessions.NewCookieStore([]byte("lady"))
 
 // BuildsIndex is to render a Builds page
 func BuildsIndex(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
@@ -70,7 +66,7 @@ func handleAddEditPage(c *interfacer.AppContext, w http.ResponseWriter, r *http.
   var build models.Build
   var errorMap map[string]string
 
-  session, e := store.Get(r, "lady")
+  session, e := c.Store.Get(r, "ladybug")
 
   if e != nil{
     log.Info("error ", "msg", e.Error())
@@ -136,7 +132,7 @@ func BuildsSaveProject(c *interfacer.AppContext, w http.ResponseWriter, r *http.
   if errorMap := build.Validate(); len(errorMap) > 0{
     log.Debug("Validation failed")
 
-    session, e := store.Get(r, "lady")
+    session, e := c.Store.Get(r, "ladybug")
     if e != nil{
       log.Warn("error ", "msg", e.Error)
     }

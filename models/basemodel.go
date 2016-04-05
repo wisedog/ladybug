@@ -37,7 +37,7 @@ func (model BaseModel) email(str string) bool {
 }
 
 func (model BaseModel) MaxSize(str string, size int) bool{
-  if len(str) > 200{
+  if len(str) > size{
     return false;
   }
   return true;

@@ -1,11 +1,9 @@
 package controllers
 
 import (
-	"fmt"
   "net/http"
-  "html/template"
 
-  "github.com/gorilla/mux"
+  //"github.com/gorilla/mux"
   "github.com/wisedog/ladybug/models"
   "github.com/wisedog/ladybug/interfacer"
   "github.com/wisedog/ladybug/errors"
@@ -15,54 +13,54 @@ import (
 
 func UserProfile(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
   log.Debug("User", "msg", "in UserProfile")
-  vars := mux.Vars(r)
-  id := vars["id"]
-
-  var user models.User
-
-  err := c.Db.Where("id = ?", id).First(&user)
-  if err.Error != nil{
-    return errors.HttpError{http.StatusBadRequest, "Bad request"}
-  }
 
   var activities []models.Activity
-  if err := c.Db.Where("user_id = ?", user.ID).Preload("User").Find(&activities); err.Error != nil{
+  if err := c.Db.Where("user_id = ?", c.User.ID).Preload("User").Find(&activities); err.Error != nil{
     return errors.HttpError{http.StatusInternalServerError, "An error is occurred while get activities."}
   }
 
-  items := struct {
-    User *models.User
-    Activities  []models.Activity  
-    Active_idx  int
-  }{
-    User: &user,
-    Activities : activities,
-    Active_idx : 0,
+  items := map[string]interface{}{
+    "Activities" : activities,
+    "Active_idx" : 0,
   }
 
-  t, er := template.New("base.tmpl").Funcs(funcMap).ParseFiles(
-    "views/base.tmpl",
-    "views/users/profile.tmpl",
-    )
-
-
-  if er != nil{
-    fmt.Println("Err ", er )
-    return er
-  }
-  
-  if err := t.Execute(w, items); err != nil{
-    fmt.Println("Execution failed : ", err)
-    return err
-  }
-  
-  return nil
+  return Render2(c, w, items, "views/base.tmpl", "views/users/profile.tmpl")
 }
 
 func UserGeneral(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
   
   return nil
 }
+
+
+// UserGetNameList returns users' ID and name.
+func UserGetNameList(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+  var users []models.User
+  if err := c.Db.Find(&users); err.Error != nil{
+    log.Error("User", "msg", err.Error)
+    return errors.HttpError{http.StatusInternalServerError, "An error is occurred while get users"}
+  }
+
+  type data struct{
+    ID  int `json:"id"`
+    Name  string  `json:"name"`
+    Email string  `json:"email"`
+    Photo string  `json:"photo"`
+  }
+
+  renderData := make([]data, len(users))
+
+  for i, x := range users{
+    renderData[i].ID = x.ID
+    renderData[i].Name = x.Name
+    renderData[i].Email = x.Email
+    renderData[i].Photo = x.Photo
+
+  }
+  return RenderJson(w, renderData)
+}
+
+
 /*
 func (c Users) SaveGeneral(id int, Name string, Language string) revel.Result {
 

@@ -13,10 +13,11 @@ const (
 
 type User struct {
 	BaseModel
+
 	Name           string
 	Email          string `sql:"not null;unique"`
-	Password       string
-	HashedPassword []byte
+	Password       string `json:"-"`
+	HashedPassword []byte `json:"-"`
 	Language       string
 	Region         string
 	Projects       []Project
@@ -29,7 +30,7 @@ type User struct {
 	//TODO link of email, homepage, FB, TW, G+ ....
 
 	LastLoginAt       time.Time
-	PasswordUpdatedAt time.Time
+	PasswordUpdatedAt time.Time `json:"-"`
 }
 
 /*func (u *User) String() string {

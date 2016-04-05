@@ -1,0 +1,130 @@
+{{define "title"}}Create Project{{ end }}
+{{define "more_style"}}
+<link rel="stylesheet" href="/public/plugins/magicsuggest/magicsuggest-min.css" >
+{{end}}
+{{define "content"}}
+<div class="content-wrapper">
+  <!-- Content header -->
+  <section class="content-header">
+	  <h1>
+	    Create Project
+	    <small>create test project</small>
+	  </h1>
+	  <ol class="breadcrumb">
+	    <li><a href="/hello"><i class="fa fa-dashboard"></i> Home</a></li>
+      	<li class="active">Here</li>
+	  </ol>
+	</section>
+  <!-- Main content -->
+  <section class="content">
+    <div class="row">
+      <form method="POST" action="/project/save">
+      <div class="col-md-12">
+        <div class="box box-default">
+          <div class="box-body">
+            <div>
+              <h3>General</h3>
+              <section>
+                <div class="row">
+                  <div class="col-md-8">
+                    <div class="form-group{{$val := index .ErrorMap "Name"}} {{if ne $val ""}}has-error{{end}}">
+                      <label for="project-name">Project Name <span class="text-red">(*)</span></label>
+                      <div class="row vertical-align bottom7">
+                        <div class="col-md-5">
+                          <input name="Name" type="text" class="form-control" value="{{.Project.Name}}">
+                        </div>
+                        <div class="col-md-5">
+                          <code class="board" style="padding:0;">{{$val}}</code>
+                        </div>
+                      </div><!-- .row -->
+                    </div><!-- .form-group -->
+                    <div class="form-group{{$val1 := index .ErrorMap "Prefix"}} {{if ne $val1 ""}}has-error{{end}}">
+                      <label for="prefix">Prefix <span class="text-red">(*)</span></label>
+                      <div class="row vertical-align bottom7">
+                        <div class="col-md-5">
+                          <input id="prefix" name="Prefix" type="text" class="form-control" value="{{.Project.Prefix}}">
+                        </div>
+                        <div class="col-md-5">
+                          <code class="board" style="padding:0;">{{$val1}}</code>
+                        </div>
+                      </div><!-- .row-->
+                    </div><!-- form-group -->
+                    <div class="form-group">
+                      <div class="checkbox">
+                        <label>
+                          <input type="checkbox" name="PublicFlag">
+                          Public Project?
+                        </label>
+                      </div>
+                      <label>Description</label>
+                      <div class="row">
+                        <div class="col-md-10">
+                          <textarea class="form-control" rows="2" name="Description">{{.Project.Description}}</textarea>
+                        </div>
+                      </div><!-- .row -->
+                    </div><!-- .form-group -->
+                    <p><span class="text-red">(*)</span> Mandatory</p>
+                  </div><!-- .col-md-8 -->
+                </div><!-- .row -->
+              </section>
+              <h3>Add Users</h3>
+              <section>
+                <div class="radio">
+                  <label>
+                    <input type="radio" name="userOption" id="optionsRadios1" value="skip" checked>
+                    Skip. Add users to project later
+                  </label>
+                </div>
+                <div class="radio">
+                  <label>
+                    <input type="radio" name="userOption" id="optionsRadios1" value="set">
+                    Add users to project right now
+                  </label>
+                </div>
+                <div id="suggestion">
+                </div>
+              </section>
+            </div>
+          </div><!-- .box-body-->
+          <div class="box-footer">
+            <button type="submit" class="btn btn-flat btn-primary pull-right">Create</button>
+          </div>
+        </div><!-- .box -->
+      </div><!-- .col-md-12 -->
+    </form>
+    </div><!-- .row -->
+  </section><!-- .content -->
+</div><!-- /.content-wrapper -->
+{{end}}
+
+{{define "more_scripts"}}
+<script src="/public/plugins/magicsuggest/magicsuggest-min.js"></script>
+
+<script>
+// CSS로 빼기 note that it would be a lot more proper to use CSS classes here instead of inline style
+var ms = $('#suggestion').magicSuggest({
+    data: '/user/get/list',
+    disabled: true,
+    renderer: function(data){
+        return '<div style="padding: 5px; overflow:hidden;">' +
+            '<div style="float: left;"><img src="/public/img/user/' + data.photo + '.png" height="36" width="36"/></div>' +
+            '<div style="float: left; margin-left: 5px">' +
+                '<div style="font-weight: bold; color: #333; font-size: 10px; line-height: 11px">' + data.name + '</div>' +
+                '<div style="color: #999; font-size: 9px">' + data.email + '</div>' +
+            '</div>' +
+        '</div><div style="clear:both;"></div>'; // make sure we have closed our dom stuff
+    }
+});
+
+// toggle magin suggest depends on radiobox's value
+$('input:radio[name="optionsRadios"]').change(
+  function(){
+      if ($(this).is(':checked') && $(this).val() == 'skip') {
+        ms.disable();
+      }else{
+        ms.enable();
+      }
+  });
+
+</script>
+{{end}}
