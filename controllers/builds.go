@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"fmt"
+  "fmt"
   "time"
   "net/http"
   "encoding/json"
@@ -10,7 +10,7 @@ import (
   "github.com/wisedog/ladybug/models"
   "github.com/wisedog/ladybug/interfacer"
   "github.com/wisedog/ladybug/errors"
-	"github.com/wisedog/ladybug/controllers/buildtools"
+  "github.com/wisedog/ladybug/controllers/buildtools"
 
   log "gopkg.in/inconshreveable/log15.v2"
 )
@@ -338,7 +338,7 @@ func AddTool(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
 }
 
 
-// ValidationTool function checks the given url is valid.
+// ValidateTool function checks the given url is valid.
 // TODO Now this checks only jenkins connection without auth, we will add more
 // next target is travis CI
 func  ValidateTool(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{

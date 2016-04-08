@@ -18,7 +18,7 @@
   <!-- Main content -->
   <section class="content">
     <div class="row">
-      <form method="POST" action="/project/save">
+      <form id="createForm" method="POST" action="/manage/project/save">
       <div class="col-md-12">
         <div class="box box-default">
           <div class="box-body">
@@ -59,7 +59,7 @@
                       <label>Description</label>
                       <div class="row">
                         <div class="col-md-10">
-                          <textarea class="form-control" rows="2" name="Description">{{.Project.Description}}</textarea>
+                          <textarea class="form-control" rows="2" name="Description" id="desc">{{.Project.Description}}</textarea>
                         </div>
                       </div><!-- .row -->
                     </div><!-- .form-group -->
@@ -117,7 +117,7 @@ var ms = $('#suggestion').magicSuggest({
 });
 
 // toggle magin suggest depends on radiobox's value
-$('input:radio[name="optionsRadios"]').change(
+$('input:radio[name="userOption"]').change(
   function(){
       if ($(this).is(':checked') && $(this).val() == 'skip') {
         ms.disable();
@@ -125,6 +125,24 @@ $('input:radio[name="optionsRadios"]').change(
         ms.enable();
       }
   });
+
+$( "#createForm" ).submit(function( event ) {  
+  var arr = ms.getSelection();
+  console.log(arr);
+  var idArr = [];
+  for(i = 0; i < arr.length; i++){
+    console.log(arr[i]);
+    idArr.push(arr[i].id);
+  }
+  
+  if(idArr.length == 0){
+    idArr = "";
+  }
+  
+  $(this).append('<input type="hidden" name="UserList" value="' + idArr.toString() + '">');
+  return true;
+});
+
 
 </script>
 {{end}}

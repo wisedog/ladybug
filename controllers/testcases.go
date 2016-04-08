@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 
 	"github.com/gorilla/mux"
-	"github.com/gorilla/schema"
   "github.com/wisedog/ladybug/models"
   "github.com/wisedog/ladybug/interfacer"
 	"github.com/wisedog/ladybug/errors"
@@ -193,11 +192,6 @@ func CaseAdd(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
 
 // handleSaveUpdate handles POST request from save and update
 func handleSaveUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request, isUpdate bool) error{
-  var user *models.User
-  if user = connected(c, r); user == nil{
-    log.Debug("Not found login information")
-    http.Redirect(w, r, "/", http.StatusFound)
-  }
   
   var testcase models.TestCase
   vars := mux.Vars(r)
@@ -206,14 +200,10 @@ func handleSaveUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
 
   if err := r.ParseForm(); err != nil {
     log.Error("Testcase", "Error ", err )
-    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Description : "ParseForm failed"}
   }
-
-  //fmt.Printf("After ParseForm : %+v\n", r)
-
-  decoder := schema.NewDecoder()
   
-  if err := decoder.Decode(&testcase, r.PostForm); err != nil {
+  if err := c.Decoder.Decode(&testcase, r.PostForm); err != nil {
     log.Warn("Testcase", "Error", err, "msg", "Decode failed but go ahead")
   }
 
@@ -224,13 +214,13 @@ func handleSaveUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
 
   if isUpdate == false{
 
-    var largest_seq_tc models.TestCase
+    var largestSeqTc models.TestCase
 
-    if err := c.Db.Where("prefix=?", testcase.Prefix).Order("seq desc").First(&largest_seq_tc); err.Error != nil {
+    if err := c.Db.Where("prefix=?", testcase.Prefix).Order("seq desc").First(&largestSeqTc); err.Error != nil {
       log.Error("An error while SELECT operation to find largest seq")
     } else {
-      testcase.Seq = largest_seq_tc.Seq + 1
-      log.Debug("testcase", "Largest number is : ", largest_seq_tc.Seq+1)
+      testcase.Seq = largestSeqTc.Seq + 1
+      log.Debug("testcase", "Largest number is : ", largestSeqTc.Seq+1)
     }
 
     c.Db.NewRecord(testcase)
@@ -240,8 +230,8 @@ func handleSaveUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
       return errors.HttpError{http.StatusInternalServerError, "Insert operation failed in TestCase.Save"}
     }
     
-    display_id := testcase.Prefix + "-" + strconv.Itoa(testcase.ID)
-    testcase.DisplayID = display_id
+    displayID := testcase.Prefix + "-" + strconv.Itoa(testcase.ID)
+    testcase.DisplayID = displayID
     
     
     if err := c.Db.Save(&testcase); err.Error != nil{
@@ -259,7 +249,7 @@ func handleSaveUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
     return errors.HttpError{http.StatusInternalServerError, "An error while select exist testcase operation"}
   }
   note := r.FormValue("Note")
-  findDiff(c, &existCase, &testcase, note, user)
+  findDiff(c, &existCase, &testcase, note, c.User)
   
   existCase.Title = testcase.Title
   existCase.Description = testcase.Description

@@ -90,7 +90,7 @@ func main() {
 
   // load config
   ctx.Config = interfacer.LoadConfig()
-  
+
   log.Info("Initialize Database...")
   if db, err := database.InitDB(ctx.Config); err != nil{
     log.Crit("Database initialization is failed.")
@@ -113,14 +113,23 @@ func main() {
   r.HandleFunc("/login", myHandler(ctx, controllers.Login)).Methods("POST")
   r.HandleFunc("/logout", myHandler(ctx, controllers.LogOut)).Methods("GET")
   r.HandleFunc("/hello", authHandler(ctx, controllers.Welcome)).Methods("GET")
+  
+  manage := r.PathPrefix("/manage/").Subrouter()
+  
+  // for project creation
+  manage.HandleFunc("/project/create", authHandler(ctx, controllers.ProjectCreate)).Methods("GET")
+  manage.HandleFunc("/project/save", authHandler(ctx, controllers.ProjectSave)).Methods("POST")
 
   // define user subrouter
   user := r.PathPrefix("/user/").Subrouter()
   user.HandleFunc("/profile/{id:[0-9]+}", authHandler(ctx, controllers.UserProfile)).Methods("GET")
   user.HandleFunc("/general/{id:[0-9]+}", authHandler(ctx, controllers.UserGeneral)).Methods("GET")
+  //user.HandleFunc("/get/list", authHandler(ctx, controllers.UserGetNameList)).Methods("GET")
+  user.HandleFunc("/get/list", authHandler(ctx, controllers.UserGetNameList)).Methods("POST")
 
   // define project subrouter
   project := r.PathPrefix("/project/").Subrouter()
+  // TODO add reserved word create, save. those words are not allowed to be project name
 
   // project specific
   project.HandleFunc("/{projectName}", authHandler(ctx, controllers.Dashboard)).Methods("GET")
