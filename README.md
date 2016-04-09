@@ -11,7 +11,7 @@ Develop | [![Build Status](https://secure.travis-ci.org/wisedog/ladybug.svg?bran
 
 ## Description
 
-Project Ladubug can 
+Project Ladybug can 
 
 * support dashboard
 * manage test case
