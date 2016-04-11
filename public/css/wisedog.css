@@ -206,9 +206,40 @@
 
 /* Iteration items for hello page(Hello.Index)*/
 .iteration-item{
-  display:block;
   border-bottom:1px solid #ddd;
-  line-height:1.7;
+  line-height:1.6;
   font-size:18px;
+  margin-left:0px;
+  margin-right:0px;
+  display: flex;
+  align-items: center;
+}
+
+.iteration-item-desc{
+  font-size:16px;
   padding:5px 0px 5px 0px;
+}
+
+
+/* belows are http://patrickdesjardins.com/blog/bootstrap-loading-spinner-with-css3*/ 
+.center-align{
+  text-align: center;
+}
+
+.glyphicon.spinning {
+    animation: spin 1s infinite linear;
+    -webkit-animation: spin2 1s infinite linear;
+}
+ 
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
+}
+ 
+.dropdown-menu>.divider{
+  margin : 3px 0;
+}
+
+.gone{
+  display : none;
 }

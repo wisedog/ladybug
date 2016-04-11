@@ -83,5 +83,5 @@ func SpecList(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
     return errors.HttpError{http.StatusInternalServerError, "Not found section"}
 	}
 	
-  return RenderJson(w, specs)
+  return RenderJSON(w, specs)
 }

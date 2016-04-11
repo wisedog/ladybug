@@ -6,13 +6,16 @@ import (
   "regexp"
 )
 
-// BaseModel is base of all modles in Ladybug. 
+// BaseModel is base of all models in Ladybug. 
 // This depends on GORM package. If GORM library is replaced, consider and define again this struct 
 type BaseModel struct {
-  ID            int   //gorm handles ID field as identifier of the table automatically
-  CreatedAt time.Time // belows are also gorm handles field.
-  UpdatedAt time.Time
-  DeletedAt *time.Time
+  //gorm handles ID field as identifier of the table automatically
+  ID            int   
+  
+  // belows are also gorm handles field.
+  CreatedAt time.Time   
+  UpdatedAt time.Time   `json:"-"`
+  DeletedAt *time.Time  `json:"-"`
 }
 
 // PostMessage is used for validation form values

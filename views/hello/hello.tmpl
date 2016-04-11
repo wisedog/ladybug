@@ -13,14 +13,18 @@
     <div class="box box-default">
       <div class="box-header with-border">
         <h3>Your Projects</h3>
-        <span>asdf</span>
       </div>
       <div class="box-body">
         <ui>
         {{range .Projects}}
-        <li class="iteration-item">
-          <a href='/project/{{.Name}}'>{{.Name}}</a>
-        </li>
+        <div class="row iteration-item">
+          <div class="col-md-4">
+            <a href='/project/{{.Name}}'>{{.Name}}</a>
+          </div>
+          <div class="col-md-6 iteration-item-desc">
+            {{.Description}}
+          </div>
+        </div>
         {{end}}
       </ui>
       </div>

@@ -90,7 +90,6 @@ func (j Jenkins) AddJenkinsBuilds(url string, projectID int, db *gorm.DB) error{
   	var data map[string]interface{}
     if err := json.Unmarshal(info, &data); err != nil {
     	return nil
-      //return c.RenderJson(res{Status:502, Msg:"Problem"})	//TEMP
     }
   	
   	timestamp := int64(data["timestamp"].(float64))

@@ -57,7 +57,7 @@ func UserGetNameList(c *interfacer.AppContext, w http.ResponseWriter, r *http.Re
     renderData[i].Photo = x.Photo
 
   }
-  return RenderJson(w, renderData)
+  return RenderJSON(w, renderData)
 }
 
 

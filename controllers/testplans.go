@@ -21,7 +21,7 @@ func PlanIndex(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
 
 	if err := c.Db.Find(&plans); err.Error != nil {
 		log.Error("TestPlan", "type", "database", "msg ", err.Error )
-    return errors.HttpError{http.StatusInternalServerError, "An error while select all Testplans in PlanIndex"}
+    return errors.HttpError{Status:http.StatusInternalServerError, Desc:"An error while select all Testplans in PlanIndex"}
 	}
 
   items := map[string]interface{}{
@@ -39,13 +39,13 @@ func PlanAdd(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
 
 	if err := c.Db.Preload("Users").Where("name = ?", c.ProjectName).Find(&prj); err.Error != nil {
 		log.Error("TestPlan", "type", "database", "msg ", err.Error )
-    return errors.HttpError{http.StatusInternalServerError, "An error while select all Testplans in PlanAdd"}
+    return errors.HttpError{Status:http.StatusInternalServerError, Desc:"An error while select all Testplans in PlanAdd"}
 	}
 
 	var builds []models.Build
 	if err := c.Db.Where("project_id = ?", prj.ID).Find(&builds); err.Error != nil{
     log.Error("TestPlan", "type", "database", "msg ", err.Error )
-    return errors.HttpError{http.StatusInternalServerError, "Project is not found in PlanAdd"}
+    return errors.HttpError{Status:http.StatusInternalServerError, Desc:"Project is not found in PlanAdd"}
   }
 
 	var sections []models.Section
@@ -87,14 +87,14 @@ func PlanSave(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 
 	if err := c.Db.Where("name = ?", c.ProjectName).First(&prj); err.Error != nil {
 		log.Error("TestPlan", "type", "database", "msg ", err.Error )
-    return errors.HttpError{http.StatusInternalServerError, "Project is not found in PlanSave"}
+    return errors.HttpError{Status:http.StatusInternalServerError, Desc:"Project is not found in PlanSave"}
 	}
 
   var testplan models.TestPlan
 
   if err := r.ParseForm(); err != nil {
     log.Error("TestPlan", "type", "http", "msg ", err )
-    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+    return errors.HttpError{Status:http.StatusInternalServerError, Desc:"ParseForm failed"}
   }
 
   execs := r.FormValue("Execs")
@@ -123,7 +123,7 @@ func PlanSave(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 
 	if err := c.Db.Create(&testplan); err.Error != nil {
     log.Error("TestPlan", "type", "database", "msg ", err.Error )
-    return errors.HttpError{http.StatusInternalServerError, "Insert operation failed in TestPlans.Save"}
+    return errors.HttpError{Status:http.StatusInternalServerError, Desc:"Insert operation failed in TestPlans.Save"}
 	}
 
   http.Redirect(w, r, "/project/" + c.ProjectName + "/testplan", http.StatusFound)
@@ -155,7 +155,7 @@ func PlanView(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 	var testplan models.TestPlan
 	if err := c.Db.Preload("Creator").Preload("Executor").Where("id= ?", id).Find(&testplan); err.Error != nil {
     log.Error("TestPlan", "type", "database", "msg", err.Error)
-    return errors.HttpError{http.StatusInternalServerError, "An error while select operation in TestPlans.PlanView"}
+    return errors.HttpError{Status:http.StatusInternalServerError, Desc:"An error while select operation in TestPlans.PlanView"}
 	}
 
 	// convert "1,2" like string to data used in JSTree
@@ -163,14 +163,14 @@ func PlanView(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 	var cases []models.TestCase
 	if err := c.Db.Where("id in (?)", arr).Find(&cases); err.Error != nil {
     log.Error("TestPlan", "type", "database", "msg", err.Error)
-    return errors.HttpError{http.StatusInternalServerError, "An error while finding testcases SELECT operation"}
+    return errors.HttpError{Status:http.StatusInternalServerError, Desc:"An error while finding testcases SELECT operation"}
 	}
 
 	var build models.BuildItem
 	if testplan.TargetBuildId != 0 {
 		if err := c.Db.Where("id = ?", testplan.TargetBuildId).First(&build); err.Error != nil {
       log.Error("TestPlan", "type", "database", "msg", err.Error)
-      return errors.HttpError{http.StatusInternalServerError, "An error while finding Build information in TestPlans"}
+      return errors.HttpError{Status:http.StatusInternalServerError, Desc:"An error while finding Build information in TestPlans"}
 		}
 	}
 
@@ -188,7 +188,7 @@ func PlanView(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 func PlanDelete(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
   if err := r.ParseForm(); err != nil {
     log.Error("TestPlan", "type", "http", "msg ", err )
-    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+    return errors.HttpError{Status:http.StatusInternalServerError, Desc:"ParseForm failed"}
   }
 
   planId := r.FormValue("id")
@@ -197,16 +197,16 @@ func PlanDelete(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request
 	
 	if err := c.Db.Where("id = ?", planId).First(&plan); err.Error != nil{
 		log.Error("TestPlan", "type", "database", "msg", err.Error)
-    return errors.HttpError{http.StatusInternalServerError, "An error while select testplan operation in TestPlans.PlanDelete"}
+    return errors.HttpError{Status:http.StatusInternalServerError, Desc:"An error while select testplan operation in TestPlans.PlanDelete"}
 	}
 	
 	
 	if err := c.Db.Delete(plan); err.Error != nil{
     log.Error("TestPlan", "type", "database", "msg", err.Error)
-    return errors.HttpError{http.StatusInternalServerError, "An error while delete operation in TestPlans.PlanDelete"}
+    return errors.HttpError{Status:http.StatusInternalServerError, Desc:"An error while delete operation in TestPlans.PlanDelete"}
 	}
 	
-	return RenderJson(w, Resp{Status:200, Msg:"OK"})
+	return RenderJSON(w, Resp{Msg:"OK"})
 }
 
 //PlanRun adds test execution with selected test plan.
@@ -219,13 +219,15 @@ func PlanRun(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
 	var prj models.Project
 	if err := c.Db.Where("name = ?", c.ProjectName).First(&prj); err.Error != nil{
     log.Error("TestPlan", "type", "database", "msg", err.Error)
-    return errors.HttpError{http.StatusInternalServerError, "An error while select project operation in TestPlans.PlanFire"}
+    return errors.HttpError{Status : http.StatusInternalServerError, 
+      Desc : "An error while select project operation in TestPlans.PlanFire"}
   }
 
 	var plan models.TestPlan
 	if err := c.Db.Where("id = ?", id).First(&plan); err.Error != nil{
     log.Error("TestPlan", "type", "database", "msg", err.Error)
-    return errors.HttpError{http.StatusInternalServerError, "Not found such testplan in TestPlans.PlanFire"}
+    return errors.HttpError{Status : http.StatusInternalServerError, 
+      Desc : "Not found such testplan in TestPlans.PlanFire"}
   }
 
 	// mendatory : testplan ID,project ID
@@ -243,7 +245,8 @@ func PlanRun(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
 	c.Db.NewRecord(exec)
 	if err := c.Db.Create(&exec); err.Error != nil {
 		log.Error("TestPlan", "type", "database", "msg", err.Error)
-    return errors.HttpError{http.StatusInternalServerError, "An error while create record in TestPlans.Fire"}
+    return errors.HttpError{Status : http.StatusInternalServerError, 
+          Desc : "An error while create record in TestPlans.Fire"}
 	}
 
 	// well...
@@ -254,17 +257,17 @@ func PlanRun(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
 //handleSelected seperates Testcases ID joined by ","
 func handleSelected(content string, buf *string) int {
 	arr := strings.Split(content, ",")
-	var case_arr []string
+	var caseArray []string
 	cnt := 0
 	for _, s := range arr {
 		if strings.HasPrefix(s, "cb") {
 			cnt++
 			k := strings.TrimPrefix(s, "cb")
-			case_arr = append(case_arr, k)
+			caseArray = append(caseArray, k)
 		}
 	}
 
-	*buf = strings.Join(case_arr[:], ",")
+	*buf = strings.Join(caseArray[:], ",")
 	
 	return cnt
 }

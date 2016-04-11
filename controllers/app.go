@@ -13,6 +13,7 @@ import (
   "golang.org/x/crypto/bcrypt"
   "github.com/robfig/config"
   "github.com/gorilla/sessions"
+  "github.com/wisedog/ladybug/errors"
   "github.com/wisedog/ladybug/models"
   "github.com/wisedog/ladybug/interfacer"
   
@@ -202,6 +203,14 @@ func LogOut(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) er
   http.Redirect(w, r, "/", http.StatusFound)
   return nil
 }
+
+// LogAndHTTPError makes log messages and return http error with given status http code
+// default log level is ERROR
+func LogAndHTTPError(status int, module string, errType string, msg string) error{
+  log.Error(module, "type" , errType, "msg", msg)
+  return errors.HttpError{Status : status, Desc : msg}
+}
+
 
 /*
 func (c Application) SaveUser(user models.User, verifyPassword string) revel.Result {

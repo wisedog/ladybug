@@ -16,7 +16,7 @@ import (
   log "gopkg.in/inconshreveable/log15.v2"
 )
 
-// connected is private utilitiy function for checking 
+// connected2 is private utilitiy function for checking 
 // this user id now on connected or not.
 func connected2(c *interfacer.AppContext, r *http.Request) *models.User{
   session, err := c.Store.Get(r, "ladybug")
@@ -86,6 +86,7 @@ func main() {
   // create router with gorilla/mux
   r := mux.NewRouter()
 
+  // create application context
   ctx := &interfacer.AppContext{}
 
   // load config
@@ -129,7 +130,10 @@ func main() {
 
   // define project subrouter
   project := r.PathPrefix("/project/").Subrouter()
-  // TODO add reserved word create, save. those words are not allowed to be project name
+  
+  // TODO add reserved word create, save, list, get. those words are not allowed to be project name
+  project.HandleFunc("/get/list", authHandler(ctx, controllers.GetProjectList)).Methods("GET")
+  
 
   // project specific
   project.HandleFunc("/{projectName}", authHandler(ctx, controllers.Dashboard)).Methods("GET")

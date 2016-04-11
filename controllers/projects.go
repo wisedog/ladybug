@@ -2,6 +2,7 @@ package controllers
 
 import (
   "strings"
+  "strconv"
   "net/http"
 
   "github.com/wisedog/ladybug/models"
@@ -131,7 +132,7 @@ func ProjectSave(c *interfacer.AppContext, w http.ResponseWriter, r *http.Reques
   if len(ids) > 0{
     if err := c.Db.Where("id in (?)", ids).Find(&userList).Error; err != nil{
       log.Error("Projects", "msg", err)
-      return errors.HttpError{Status : http.StatusInternalServerError, Description : "multiple users selection is failed"}
+      return errors.HttpError{Status : http.StatusInternalServerError, Desc : "multiple users selection is failed"}
     }
     
     project.Users = userList
@@ -139,12 +140,12 @@ func ProjectSave(c *interfacer.AppContext, w http.ResponseWriter, r *http.Reques
   
   if rv := c.Db.NewRecord(project); rv == false {
     log.Error("Projects", "type", "database", "msg", "duplicated primary key")
-    return errors.HttpError{Status : http.StatusInternalServerError, Description : "duplicated primary key"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "duplicated primary key"}
   }
   
   if err := c.Db.Create(&project).Error; err != nil {
 		log.Error("Projects", "Type", "database", "Error", err)
-    return errors.HttpError{Status : http.StatusInternalServerError, Description : "could not create a build model"}  
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "could not create a build model"}  
 	}
   
   http.Redirect(w, r, "/project/" + project.Name, http.StatusFound)
@@ -160,7 +161,7 @@ func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
   
   if err.Error != nil{
     log.Error("Projects", "msg", err.Error)
-    return errors.HttpError{Status : http.StatusInternalServerError, Description : "Not found project"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "Not found project"}
   }
   
   // counting testcases
@@ -193,26 +194,24 @@ func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
   return Render2(c, w, items, "views/base.tmpl","views/projects/dashboard.tmpl")
 }
 
-//(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
-func GetProjectList(limit int){
-  /*var prjs []models.Project
-  lm := 0
-  if limit == 0 {
-    lm = -1
-  }else{
-    lm = limit
+// GetProjectList returns project list in JSON format
+func GetProjectList(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+  var prjs []models.Project
+  limitStr := r.URL.Query().Get("limit")
+  limit, e := strconv.Atoi(limitStr)
+  if e != nil{
+    resp := map[string]interface{}{
+      "ErrorMsg" : "Invalid limit value",
+    }
+    return RenderJSONWithStatus(w, resp, http.StatusInternalServerError)
   }
-  c.Tx.Find(&prjs).Limit(lm)*/
+  if err := c.Db.Limit(limit).Find(&prjs).Error; err != nil{
+    resp := map[string]interface{}{
+      "ErrorMsg" : "Database Error",
+    }
+    return RenderJSONWithStatus(w, resp, http.StatusInternalServerError)
+  }
+  
   //TODO renderJson to cover "Show All Projects", Clicking all project in the right upper menu
-  //return c.RenderJson(prjs)
-}
-
-/*
- A handler for "Show All Projects"
-*/
-func List(limit int){
-  /*var prjs []models.Project
-  c.Tx.Find(&prjs)*/
-  //TODO renderJson to cover "Show All Projects", Clicking all project in the right upper menu
-  //return c.Render(prjs)
+  return RenderJSON(w, prjs)
 }

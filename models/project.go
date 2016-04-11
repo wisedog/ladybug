@@ -15,7 +15,7 @@ type Project struct {
 	Name        string `sql:"not null;unique"`
 	Status      int    // Activation, Deactivation, closed
 	Description string `sql:"size:4000"` // description of the issue
-	Users       []User `gorm:"many2many:user_project;"`
+	Users       []User `gorm:"many2many:user_project;" json:"-"`
 	Prefix      string `sql:"size:12"`
 
 	// belows are used for form input, not store in database

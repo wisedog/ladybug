@@ -8,14 +8,15 @@ import(
 
 type HttpError struct {
   Status      int
-  Description string
+  // Description of HttpError
+  Desc string
 }
 
 func (h HttpError) Error() string {
-  if h.Description == "" {
+  if h.Desc == "" {
     return http.StatusText(h.Status)
   }
-  return h.Description
+  return h.Desc
 }
 
 func HandleError(w http.ResponseWriter, r *http.Request, err error) {

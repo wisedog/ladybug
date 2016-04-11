@@ -16,14 +16,16 @@ import (
 )
 
 const(
+  // BuildFlashKey is a key of flash data 
   BuildFlashKey = "LADYBUG_BUILD"
+  
+  // ErrorMsg is a key of flash data
   ErrorMsg = "LADUBUG_ERROR_MSG"
 )
 
 // Resp struct is for response form 
 // TODO will remove Status and make http header response to represent response status
 type Resp struct{
-  Status int  `json:"status"`
   Msg   string  `json:"msg"`
 }
 
@@ -34,7 +36,7 @@ func BuildsIndex(c *interfacer.AppContext, w http.ResponseWriter, r *http.Reques
 	
 	if err := c.Db.Order("id desc").Find(&builds); err.Error != nil {
 		log.Error("Builds", "type", "database", "msg", "Error on Builds.Index")
-    return errors.HttpError{http.StatusInternalServerError, "Error on Builds.BuildsIndex"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc: "Error on Builds.BuildsIndex"}
 	}
 
   items := map[string]interface{}{
@@ -90,7 +92,7 @@ func handleAddEditPage(c *interfacer.AppContext, w http.ResponseWriter, r *http.
     if isEdit{
       if err := c.Db.Where("id = ?", id).First(&build).Error; err != nil{
         log.Error("Builds", "Type", "database", "Error ", err )
-        return errors.HttpError{http.StatusInternalServerError, "not found build project on edit"}
+        return errors.HttpError{Status : http.StatusInternalServerError, Desc : "not found build project on edit"}
       }
     }
   }
@@ -119,7 +121,7 @@ func BuildsSaveProject(c *interfacer.AppContext, w http.ResponseWriter, r *http.
 
   if err := r.ParseForm(); err != nil {
     log.Error("Build", "Error ", err )
-    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "ParseForm failed"}
   }
 
   var build models.Build
@@ -148,7 +150,7 @@ func BuildsSaveProject(c *interfacer.AppContext, w http.ResponseWriter, r *http.
 	var prj models.Project
 	if err := c.Db.Where("name = ?", projectName).First(&prj).Error; err != nil{
     log.Error("Builds", "Type", "database", "Error ", err )
-    return errors.HttpError{http.StatusInternalServerError, "Not found database select project"}  
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "Not found database select project"}  
   }
 
 	build.Project_id = prj.ID
@@ -158,7 +160,7 @@ func BuildsSaveProject(c *interfacer.AppContext, w http.ResponseWriter, r *http.
 
 	if err := c.Db.Create(&build).Error; err != nil {
 		log.Error("Builds", "Type", "database", "Error", err)
-    return errors.HttpError{http.StatusInternalServerError, "could not create a build model"}  
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc :  "could not create a build model"}  
 	}
 
   http.Redirect(w, r, "/project/" + projectName + "/build", http.StatusFound)
@@ -175,19 +177,19 @@ func BuildsView(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request
 	var prj models.Project
 	if err := c.Db.Where("name = ?", c.ProjectName).First(&prj).Error; err != nil{
     log.Error("Builds", "type", "database", "msg" , err )
-    return errors.HttpError{http.StatusInternalServerError, "Not found project"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc: "Not found project"}
   }
 
 	var build models.Build
 	if err := c.Db.Where("id = ?", id).First(&build).Error; err != nil{
     log.Error("Builds", "type", "database", "msg" , err )
-    return errors.HttpError{http.StatusInternalServerError, "Not found build project"} 
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "Not found build project"} 
   }
 	
 	var builds []models.BuildItem
 	if err := c.Db.Order("id_by_tool_int desc").Where("build_project_id = ?", build.ID).Find(&builds).Error; err != nil{
     log.Error("Builds", "type", "database", "msg" , err )
-    return errors.HttpError{http.StatusInternalServerError, "select builds error"}  
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "select builds error"}  
   }
 
   items := map[string]interface{}{
@@ -280,15 +282,10 @@ func Integrate(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
 
 // AddTool has responsibility for handling a POST request adding CI tool pages.
 func AddTool(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
-  var user *models.User
-  if user = connected(c, r); user == nil{
-    log.Debug("Not found login information")
-    http.Redirect(w, r, "/", http.StatusFound)
-  }
 
   if err := r.ParseForm(); err != nil {
     log.Error("Build", "type", "http", "msg ", err )
-    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "ParseForm failed"}
   }
   url := r.FormValue("url")
   toolname := r.FormValue("toolname")
@@ -300,7 +297,7 @@ func AddTool(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
 	var prj models.Project
 	
 	if err := c.Db.Where("name = ?", projectName).First(&prj); err.Error != nil {
-    return RenderJson(w, Resp{Status:501, Msg:"problem"})
+    return RenderJSONWithStatus(w, Resp{Msg:"problem"}, http.StatusInternalServerError)
 	}
 	
 	
@@ -314,27 +311,27 @@ func AddTool(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
 		var j buildtools.Jenkins
 		_, err := j.ConnectionTest(url)
 		if err != nil{
-			return RenderJson(w, Resp{Status:500, Msg:err.Error()})
+			return RenderJSONWithStatus(w, Resp{Msg:err.Error()}, http.StatusInternalServerError)
 		}
 		
-		err = j.AddJenkinsBuilds(url, prj.ID, c.Db)
-		if err != nil{
-			return RenderJson(w, Resp{Status:500, Msg : err.Error()})
+		
+		if err := j.AddJenkinsBuilds(url, prj.ID, c.Db); err != nil{
+			return RenderJSONWithStatus(w, Resp{Msg:err.Error()}, http.StatusInternalServerError)
 		}
 		
 	}else if toolname == "travis"{
 		log.Debug("Entering Travis routine....\n",)
 		var t buildtools.Travis
-		err := t.AddTravisBuilds(url, prj.ID, c.Db)
-		if err != nil{
-			return RenderJson(w, Resp{Status:500, Msg : err.Error()})
+		
+		if err := t.AddTravisBuilds(url, prj.ID, c.Db); err != nil{
+			return RenderJSONWithStatus(w, Resp{Msg : err.Error()}, http.StatusInternalServerError)
 		}
 		
 	}else{
-		return RenderJson(w, Resp{Status:501, Msg : "Not support CI tool"})
+		return RenderJSONWithStatus(w, Resp{Msg : "Not support CI tool"}, http.StatusNotImplemented)
 	}
 	
-	return RenderJson(w, Resp{Status:200, Msg:"OK"})
+	return RenderJSON(w, Resp{Msg:"OK"})
 }
 
 
@@ -350,11 +347,10 @@ func  ValidateTool(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
 
   if err := r.ParseForm(); err != nil {
     log.Error("Build", "type", "http", "msg ", err )
-    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "ParseForm failed"}
   }
   url := r.FormValue("url")
   toolname := r.FormValue("toolname")
-
  
   var msg string
   var status int
@@ -366,10 +362,10 @@ func  ValidateTool(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
 		var j buildtools.Jenkins
 		m, err := j.ConnectionTest(url)
 		if err != nil{
-      status = 500
+      status = http.StatusInternalServerError
       msg = err.Error()
 		}else{
-      status = 200
+      status = http.StatusOK
       msg = m
     }
 	}else if toolname == "travis"{
@@ -377,10 +373,10 @@ func  ValidateTool(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
 		var t buildtools.Travis
 		resp, _, err := t.ConnectionTest(url)
 		if err != nil{
-      status = 500
+      status = http.StatusInternalServerError
 			msg = err.Error()
 		}else{
-      status = 200
+      status = http.StatusOK
       msg += "Slug : " + resp.Repo.Slug + "\n"
       msg += "Description : " + resp.Repo.Description + "\n"
       msg += "Last Build Number : " + resp.Repo.LastBuildNumber + "\n"
@@ -388,11 +384,11 @@ func  ValidateTool(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
       msg += "Last Build Finished at : " + resp.Repo.LastBuildFinish + "\n"
     }
 	}else{
-    status = 500
+    status = http.StatusInternalServerError
 		msg = "Not supported tool"
 	}
 
-  return RenderJson(w, Resp{Status : status, Msg : msg})
+  return RenderJSONWithStatus(w, Resp{Msg : msg}, status)
 }
 
 // GetBuildItems returns BuildItem matched with given "id"
@@ -413,7 +409,7 @@ func  GetBuildItems(c *interfacer.AppContext, w http.ResponseWriter, r *http.Req
   js, err := json.Marshal(items)
   if err != nil {
     log.Error("Builds", "msg", "Json Marshalling failed in GetBuildItems")
-    return errors.HttpError{http.StatusInternalServerError, "Json Marshalling failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "Json Marshalling failed"}
   }
 
   w.Header().Set("Content-Type", "application/json")

@@ -19,7 +19,8 @@ func ExecIndex(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
 	var prj models.Project
 	if err := c.Db.Where("name = ?", c.ProjectName).First(&prj); err.Error != nil {
     log.Error("TestPlan", "type", "database", "msg ", err.Error )
-    return errors.HttpError{http.StatusInternalServerError, "An error while find project in ExecIndex.Index"}
+    return errors.HttpError{Status : http.StatusInternalServerError, 
+      Desc : "An error while find project in ExecIndex.Index"}
 	}
 
 	var testexecs []models.Execution
@@ -48,23 +49,24 @@ func ExecDone(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 
   if err := r.ParseForm(); err != nil {
     log.Error("TestExec", "type", "http", "msg ", err )
-    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "ParseForm failed"}
   }
 
-  execId := r.FormValue("exec_id")
+  execID := r.FormValue("exec_id")
   //comment := r.FormValue("comment")
 
 	var prj models.Project
 	
 	if err := c.Db.Where("name = ?", c.ProjectName).First(&prj); err.Error != nil {
     log.Error("TestExec", "type", "database", "msg ", err.Error )
-		return RenderJson(w, Resp{Status:500, Msg : "Find Project failed in TestExecs.Done"})
+		return RenderJSONWithStatus(w, Resp{Msg : "Find Project failed in TestExecs.Done"}, http.StatusInternalServerError)
 	}
 
 	var testexec models.Execution
-	if err := c.Db.Preload("Plan").Where("id = ?", execId).First(&testexec); err.Error != nil{
+	if err := c.Db.Preload("Plan").Where("id = ?", execID).First(&testexec); err.Error != nil{
     log.Error("TestExec", "type", "database", "msg ", err.Error )
-		return RenderJson(w, Resp{Status:500, Msg : "Find Test Execution entity failed in TestExecs.Done"})
+		return RenderJSONWithStatus(w, Resp{Msg : "Find Test Execution entity failed in TestExecs.Done"},
+        http.StatusInternalServerError)
 	}
 	
 	// validation this execution. 
@@ -72,7 +74,7 @@ func ExecDone(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 	// second, find all test cases belongs to this execution's testplan
 	// third, check all test cases are tested
 	if calculateProgress(c, &testexec) != 100{
-		return RenderJson(w, Resp{Status:500, Msg : "Not complete test execution."})
+		return RenderJSONWithStatus(w, Resp{Msg : "Not complete test execution."}, http.StatusInternalServerError)
 	}
 
 	f, _ := calculatePassFail(c, &testexec)
@@ -91,16 +93,14 @@ func ExecDone(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 	
 	if err := c.Db.Save(&testexec); err.Error != nil{
     log.Error("TestExec", "type", "database", "msg ", err.Error )
-		return RenderJson(w, Resp{Status:500, Msg : "Update Test Execution entity failed in TestExecs.Done"})
+		return RenderJSONWithStatus(w, Resp{Msg : "Update Test Execution entity failed in TestExecs.Done"}, 
+        http.StatusInternalServerError)
 	}
 
-	return RenderJson(w, Resp{Status:200, Msg:"OK"})
+	return RenderJSON(w, Resp{Msg:"OK"})
 }
 
-
-//id is testcase's id
-//result is pass/fail or something else (blocked, ......)
-//func (c TestExecs) UpdateResult(case_id int, exec_id int, result bool, actual string, case_ver int) revel.Result{
+// ExecUpdateResult update execution results 
 func ExecUpdateResult(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
 	var rv models.TestResult
 	var rvTmp []models.TestResult
@@ -108,7 +108,7 @@ func ExecUpdateResult(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
 
   if err := r.ParseForm(); err != nil {
     log.Error("TestExec", "type", "http", "msg ", err )
-    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "ParseForm failed"}
   }
 
   execIDStr := r.FormValue("exec_id")
@@ -136,12 +136,14 @@ func ExecUpdateResult(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
 	
 		if err := c.Db.Create(&rv); err.Error != nil {
 			log.Error("Insert operation failed in TestExecs.UpdateResult")
-			return RenderJson(w, Resp{Status:500, Msg : "Insert operation failed in TestExecs.UpdateResult"})
+			return RenderJSONWithStatus(w, Resp{Msg : "Insert operation failed in TestExecs.UpdateResult"},
+            http.StatusInternalServerError)
 		}
 	} else{
 		if err := c.Db.Where("exec_id = ? and test_case_id = ?", execID, caseID).First(&rv); err.Error != nil{
 			log.Error("Select operation failed in TestExecs.UpdateResult")
-			return RenderJson(w, Resp{Status:500, Msg : "Select operation failed in TestExecs.UpdateResult"})
+			return RenderJSONWithStatus(w, Resp{Msg : "Select operation failed in TestExecs.UpdateResult"}, 
+            http.StatusInternalServerError)
 		}
 		rv.Status = result
 		rv.Actual = actual
@@ -149,7 +151,8 @@ func ExecUpdateResult(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
 		// update
 		if err := c.Db.Save(&rv); err.Error != nil{
 			log.Error("Update operation failed in TestExecs.UpdateResult")
-			return RenderJson(w, Resp{Status:500, Msg : "Update operation failed in TestExecs.UpdateResult"})
+			return RenderJSONWithStatus(w, Resp{Msg : "Update operation failed in TestExecs.UpdateResult"}, 
+            http.StatusInternalServerError)
 		}
 	}
 	
@@ -161,27 +164,28 @@ func ExecUpdateResult(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
 		c.Db.Save(&exec)
 	}else{
 		log.Error("An error while on finding test result in TestExecs.calculateProgress")
-		return RenderJson(w, Resp{Status : 500, Msg : "An error while on finding test result in TestExecs.calculateProgress"})
+		return RenderJSONWithStatus(w, Resp{Msg : "An error while on finding test result in TestExecs.calculateProgress"},
+          http.StatusInternalServerError)
 	}
 	
-	return RenderJson(w, Resp{Status : 200, Msg : "OK"})
+	return RenderJSON(w, Resp{Msg : "OK"})
 }
 
 // calculatePassFail calculates pass fail of the excution
 func calculatePassFail(c *interfacer.AppContext, exec *models.Execution) (int,int){
 	var results []models.TestResult
 	c.Db.Where("exec_id = ?", exec.ID).Find(&results)
-	pass_counter := 0
-	fail_counter := 0
+	passCounter := 0
+	failCounter := 0
 	for _, k := range results{
 		if k.Status == true{
-			pass_counter++
+			passCounter++
 		}else{
-			fail_counter++
+			failCounter++
 		}
 	}
 	
-	return fail_counter, pass_counter
+	return failCounter, passCounter
 }
 
 
@@ -242,7 +246,7 @@ func ExecRun(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
 	
 	if err := c.Db.Where("name = ?", c.ProjectName).First(&prj); err.Error != nil {
 		log.Error("TestExec", "type", "database", "msg ", err )
-    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "ParseForm failed"}
 	}
 	
 	c.Db.Preload("Plan").Preload("TargetBuild").Where("id = ?", id).First(&testexec)
@@ -284,16 +288,17 @@ func ExecRemove(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request
 
   if err := r.ParseForm(); err != nil {
     log.Error("TestExec", "type", "http", "msg ", err )
-    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "ParseForm failed"}
   }
 
   id := r.FormValue("id")
 
 	//revel.INFO.Println("REMOVE : id, project", id, project)
 	if err := c.Db.Where("id = ?", id).Delete(models.Execution{}); err.Error != nil {
-		return RenderJson(w, Resp{Status:500, Msg:"Problem while deleting execution"})
+		return RenderJSONWithStatus(w, Resp{Msg:"Problem while deleting execution"}, 
+          http.StatusInternalServerError)
 	}
-	return RenderJson(w, Resp{Status : 200, Msg : "ok"})
+	return RenderJSON(w, Resp{Msg : "ok"})
 }
 
 
@@ -302,7 +307,7 @@ func ExecDeny(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 
   if err := r.ParseForm(); err != nil {
     log.Error("TestExec", "type", "http", "msg ", err )
-    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "ParseForm failed"}
   }
 
   id := r.FormValue("id")
@@ -310,14 +315,14 @@ func ExecDeny(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 
 	var testexec models.Execution
 	if err := c.Db.Where("id = ?", id).First(&testexec); err.Error != nil{
-		return RenderJson(w, Resp{Status:500, Msg : "Not found Test Execution"})
+		return RenderJSONWithStatus(w, Resp{Msg : "Not found Test Execution"}, http.StatusInternalServerError)
 	}
 
 	testexec.Status = ExecStatusDeny
 	testexec.Message = msg
 	if err := c.Db.Save(testexec); err.Error != nil{
-		return RenderJson(w, Resp{Status:500, Msg : "Error while saving"})
+		return RenderJSONWithStatus(w, Resp{Msg : "Error while saving"}, http.StatusInternalServerError)
 	}
 	
-	return RenderJson(w, Resp{Status : 200, Msg : "ok"})
+	return RenderJSON(w, Resp{Msg : "ok"})
 }

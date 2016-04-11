@@ -66,8 +66,7 @@ func CaseView(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 
 	var tc models.TestCase
   if err := c.Db.Where("id = ?", id).Preload("Category").First(&tc); err.Error != nil{
-    log.Error("testcases", "Error on Select-ID query in TestCases.Index", err.Error)
-    return errors.HttpError{http.StatusInternalServerError, "DB error"}
+    return LogAndHTTPError(http.StatusInternalServerError, "testcases", "db", err.Error.Error())
   }
 	
 	tc.PriorityStr = getPriorityI18n(tc.Priority)
@@ -118,10 +117,10 @@ func renderAddEdit(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
   id := vars["id"]
 
   // valid when rendering Add 
-  section_id :=  r.URL.Query().Get("sectionid")
-  if section_id == "" && isEdit == false {
-    log.Error("testcase", "type" , "general", "msg", "invalid condition. Add rendering requires section id")
-    return errors.HttpError{http.StatusBadRequest, "invalid condition. Add rendering requires section id"}
+  sectionID :=  r.URL.Query().Get("sectionid")
+  if sectionID == "" && isEdit == false {
+    return LogAndHTTPError(http.StatusBadRequest, "testcases", "http", 
+      "invalid condition. Add rendering requires section id")
   }
 
   var category []models.Category
@@ -149,7 +148,7 @@ func renderAddEdit(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
       return errors.HttpError{http.StatusInternalServerError, "An Error while SELECT operation for TestCase.Edit"}
     }
 
-    testcase.SectionID, _ = strconv.Atoi(section_id)
+    testcase.SectionID, _ = strconv.Atoi(sectionID)
     testcase.Prefix = prj.Prefix
   }
   
@@ -169,7 +168,7 @@ func renderAddEdit(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
     Id : id,
     User: user,
     ProjectName : projectName,
-    SectionID : section_id,
+    SectionID : sectionID,
     TestCase : testcase,
     Category : category,
     IsEdit : isEdit,
@@ -200,7 +199,7 @@ func handleSaveUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
 
   if err := r.ParseForm(); err != nil {
     log.Error("Testcase", "Error ", err )
-    return errors.HttpError{Status : http.StatusInternalServerError, Description : "ParseForm failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "ParseForm failed"}
   }
   
   if err := c.Decoder.Decode(&testcase, r.PostForm); err != nil {
@@ -227,7 +226,8 @@ func handleSaveUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
 
     if err := c.Db.Create(&testcase); err.Error != nil {
       log.Error("testcase", "type" , "database", "msg", err.Error)
-      return errors.HttpError{http.StatusInternalServerError, "Insert operation failed in TestCase.Save"}
+      return errors.HttpError{Status : http.StatusInternalServerError, 
+        Desc : "Insert operation failed in TestCase.Save"}
     }
     
     displayID := testcase.Prefix + "-" + strconv.Itoa(testcase.ID)
@@ -236,7 +236,8 @@ func handleSaveUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
     
     if err := c.Db.Save(&testcase); err.Error != nil{
       log.Error("testcase", "type" , "database", "msg", err.Error)
-      return errors.HttpError{http.StatusInternalServerError, "Update operation failed in TestCase.Save"}
+      return errors.HttpError{Status : http.StatusInternalServerError, 
+        Desc : "Update operation failed in TestCase.Save"}
     }
 
     http.Redirect(w, r, redirectionTarget, http.StatusFound)
@@ -263,7 +264,8 @@ func handleSaveUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
 
   if err := c.Db.Save(&existCase); err.Error != nil {
     log.Error("testcase", "type", "database", "msg", err.Error)
-    return errors.HttpError{http.StatusInternalServerError, "An error while SAVE operation on TestCases.Update"}
+    return errors.HttpError{Status : http.StatusInternalServerError, 
+      Desc : "An error while SAVE operation on TestCases.Update"}
   }
   
   //c.Flash.Success("Update Success!")
@@ -292,7 +294,7 @@ func CaseDelete(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request
 
   if err := r.ParseForm(); err != nil {
     log.Error("Testcase", "Error ", err )
-    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "ParseForm failed"}
   }
 
   id := r.FormValue("id")
@@ -300,7 +302,7 @@ func CaseDelete(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request
   // Delete the testcase  permanently for sequence
   if err := c.Db.Unscoped().Where("id = ?", id).Delete(&models.TestCase{}); err.Error != nil{
     log.Error("testcase", "An error while delete testcase ", err.Error)
-    return errors.HttpError{http.StatusInternalServerError, "testcase delete failed"} 
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "testcase delete failed"} 
   }
 
   // the client do redirect or refresh. 
