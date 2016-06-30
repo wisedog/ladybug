@@ -142,11 +142,7 @@ func createDummy() {
 
 	// Create dummy testcases
 	Database.AutoMigrate(&models.TestCase{})
-
-/*
-1. Drag some texts on web browser to select text and CTRL + C 
-2. Click TextArea and CTRL + V
-*/
+  
 	testcases := []*models.TestCase{
 		&models.TestCase{
 			Prefix: prj.Prefix, Seq: 1, 
@@ -157,7 +153,8 @@ func createDummy() {
 		&models.TestCase{
 			Prefix: prj.Prefix, Seq: 2, Title: "The Mars rover should be tested", 
 			Status: models.TcStatusActivate, Description: "Desc", SectionID: 3,
-			ProjectID : prj.ID, Priority : models.PriorityHighest,
+			ProjectID : prj.
+      ID, Priority : models.PriorityHighest,
 			CategoryID : 1, DisplayID : prj.Prefix + "-2",Estimated : 1,
 		},
 		&models.TestCase{
@@ -192,6 +189,16 @@ func createDummy() {
 		Database.NewRecord(tc)
 		Database.Create(&tc)
 	}
+  
+  /*var tempTestCase []models.TestCase
+  Database.Find(&tempTestCase)
+  
+  now := time.Now()
+  for i, iter := range tempTestCase{
+    then := now.AddDate(0, 0, -i)
+    fmt.Println("then:", then)
+    tc.CreatedAt = then
+  }*/
 
 	// Create dummy testplan
 	Database.AutoMigrate(&models.TestPlan{})

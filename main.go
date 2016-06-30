@@ -16,6 +16,10 @@ import (
   log "gopkg.in/inconshreveable/log15.v2"
 )
 
+const ( 
+  CookieKey = "ladybug"
+)
+
 // connected2 is private utilitiy function for checking 
 // this user id now on connected or not.
 func connected2(c *interfacer.AppContext, r *http.Request) *models.User{
@@ -113,7 +117,9 @@ func main() {
   r.HandleFunc("/login", myHandler(ctx, controllers.LoginPage)).Methods("GET")
   r.HandleFunc("/login", myHandler(ctx, controllers.Login)).Methods("POST")
   r.HandleFunc("/logout", myHandler(ctx, controllers.LogOut)).Methods("GET")
+  r.HandleFunc("/register", myHandler(ctx, controllers.Register)).Methods("GET")
   r.HandleFunc("/hello", authHandler(ctx, controllers.Welcome)).Methods("GET")
+  r.HandleFunc("/saveuser", myHandler(ctx, controllers.SaveUser)).Methods("POST")
   
   manage := r.PathPrefix("/manage/").Subrouter()
   

@@ -55,14 +55,6 @@ func init(){
   // in funcMap - categorui18n function refers the var.
 }
 
-//@deprecated
-//var store = sessions.NewCookieStore([]byte("something-very-secret"))
-
-/*var cookieHandler = securecookie.New(
-  securecookie.GenerateRandomKey(64),
-  securecookie.GenerateRandomKey(32),
-  )*/
-
 // connected is private utilitiy function for checking 
 // this user id now on connected or not.
 func connected(c *interfacer.AppContext, r *http.Request) *models.User{
@@ -123,9 +115,6 @@ func Login(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) err
     if err := bcrypt.CompareHashAndPassword(user.HashedPassword, []byte(passwd)); err == nil {
       session.Values["user"] = email
       session.Values["uid"] = user.ID
-
-      fmt.Println("user", user)
-      fmt.Println("uid", user.ID)
 
       // Save it before we write to the response/return from the handler.
       session.Save(r, w)
@@ -203,6 +192,83 @@ func LogOut(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) er
   http.Redirect(w, r, "/", http.StatusFound)
   return nil
 }
+
+// Register renders just a user registration page
+func Register(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
+  dir, _ := os.Getwd()
+  target := filepath.Join(dir, "views", "application", "register.html" )
+  t, err := template.ParseFiles(target)
+
+  if err != nil{
+    log.Error("App", "msg", "Template parse files error", "err", err)
+    return err
+  }
+  
+  session, e := c.Store.Get(r, "ladybug")
+  var errorMap map[string]string
+  if e == nil{
+    errorMap = getErrorMap(session)
+    if errorMap == nil{
+      log.Info("app", "msg", "map is nil")
+      errorMap = make(map[string]string)
+    }  
+  }else{
+    errorMap = make(map[string]string)
+  }
+  
+
+  items := map[string]interface{}{
+    "Messages": "msg",
+    "ErrorMap" : errorMap,
+  }
+  
+  if err := t.Execute(w, items); err != nil{
+    log.Error("App", "msg", "Template Execute error","err", err)
+    return err
+  }
+  
+  return nil
+}
+
+// SaveUser is a POST handler from Register page
+func SaveUser(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
+  // First parse form value
+  if err := r.ParseForm(); err != nil {
+    //return LogAndHTTPError(http.StatusInternalServerError, "User", "http", err.Error())
+    log.Error("User", "type", "http", "msg ", err )
+  }
+  
+  password1 := r.FormValue("Password1")
+  password2 := r.FormValue("Password2")
+  
+  // check those two password is identical
+  if password1 != password2{
+    session, _ := c.Store.Get(r, "ladybug")
+    errorMap := make(map[string]string)
+    errorMap["Password"] = "The passwords are not identical."
+    session.AddFlash(errorMap, ErrorMsg)
+    
+    session.Save(r, w)
+    
+    http.Redirect(w, r, "/register", http.StatusFound)
+    return nil
+  }
+  
+  /*email := r.FormValue("Email")
+  name := r.FormValue("Name")*/
+  
+  
+  // validate
+  // if validate failed, redirect register page with Flash
+  // else
+  // check duplicated 
+  // save to db
+  // redirect hello
+ 
+  return nil 
+}
+
+
 
 // LogAndHTTPError makes log messages and return http error with given status http code
 // default log level is ERROR

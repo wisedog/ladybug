@@ -31,12 +31,12 @@ func getPriorityI18n(priority int) string{
 	return str
 }
 
-func getErrorMap(session *sessions.Session) *map[string]string{
+func getErrorMap(session *sessions.Session) map[string]string{
   if fm := session.Flashes(ErrorMsg); fm != nil {
     b, ok := fm[0].(*map[string]string)
     if ok{
       delete(session.Values, ErrorMsg)
-      return b
+      return *b
     }else{
       log.Debug("Build", "msg", "flash type assertion failed")
     }    

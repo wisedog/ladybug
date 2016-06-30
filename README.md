@@ -29,13 +29,15 @@ Since I'm new to Go language, not familiar with code convention, documentation, 
 
 The Project Ladybug uses below... 
 
+* [go](http://www.golang.org) v1.6 or higher
 * [gorilla toolkits](http://www.gorillatoolkit.org)
-* [gorm](https://github.com/jinzhu/gorm) database driver. 
+* [gorm](https://github.com/jinzhu/gorm) database driver.
+* [bower](http://www.wwwwwwww.org)  
 
 ### Installation
 
 * You need set up database before running ladybug
-* Now only Postgresql is required. You can use not only Postgresql but other relational database, but not tested. 
+* Now only Postgresql is supported. You can use not only Postgresql but other relational database, but not tested. 
 * Default database name is "ladybug" and user "ladybug". see "gorm.go" in app/controllers/gorm.go
 
 ### Databases
@@ -45,6 +47,7 @@ This app uses now only Postgresql. Various databases(MySQL, MarinaDB ....) will 
 ### Run
 
 ```
+$ bower install jquery bootstrap bootstrap-sweetalert datatables iCheck ladda 
 $ go build
 $ ./ladybug 
 ```

@@ -11,12 +11,13 @@ const (
 	RoleGuest
 )
 
+// User is a model represents a user
 type User struct {
 	BaseModel
 
 	Name           string
 	Email          string `sql:"not null;unique"`
-	Password       string `json:"-"`
+	Password       string `json:"-"`  // to be removed
 	HashedPassword []byte `json:"-"`
 	Language       string
 	Region         string
@@ -33,29 +34,31 @@ type User struct {
 	PasswordUpdatedAt time.Time `json:"-"`
 }
 
-/*func (u *User) String() string {
-	return fmt.Sprintf("User(%s)", u.Email)
+
+// Validate check input value and return error map
+func (user *User) Validate() map[string]string {
+  errorMap := make(map[string]string)
+  
+  if !user.Required(user.Name){
+		errorMap["Name"] = "Name is required."
+	}else{
+    if !user.MaxSize(user.Name, 30){
+      errorMap["Name"] = "Too long name"
+    }
+  }
+  
+  if !user.Required(user.Email){
+    errorMap["Email"] = "Email is required."
+  }else{
+    if !user.ValidateEmail(user.Email){
+      errorMap["Email"] = "Invalid email address"
+    }
+  }
+  
+  if !user.Required(user.Password){
+    errorMap["Password"] = "Password is required"
+  }
+  
+  return errorMap
+  
 }
-
-var userRegex = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-
-func (user *User) Validate(v *revel.Validation) {
-	v.Email(user.Email)
-
-	ValidatePassword(v, user.Password).
-		Key("user.Password")
-
-	v.Check(user.Name,
-		revel.Required{},
-		revel.MaxSize{25},
-	)
-}
-
-func ValidatePassword(v *revel.Validation, password string) *revel.ValidationResult {
-	return v.Check(password,
-		revel.Required{},
-		revel.MaxSize{20},
-		revel.MinSize{2},
-	)
-}
-*/

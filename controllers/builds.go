@@ -84,7 +84,7 @@ func handleAddEditPage(c *interfacer.AppContext, w http.ResponseWriter, r *http.
     }    
 
     delete(session.Values, BuildFlashKey)
-    errorMap = *getErrorMap(session)
+    errorMap = getErrorMap(session)
     session.Save(r, w)
 
   }else{

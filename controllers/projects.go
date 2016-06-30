@@ -48,7 +48,7 @@ func ProjectCreate(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
     }    
 
     delete(session.Values, ProjectFlashKey)
-    errorMap = *getErrorMap(session)
+    errorMap = getErrorMap(session)
     session.Save(r, w)
   }else{
     log.Debug("Project", "msg", "no flashes")
