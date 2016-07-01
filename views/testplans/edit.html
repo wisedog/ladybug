@@ -1,6 +1,6 @@
 {{set . "title" "Test Plan"}}
 {{set . "showsidebar" "true"}}
-{{append . "moreStyle" "jstree/themes/default/style.min.css"}}
+{{append . "moreStyle" "jstree/dist/themes/default/style.min.css"}}
 {{template "header.html" .}}
 <div id="page-wrapper">
   <form id="plan_form" method="POST" action="{{url "TestPlans.Save" .project }}">
@@ -57,7 +57,7 @@
 
 {{template "footer.html" .}}
 
-<script src="/public/libs/jstree/jstree.min.js"></script>
+<script src="/public/libs/jstree/dist/jstree.min.js"></script>
 
 <script>
 $(document).ready(function() {
