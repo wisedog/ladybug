@@ -1,6 +1,7 @@
 package controllers
 
 import (
+  "time"
   "strings"
   "strconv"
   "net/http"
@@ -165,13 +166,12 @@ func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
   }
   
   // counting testcases
-  tcCount := 0
-  c.Db.Model(models.TestCase{}).Where("project_id = ?", prj.ID).Count(&tcCount)
-  
+  /*tcCount := 0
+  c.Db.Model(models.TestCase{}).Where("project_id = ?", prj.ID).Count(&tcCount)*/
   
   var execs []models.Execution
   
-  c.Db.Where("project_id = ?", prj.ID).Find(&execs)
+  c.Db.Where("project_id = ?", prj.ID).Preload("Executor").Preload("Plan").Find(&execs)
   
   execCount := 0
   taskCount := 0
@@ -183,11 +183,29 @@ func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
     }
   }
 
+  buildCount := 0
+  c.Db.Model(models.Build{}).Where("project_id=?", prj.ID).Count(&buildCount)
+
+  testPlanCount := 0
+  c.Db.Model(models.TestPlan{}).Where("project_id=?", prj.ID).Count(&testPlanCount)
+
+  var milestone models.Milestone
+  c.Db.Where("project_id=?", prj.ID).Where("due_date >= ?", time.Now()).Order("due_date").First(&milestone)
+
+  var daysLeft time.Duration
+  if milestone.Name != ""{
+    daysLeft = milestone.DueDate.Sub(time.Now()) 
+  }
+
   items := map[string]interface{}{
     "Project" : prj,
-    "TestCaseCount" : tcCount,
     "ExecCount" : execCount,
+    "BuildCount" : buildCount,
     "TaskCount"  : taskCount,
+    "Tasks" : execs,
+    "TestPlanCount" : testPlanCount,
+    "Milestone" : milestone,
+    "DaysLeft" : int(daysLeft.Hours() / 24), 
     "Active_idx" : 1,
   }
 

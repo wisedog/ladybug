@@ -62,7 +62,7 @@
     $("#toolname").change(function(){
       var toolname = $(this).val();
       if( toolname == "jenkins"){
-        $("#build-url").attr("placeholder", "ex) http://<your jenkins server's IP>/job/sample");
+        $("#build-url").attr("placeholder", "ex) http://<your jenkins server's Address>/job/sample");
       }
       else if(toolname == "travis"){
         $("#build-url").attr("placeholder", "ex) https://travis-ci.org/wisedog/ladybug");
@@ -70,15 +70,17 @@
       }
     });
     $("#btn-validate").click(function(){
+      $('#board').html('');
       var data={
         url : $('#build-url').val(),
         toolname : $("#toolname").val()
       };
       
-      $.post('/project/{{.ProjectName}}/build/tool/validate', data).done(function(r){
-        if(r.status == 200){
+      $.post('/project/{{.ProjectName}}/build/tool/validate', data).done(function(r, status){
+        if(status == "success"){
+          var resp = JSON.parse(r);
           // show msg to panel
-          var brText = r.msg.replace(/\n/g,"<br />");
+          var brText = resp.msg.replace(/\n/g,"<br />");
           $("#board").html("<div class='col-md-6'><div class='attachment-block clearfix'>" + brText + "</div></div>");
           $("#btnbox").show();
         }
@@ -96,9 +98,9 @@
         project : "{{.ProjectName}}"
       };
       
-      $.post('/project/{{.ProjectName}}/build/tool/add', data).done(function(r){
+      $.post('/project/{{.ProjectName}}/build/tool/add', data).done(function(r, status){
         console.log(r);
-        if(r.status == 200){
+        if(r.status == "success"){
           window.location.replace('/project/{{.ProjectName}}/build');
         }else{
           // TODO error handling

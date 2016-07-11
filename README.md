@@ -47,7 +47,7 @@ This app uses now only Postgresql. Various databases(MySQL, MarinaDB ....) will 
 ### Run
 
 ```
-$ bower install jquery#2.2.4 bootstrap bootstrap-sweetalert datatables iCheck ladda jstree 
+$ bower install 
 $ go build
 $ ./ladybug 
 ```

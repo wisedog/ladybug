@@ -130,7 +130,8 @@ func main() {
   // define user subrouter
   user := r.PathPrefix("/user/").Subrouter()
   user.HandleFunc("/profile/{id:[0-9]+}", authHandler(ctx, controllers.UserProfile)).Methods("GET")
-  user.HandleFunc("/general/{id:[0-9]+}", authHandler(ctx, controllers.UserGeneral)).Methods("GET")
+  user.HandleFunc("/profile/update/{id:[0-9]+}", authHandler(ctx, controllers.UserUpdateProfile)).Methods("POST")
+  //user.HandleFunc("/general/{id:[0-9]+}", authHandler(ctx, controllers.UserGeneral)).Methods("GET")
   //user.HandleFunc("/get/list", authHandler(ctx, controllers.UserGetNameList)).Methods("GET")
   user.HandleFunc("/get/list", authHandler(ctx, controllers.UserGetNameList)).Methods("POST")
 
@@ -149,6 +150,7 @@ func main() {
   project.HandleFunc("/{projectName}/spec", authHandler(ctx, controllers.SpecIndex)).Methods("GET")
   project.HandleFunc("/{projectName}/testplan", authHandler(ctx, controllers.PlanIndex)).Methods("GET")
   project.HandleFunc("/{projectName}/exec", authHandler(ctx, controllers.ExecIndex)).Methods("GET")
+  project.HandleFunc("/{projectName}/milestone", authHandler(ctx, controllers.MilestoneIndex)).Methods("GET")
 
   // section
   section := project.PathPrefix("/{projectName}/section/").Subrouter()
@@ -197,7 +199,6 @@ func main() {
   spec.HandleFunc("/list/{id:[0-9]+}", authHandler(ctx, controllers.SpecList)).Methods("GET")
 
   // testexec
-
   exec := project.PathPrefix("/{projectName}/exec").Subrouter()
   exec.HandleFunc("/", authHandler(ctx, controllers.ExecIndex)).Methods("GET")
   exec.HandleFunc("/run/{id:[0-9]+}", authHandler(ctx, controllers.ExecRun)).Methods("GET")
@@ -205,6 +206,11 @@ func main() {
   exec.HandleFunc("/deny", authHandler(ctx, controllers.ExecDeny)).Methods("POST")
   exec.HandleFunc("/update", authHandler(ctx, controllers.ExecUpdateResult)).Methods("POST")
   exec.HandleFunc("/done", authHandler(ctx, controllers.ExecUpdateResult)).Methods("POST")
+
+  // milestone
+  milestone := project.PathPrefix("/{projectName}/milestone").Subrouter()
+  milestone.HandleFunc("/", authHandler(ctx, controllers.MilestoneIndex)).Methods("GET")
+  milestone.HandleFunc("/add", authHandler(ctx, controllers.MilestoneAdd)).Methods("GET")
 
 
   r.PathPrefix("/public/").Handler(http.StripPrefix("/public/", 

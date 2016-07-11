@@ -210,7 +210,7 @@ func BuildsAddItem(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
   var build models.Build
   if err := c.Db.Where("id = ?", id).First(&build).Error; err != nil{
     log.Error("Build", "Type", "database", "msg", err)
-    return errors.HttpError{http.StatusInternalServerError, "not found build project on add item"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "not found build project on add item"}
   }
   
   items := map[string]interface{}{
@@ -227,7 +227,7 @@ func BuildsAddItem(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
 func BuildsSaveItem(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
   if err := r.ParseForm(); err != nil {
     log.Error("Build", "type", "http", "msg ", err )
-    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "ParseForm failed"}
   }
 
   var builditem models.BuildItem
@@ -240,7 +240,7 @@ func BuildsSaveItem(c *interfacer.AppContext, w http.ResponseWriter, r *http.Req
   var build models.Build
   if err := c.Db.Where("id = ?", builditem.BuildProjectID).First(&build).Error; err != nil{
     log.Error("Build", "type", "database", "msg ", err )
-    return errors.HttpError{http.StatusInternalServerError, "Could not find build project"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "Could not find build project"}
   }
   
   //get largest number
@@ -387,7 +387,6 @@ func  ValidateTool(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
     status = http.StatusInternalServerError
 		msg = "Not supported tool"
 	}
-
   return RenderJSONWithStatus(w, Resp{Msg : msg}, status)
 }
 

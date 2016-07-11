@@ -1,0 +1,14 @@
+{
+  "name": "ladybug",
+  "version": "0.0.1",
+  "dependencies": {
+    "jquery": "2.2.4",
+    "bootstrap":"3.3.6",
+    "datatables":"1.10.12",
+    "bootstrap-sweetalert" : "1.0.0",
+    "iCheck":"1.0.2",
+    "jstree" : "3.3.1",
+    "ladda" : "1.0.0",
+    "magicsuggest" : "2.1.4"
+  }
+}

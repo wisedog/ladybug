@@ -11,12 +11,13 @@ import (
   log "gopkg.in/inconshreveable/log15.v2"
 )
 
+// UserProfile renders first page of user's profile
 func UserProfile(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
   log.Debug("User", "msg", "in UserProfile")
 
   var activities []models.Activity
   if err := c.Db.Where("user_id = ?", c.User.ID).Preload("User").Find(&activities); err.Error != nil{
-    return errors.HttpError{http.StatusInternalServerError, "An error is occurred while get activities."}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "An error is occurred while get activities."}
   }
 
   items := map[string]interface{}{
@@ -24,21 +25,16 @@ func UserProfile(c *interfacer.AppContext, w http.ResponseWriter, r *http.Reques
     "Active_idx" : 0,
   }
 
+
   return Render2(c, w, items, "views/base.tmpl", "views/users/profile.tmpl")
 }
-
-func UserGeneral(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
-  
-  return nil
-}
-
 
 // UserGetNameList returns users' ID and name.
 func UserGetNameList(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
   var users []models.User
   if err := c.Db.Find(&users); err.Error != nil{
     log.Error("User", "msg", err.Error)
-    return errors.HttpError{http.StatusInternalServerError, "An error is occurred while get users"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "An error is occurred while get users"}
   }
 
   type data struct{
@@ -58,6 +54,12 @@ func UserGetNameList(c *interfacer.AppContext, w http.ResponseWriter, r *http.Re
 
   }
   return RenderJSON(w, renderData)
+}
+
+// UserUpdateProfile is a POST handler for updating user's profile
+func UserUpdateProfile(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+
+  return nil
 }
 
 
@@ -87,27 +89,4 @@ func (c Users) SaveGeneral(id int, Name string, Language string) revel.Result {
 
 }
 
-func (c Users) Register() revel.Result {
-
-	return c.Render()
-}
-
-func (c Users) Edit(id int) revel.Result {
-
-	return c.Render()
-}
-
-func (c Users) Profile(id int) revel.Result {
-	var user models.User
-	r := c.Tx.Where("id = ?", id).First(&user)
-
-	if r.Error != nil {
-		return c.NotFound("Something wrong....")
-	}
-	
-	var activities []models.Activity
-	c.Tx.Where("user_id = ?", user.ID).Preload("User").Find(&activities)
-
-	return c.Render(user, activities)
-}
 */

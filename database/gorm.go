@@ -39,6 +39,7 @@ func InitDB(conf *interfacer.AppConfig) (*gorm.DB, error){
   Database.AutoMigrate(&models.Review{})
   Database.AutoMigrate(&models.Category{})
   Database.AutoMigrate(&models.Specification{})
+	Database.AutoMigrate(&models.Milestone{})
   createDummy()
 
   return Database, nil
@@ -88,6 +89,7 @@ func createDummy() {
 	Database.DropTable(&models.Specification{})
 	Database.DropTable(&models.Activity{})
 	Database.DropTable(&models.History{})
+	Database.DropTable(&models.Milestone{})
 
 	// Create dummy users
 	Database.AutoMigrate(&models.User{})
@@ -326,6 +328,23 @@ func createDummy() {
 	
 	// for creating dummy for History
 	Database.AutoMigrate(&models.History{})
+
+	Database.AutoMigrate(&models.Milestone{})
+	now := time.Now()
+	oneMonthFromNow := time.Hour * 24 * 30
+
+	next := now.Add(oneMonthFromNow)
+	next1 := next.Add(oneMonthFromNow)
+	Milestones := []*models.Milestone{
+		&models.Milestone{Name : "Milestone#1", ProjectID : prj.ID, Status : models.MilestoneStatusActive, DueDate : next},
+		&models.Milestone{Name : "Milestone#2", ProjectID : prj.ID, Status : models.MilestoneStatusActive, DueDate : next1},
+	}
+
+	for _, ms := range Milestones {
+		Database.NewRecord(ms)
+		Database.Create(&ms)
+	}
+
 }
 /*
 func (c *GormController) Begin() revel.Result {

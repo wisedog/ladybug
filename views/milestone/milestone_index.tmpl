@@ -7,23 +7,30 @@
   <!-- Content header -->
   <section class="content-header">
     <h1>
-      Test Execution
-      <small>Manage test executions</small>
+      Milestone
+      <small>Manage your milestone</small>
     </h1>
     <ol class="breadcrumb">
       <li><a href="/project/{{.ProjectName}}/dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
-      <li class="active">Test Execution</li>
+      <li class="active">Milestone</li>
     </ol>
   </section>
 
   <!-- Main content -->
   <section class="content">
+    <div class="row bottom7">
+      <div class="col-md-12">
+        <button class="btn btn-primary btn-xs btn-flat" data-toggle="modal" data-target="#myModal">
+          <i class='fa fa-plus right7'></i>Milestone
+        </button>
+      </div>
+    </div>
     <div class="row">
       <div class="col-md-12">
         <div class="box box-primary">
           <div class="box-header with-border">
             <label>
-              Test execution list
+              Milestone list
             </label>
           </div>
           <div class="box-body">
@@ -31,54 +38,34 @@
               <table class='table table-striped'>
                 <thead>
                   <tr>
+                    <th>Name</th>
                     <th>Status</th>
-                    <th>TestPlan</th>
-                    <th>TC#</th>
-                    <th>Tester</th>
-                    <th>Build</th>
-                    <th>Progress</th>
-                    <th>Pass/Fail</th>
+                    <th>Due Date</th>
+                    <th>Description</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                {{range .TestExecs}}
+                {{range .Milestones}}
                 <tr>
+                  <td>{{.Name}}
+                  </td>
                   <td>
                     {{if eq .Status 1}}
-                      Ready
+                      Active
                     {{else if eq .Status 2}}
-                      In Progress
-                    {{else if eq .Status 3}}
-                      N/A
-                    {{else if eq .Status 4}}
                       Done
-                    {{else if eq .Status 5}}
-                      Done-Deny
-                    {{else if eq .Status 6}}
-                      Pass
-                    {{else if eq .Status 7}}
-                      Fail
                     {{else}}
                       Unknown
                     {{end}}
                   </td>
-                  <td><a href='/project/{{$.ProjectName}}/testplan/view/{{.Plan.ID}}'>{{.Plan.Title}}</a></td>
-                  <td>{{.Plan.ExecCaseNum}}</td>
-                  <td>{{.Executor.Name}}</td>
                   <td>
-                    <a href='/project/{{$.ProjectName}}/testplan/view/{{.TargetBuild.BuildProjectID }}'>
-                      {{.TargetBuild.FullDisplayName}}
-                    </a>
+                     {{.DueDate.Format "Jan 02, 2006"}}
                   </td>
-                  <td>{{.Progress}}%</td>
-                  <td>{{.PassCaseNum}}/{{.FailCaseNum}}</td>
+                  <td>{{.Description}}</td>
                   <td>
-                    {{if lt .Status 4}}
-                    <a href='/project/{{$.ProjectName}}/exec/run/{{.ID}}' class="glyphicon glyphicon-fire fa-fw"></a>
                     <a href='javascript:deny({{.ID}});' class="glyphicon glyphicon-ban-circle"></a>
                     <a href='javascript:remove({{.ID}});' class="glyphicon glyphicon-remove"></a>
-                    {{end}}
                   </td>
                 </tr>
                 {{end}}

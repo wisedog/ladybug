@@ -187,6 +187,12 @@
               <span>Specification</span>
             </a>
           </li>
+          <li {{if eq .Active_idx 7}}class="active"{{end}}>
+            <a href='/project/{{.ProjectName}}/milestone'>
+              <i class="fa fa-map-signs"></i>
+              <span>Milestone</span>
+            </a>
+          </li>
           <li class="treeview">
             <a href="#"><i class="glyphicon glyphicon-book"></i> <span>Report</span> <i class="fa fa-angle-left pull-right"></i></a>
             <ul class="treeview-menu">
