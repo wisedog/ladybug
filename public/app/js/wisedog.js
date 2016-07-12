@@ -6,6 +6,7 @@ $('#dropdown-target').click(function(){
     $.ajax({
       url : "/project/get/list?limit=10"
     }).done(function(data){
+      $('.prjs').remove();
       var dataJSON = jQuery.parseJSON(data)
       var toBeInsert = "";
       for(i = 0; i < dataJSON.length; i++){

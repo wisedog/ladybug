@@ -1,4 +1,4 @@
-{{define "title"}}Title!{{ end }}
+{{define "title"}}Profile{{ end }}
 {{define "more_style"}}{{end}}
 {{define "content"}}
 <div class="content-wrapper">
@@ -21,23 +21,23 @@
           <!-- Profile Image -->
           <div class="box box-primary">
             <div class="box-body box-profile">
-              <img class="profile-user-img img-responsive img-circle" src="/public/img/user/{{.User.Photo}}.png" alt="User profile picture">
+              <img class="profile-user-img img-responsive img-circle" src="/public/img/user/{{.TargetUser.Photo}}.png" alt="User profile picture">
 
-              <h3 class="profile-username text-center">{{.User.Name}}</h3>
+              <h3 class="profile-username text-center">{{.TargetUser.Name}}</h3>
 
               <p class="text-muted text-center">Software Engineer</p>
 
               <ul class="list-group list-group-unbordered">
                 <li class="list-group-item">
                   <strong><i class="fa fa-file-text-o margin-r-5"></i> Notes</strong>
-                  <p>{{.User.Notes}}</p>
+                  <p>{{.TargetUser.Notes}}</p>
                 </li>
                 <li class="list-group-item">
                   <strong><i class="fa fa-map-marker margin-r-5"></i> Location</strong>
-                  <p class="text-muted">{{.User.Location}}</p>
+                  <p class="text-muted">{{.TargetUser.Location}}</p>
                 </li>
                 <li class="list-group-item">
-                  <b>Member since {{.User.CreatedAt.Format "2006-01-02"}}</b>
+                  <b>Member since {{.TargetUser.CreatedAt.Format "2006-01-02"}}</b>
                 </li>
               </ul>
             </div>
@@ -50,7 +50,9 @@
           <div class="nav-tabs-custom">
             <ul class="nav nav-tabs">
               <li class="active"><a href="#activity" data-toggle="tab">Activity</a></li>
+              {{if eq .TargetUser.ID .User.ID}}
               <li><a href="#settings" data-toggle="tab">Settings</a></li>
+              {{end}}
             </ul>
             <div class="tab-content">
               <div class="active tab-pane" id="activity">
@@ -85,30 +87,31 @@
                 <!-- /.post -->
                 {{end}}
               </div>
+              {{if eq .TargetUser.ID .User.ID}}
               <div class="tab-pane" id="settings">
-                <form class="form-horizontal" method="POST" action="/user/profile/update/{{.User.ID}}">
+                <form class="form-horizontal" method="POST" action="/user/profile/update/{{.TargetUser.ID}}">
                   <div class="form-group">
                     <label for="inputName" class="col-sm-2 control-label">Name</label>
                     <div class="col-sm-10">
-                      <input type="text" class="form-control" value="{{.User.Name}}">
+                      <input type="text" class="form-control" value="{{.TargetUser.Name}}">
                     </div>
                   </div>
                   <div class="form-group">
                     <label for="inputEmail" class="col-sm-2 control-label">Email</label>
                     <div class="col-sm-10">
-                      <input type="email" class="form-control" value="{{.User.Email}}">
+                      <input type="email" class="form-control" value="{{.TargetUser.Email}}">
                     </div>
                   </div>
                   <div class="form-group">
                     <label for="inputName" class="col-sm-2 control-label">Location</label>
                     <div class="col-sm-10">
-                      <input type="text" class="form-control" value="{{.User.Location}}">
+                      <input type="text" class="form-control" value="{{.TargetUser.Location}}">
                     </div>
                   </div>
                   <div class="form-group">
                     <label for="inputExperience" class="col-sm-2 control-label">Notes</label>
                     <div class="col-sm-10">
-                      <textarea class="form-control">{{.User.Notes}}</textarea>
+                      <textarea class="form-control">{{.TargetUser.Notes}}</textarea>
                     </div>
                   </div>
                   <div class="form-group">
@@ -117,16 +120,12 @@
                     </div>
                   </div>
                 </form>
-              </div>
-              <!-- /.tab-pane -->
-            </div>
-            <!-- /.tab-content -->
-          </div>
-          <!-- /.nav-tabs-custom -->
-        </div>
-        <!-- /.col -->
-      </div>
-      <!-- /.row -->
+              </div><!-- /.tab-pane -->
+              {{end}}
+            </div><!-- /.tab-content -->
+          </div><!-- /.nav-tabs-custom -->
+        </div><!-- /.col -->
+      </div><!-- /.row -->
   </section>
 </div><!-- /.content-wrapper -->
 {{end}}

@@ -130,7 +130,7 @@
           <div class="pull-left info">
             <p>{{.User.Name}}</p>
             <!-- Status -->
-            <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+            <span><small>Dev 1 dept.</small></span>
           </div>
         </div>
 
@@ -146,11 +146,24 @@
         </form>
         <!-- /.search form -->
 
-        {{if ne .Active_idx 0}}
+        {{if ne .Active_idx 0}}        
         <!-- Sidebar Menu -->
         <ul class="sidebar-menu">
           <li class="header">Main Navigation</li>
-          <!-- Optionally, you can add icons to the links -->
+          {{if .ShowUserMenu}}
+          <li {{if eq .Active_idx 1}}class="active"{{end}}>
+            <a href='/project/'>
+              <i class="fa fa-dashboard"></i>
+              <span>Profile</span>
+            </a>
+          </li>
+          <li {{if eq .Active_idx 1}}class="active"{{end}}>
+            <a href='/project/'>
+              <i class="fa fa-dashboard"></i>
+              <span>Notification</span>
+            </a>
+          </li>
+          {{else}}
           <li {{if eq .Active_idx 1}}class="active"{{end}}>
             <a href='/project/{{.ProjectName}}'>
               <i class="fa fa-dashboard"></i>
@@ -199,9 +212,8 @@
               <li><a href="#">Testcases </a></li>
               <li><a href="#">Test Execution</a></li>
             </ul>
-          </li>
-        </ul>
-        <!-- /.sidebar-menu -->
+          </li>{{end}}
+        </ul><!-- /.sidebar-menu -->        
         {{end}}
       </section>
       <!-- /.sidebar -->

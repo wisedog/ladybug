@@ -30,7 +30,7 @@ func DesignIndex(c *interfacer.AppContext, w http.ResponseWriter, r *http.Reques
 	rv := c.Db.Where("name = ?", project).First(&prj)
 	if rv.Error != nil{
     log.Error("TestDesign", "type", "database", "msg", "Project is not found in TestDesign.Index")
-		return errors.HttpError{http.StatusInternalServerError, "Project is not found in TestDesign.Index"}
+		return errors.HttpError{Status : http.StatusInternalServerError, Desc : "Project is not found in TestDesign.Index"}
 	}
 	
 
@@ -55,31 +55,23 @@ func DesignIndex(c *interfacer.AppContext, w http.ResponseWriter, r *http.Reques
 	treedataByte, _ := json.Marshal(nodes)
 	treedata := string(treedataByte)
 
-  items := struct {
-    User *models.User
-    Project models.Project
-    ProjectName string
-    TreeData string
-    Active_idx  int
-  }{
-    User: user,
-    Project : prj,
-    ProjectName : prj.Name,
-    TreeData : treedata,
-    Active_idx : 2,
+	items := map[string]interface{}{
+    "Active_idx" : 2,
+		"TreeData" : treedata,
+		"Project" : prj,
   }
 
-  return Render(w, items, "views/base.tmpl", "views/testdesign/designindex.tmpl")
+  return Render2(c, w, items, "views/base.tmpl", "views/testdesign/designindex.tmpl")
 }
 
 
-// GetAllTestCaeses returns all testcase of the section what "id" is matching
+// GetAllTestCases returns all testcase of the section what "id" is matching
 // Results in JSON format
 func GetAllTestCases(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
   log.Info("in TestDesign - GetAllTestCase")
   vars := mux.Vars(r)
   //project := vars["projectName"]
-  sectionId := vars["sectionID"]
+  sectionID := vars["sectionID"]
 	var testcases []models.TestCase
 	// Check user or return 404 or ....
 	if user := connected(c, r); user == nil {
@@ -90,14 +82,14 @@ func GetAllTestCases(c *interfacer.AppContext, w http.ResponseWriter, r *http.Re
 	}
 
 	// if there is no result, return empty JSON array
-	if err := c.Db.Where("section_id = ? ", sectionId).Preload("Category").Find(&testcases); err.Error != nil {
+	if err := c.Db.Where("section_id = ? ", sectionID).Preload("Category").Find(&testcases); err.Error != nil {
 	log.Error("[TestDesign]", "msg", "Error while select section operation in TestDesign.GetAllTestCases")
-	return errors.HttpError{http.StatusInternalServerError, "Template Exection Error"}
+	return errors.HttpError{Status : http.StatusInternalServerError, Desc : "Template Exection Error"}
 	}
 
   js, err := json.Marshal(testcases)
   if err != nil {
-    return errors.HttpError{http.StatusInternalServerError, "Json Marshalling failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "Json Marshalling failed"}
   }
   // TODO define status and content struct and serialized
   w.Header().Set("Content-Type", "application/json")

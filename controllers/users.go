@@ -1,9 +1,10 @@
 package controllers
 
 import (
+  "strconv"
   "net/http"
 
-  //"github.com/gorilla/mux"
+  "github.com/gorilla/mux"
   "github.com/wisedog/ladybug/models"
   "github.com/wisedog/ladybug/interfacer"
   "github.com/wisedog/ladybug/errors"
@@ -15,16 +16,31 @@ import (
 func UserProfile(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
   log.Debug("User", "msg", "in UserProfile")
 
+  vars := mux.Vars(r)
+  id := vars["id"]
+
+  var targetUser models.User
+  if err := c.Db.Where("id = ?", id).First(&targetUser); err.Error != nil{
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "An error is occurred while get target user"}
+  }
+
   var activities []models.Activity
-  if err := c.Db.Where("user_id = ?", c.User.ID).Preload("User").Find(&activities); err.Error != nil{
+  if err := c.Db.Where("user_id = ?", id).Preload("User").Find(&activities); err.Error != nil{
     return errors.HttpError{Status : http.StatusInternalServerError, Desc : "An error is occurred while get activities."}
+  }
+
+  idNum, _ := strconv.Atoi(id)
+  isSameID := 0
+  if idNum == c.User.ID{
+    isSameID = 1
   }
 
   items := map[string]interface{}{
     "Activities" : activities,
-    "Active_idx" : 0,
+    "Active_idx" : isSameID,
+    "TargetUser" : targetUser,
+    "ShowUserMenu" : true,
   }
-
 
   return Render2(c, w, items, "views/base.tmpl", "views/users/profile.tmpl")
 }
@@ -58,6 +74,8 @@ func UserGetNameList(c *interfacer.AppContext, w http.ResponseWriter, r *http.Re
 
 // UserUpdateProfile is a POST handler for updating user's profile
 func UserUpdateProfile(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+  // if c.User.ID != POST Data's ID 
+  // return unauth
 
   return nil
 }
