@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 
 	"github.com/gorilla/mux"
-	"github.com/gorilla/schema"
   "github.com/wisedog/ladybug/models"
   "github.com/wisedog/ladybug/interfacer"
 	"github.com/wisedog/ladybug/errors"
@@ -29,7 +28,7 @@ func makeHistoryMessage(historyUnit *[]models.HistoryTestCaseUnit){
 	
 	// TODO L10N with using GetI18nMessage format string
 	for i := 0; i < len(*historyUnit); i++{
-		if (*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_CHANGED{
+		if (*historyUnit)[i].ChangeType == models.HistoryChangeTypeChanged{
 			if((*historyUnit)[i].From == 0 && (*historyUnit)[i].To == 0 ){
 				msg = fmt.Sprintf(`"%s" is changed from "%s" to "%s".`, 
 				(*historyUnit)[i].What, (*historyUnit)[i].FromStr, (*historyUnit)[i].ToStr)
@@ -37,13 +36,13 @@ func makeHistoryMessage(historyUnit *[]models.HistoryTestCaseUnit){
 				msg = fmt.Sprintf(`"%s" is changed from %d to %d.`, 
 				(*historyUnit)[i].What, (*historyUnit)[i].From, (*historyUnit)[i].To)
 			}
-		}else if(*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_SET{
+		}else if(*historyUnit)[i].ChangeType == models.HistoryChangeTypeSet{
 			msg = fmt.Sprintf(`"%s" is set to "%s".`, 
 				(*historyUnit)[i].What, (*historyUnit)[i].Set)
-		}else if(*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_DIFF{
+		}else if(*historyUnit)[i].ChangeType == models.HistoryChangeTypeDiff{
 			msg = fmt.Sprintf(`"%s" is changed(diff).`, 
 				(*historyUnit)[i].What)
-		}else if(*historyUnit)[i].ChangeType == models.HISTORY_CHANGE_TYPE_NOTE{
+		}else if(*historyUnit)[i].ChangeType == models.HistoryChangeTypeNote{
 			msg = fmt.Sprintf("%s added a note.", (*historyUnit)[i].What)
 		}else{
 			msg = ""
@@ -67,8 +66,7 @@ func CaseView(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 
 	var tc models.TestCase
   if err := c.Db.Where("id = ?", id).Preload("Category").First(&tc); err.Error != nil{
-    log.Error("testcases", "Error on Select-ID query in TestCases.Index", err.Error)
-    return errors.HttpError{http.StatusInternalServerError, "DB error"}
+    return LogAndHTTPError(http.StatusInternalServerError, "testcases", "db", err.Error.Error())
   }
 	
 	tc.PriorityStr = getPriorityI18n(tc.Priority)
@@ -119,10 +117,10 @@ func renderAddEdit(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
   id := vars["id"]
 
   // valid when rendering Add 
-  section_id :=  r.URL.Query().Get("sectionid")
-  if section_id == "" && isEdit == false {
-    log.Error("testcase", "type" , "general", "msg", "invalid condition. Add rendering requires section id")
-    return errors.HttpError{http.StatusBadRequest, "invalid condition. Add rendering requires section id"}
+  sectionID :=  r.URL.Query().Get("sectionid")
+  if sectionID == "" && isEdit == false {
+    return LogAndHTTPError(http.StatusBadRequest, "testcases", "http", 
+      "invalid condition. Add rendering requires section id")
   }
 
   var category []models.Category
@@ -150,7 +148,7 @@ func renderAddEdit(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
       return errors.HttpError{http.StatusInternalServerError, "An Error while SELECT operation for TestCase.Edit"}
     }
 
-    testcase.SectionID, _ = strconv.Atoi(section_id)
+    testcase.SectionID, _ = strconv.Atoi(sectionID)
     testcase.Prefix = prj.Prefix
   }
   
@@ -170,7 +168,7 @@ func renderAddEdit(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
     Id : id,
     User: user,
     ProjectName : projectName,
-    SectionID : section_id,
+    SectionID : sectionID,
     TestCase : testcase,
     Category : category,
     IsEdit : isEdit,
@@ -193,11 +191,6 @@ func CaseAdd(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
 
 // handleSaveUpdate handles POST request from save and update
 func handleSaveUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request, isUpdate bool) error{
-  var user *models.User
-  if user = connected(c, r); user == nil{
-    log.Debug("Not found login information")
-    http.Redirect(w, r, "/", http.StatusFound)
-  }
   
   var testcase models.TestCase
   vars := mux.Vars(r)
@@ -206,14 +199,10 @@ func handleSaveUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
 
   if err := r.ParseForm(); err != nil {
     log.Error("Testcase", "Error ", err )
-    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "ParseForm failed"}
   }
-
-  //fmt.Printf("After ParseForm : %+v\n", r)
-
-  decoder := schema.NewDecoder()
   
-  if err := decoder.Decode(&testcase, r.PostForm); err != nil {
+  if err := c.Decoder.Decode(&testcase, r.PostForm); err != nil {
     log.Warn("Testcase", "Error", err, "msg", "Decode failed but go ahead")
   }
 
@@ -224,29 +213,31 @@ func handleSaveUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
 
   if isUpdate == false{
 
-    var largest_seq_tc models.TestCase
+    var largestSeqTc models.TestCase
 
-    if err := c.Db.Where("prefix=?", testcase.Prefix).Order("seq desc").First(&largest_seq_tc); err.Error != nil {
+    if err := c.Db.Where("prefix=?", testcase.Prefix).Order("seq desc").First(&largestSeqTc); err.Error != nil {
       log.Error("An error while SELECT operation to find largest seq")
     } else {
-      testcase.Seq = largest_seq_tc.Seq + 1
-      log.Debug("testcase", "Largest number is : ", largest_seq_tc.Seq+1)
+      testcase.Seq = largestSeqTc.Seq + 1
+      log.Debug("testcase", "Largest number is : ", largestSeqTc.Seq+1)
     }
 
     c.Db.NewRecord(testcase)
 
     if err := c.Db.Create(&testcase); err.Error != nil {
       log.Error("testcase", "type" , "database", "msg", err.Error)
-      return errors.HttpError{http.StatusInternalServerError, "Insert operation failed in TestCase.Save"}
+      return errors.HttpError{Status : http.StatusInternalServerError, 
+        Desc : "Insert operation failed in TestCase.Save"}
     }
     
-    display_id := testcase.Prefix + "-" + strconv.Itoa(testcase.ID)
-    testcase.DisplayID = display_id
+    displayID := testcase.Prefix + "-" + strconv.Itoa(testcase.ID)
+    testcase.DisplayID = displayID
     
     
     if err := c.Db.Save(&testcase); err.Error != nil{
       log.Error("testcase", "type" , "database", "msg", err.Error)
-      return errors.HttpError{http.StatusInternalServerError, "Update operation failed in TestCase.Save"}
+      return errors.HttpError{Status : http.StatusInternalServerError, 
+        Desc : "Update operation failed in TestCase.Save"}
     }
 
     http.Redirect(w, r, redirectionTarget, http.StatusFound)
@@ -259,7 +250,7 @@ func handleSaveUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
     return errors.HttpError{http.StatusInternalServerError, "An error while select exist testcase operation"}
   }
   note := r.FormValue("Note")
-  findDiff(c, &existCase, &testcase, note, user)
+  findDiff(c, &existCase, &testcase, note, c.User)
   
   existCase.Title = testcase.Title
   existCase.Description = testcase.Description
@@ -273,7 +264,8 @@ func handleSaveUpdate(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
 
   if err := c.Db.Save(&existCase); err.Error != nil {
     log.Error("testcase", "type", "database", "msg", err.Error)
-    return errors.HttpError{http.StatusInternalServerError, "An error while SAVE operation on TestCases.Update"}
+    return errors.HttpError{Status : http.StatusInternalServerError, 
+      Desc : "An error while SAVE operation on TestCases.Update"}
   }
   
   //c.Flash.Success("Update Success!")
@@ -302,7 +294,7 @@ func CaseDelete(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request
 
   if err := r.ParseForm(); err != nil {
     log.Error("Testcase", "Error ", err )
-    return errors.HttpError{http.StatusInternalServerError, "ParseForm failed"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "ParseForm failed"}
   }
 
   id := r.FormValue("id")
@@ -310,7 +302,7 @@ func CaseDelete(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request
   // Delete the testcase  permanently for sequence
   if err := c.Db.Unscoped().Where("id = ?", id).Delete(&models.TestCase{}); err.Error != nil{
     log.Error("testcase", "An error while delete testcase ", err.Error)
-    return errors.HttpError{http.StatusInternalServerError, "testcase delete failed"} 
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "testcase delete failed"} 
   }
 
   // the client do redirect or refresh. 
@@ -330,7 +322,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	if note != ""{
 		// this means user add a note on this testcase
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_NOTE, What : user.Name,
+			ChangeType : models.HistoryChangeTypeNote, What : user.Name,
 		}
 		
 		his.Note = note
@@ -340,7 +332,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	// check title
 	if existCase.Title != newCase.Title {
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, What : "Title",
+			ChangeType : models.HistoryChangeTypeChanged, What : "Title",
 			FromStr : existCase.Title, ToStr : newCase.Title,
 		}
 		changes = append(changes, unit)
@@ -349,7 +341,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	// check priority
 	if existCase.Priority != newCase.Priority {
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, 
+			ChangeType : models.HistoryChangeTypeChanged, 
 			What : GetI18nMessage("testcase.priority"),
 			FromStr : getPriorityI18n(existCase.Priority),
 			ToStr : getPriorityI18n(newCase.Priority),
@@ -361,7 +353,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	if existCase.ExecutionType != newCase.ExecutionType {
 		arr := [2]string{"Manual", "Automated"}
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, What : "Execution type",
+			ChangeType : models.HistoryChangeTypeChanged, What : "Execution type",
 			FromStr : arr[existCase.ExecutionType], ToStr : arr[newCase.ExecutionType],
 		}
 		changes = append(changes, unit)
@@ -372,7 +364,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	// check Description
 	if existCase.Description != newCase.Description {
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, 
+			ChangeType : models.HistoryChangeTypeDiff, 
 			What : GetI18nMessage("description"),
 			DiffID : 2,
 		}
@@ -382,7 +374,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	// check Precondition
 	if existCase.Precondition != newCase.Precondition {
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, 
+			ChangeType : models.HistoryChangeTypeDiff, 
 			What : GetI18nMessage("priority.precondition"),
 			DiffID : 2,//TODO should be implemnted DIFF
 		}
@@ -392,7 +384,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	// check Estimated
 	if existCase.Estimated != newCase.Estimated {
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, What : "Estimated Time",
+			ChangeType : models.HistoryChangeTypeDiff, What : "Estimated Time",
 			DiffID : 2,	//TODO should be implemnted DIFF
 		}
 		changes = append(changes, unit)
@@ -402,7 +394,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	if existCase.Steps != newCase.Steps {
     // FIXME A bug : those strings are same, but,,,, 
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, What : "Steps",
+			ChangeType : models.HistoryChangeTypeDiff, What : "Steps",
 			DiffID : 2,	//TODO should be implemnted DIFF
 		}
 		changes = append(changes, unit)
@@ -411,7 +403,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	// check Expected
 	if existCase.Expected != newCase.Expected {
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_DIFF, 
+			ChangeType : models.HistoryChangeTypeDiff, 
 			What : GetI18nMessage("priority.expected"),
 			DiffID : 2,	//TODO should be implemnted DIFF
 		}
@@ -427,7 +419,7 @@ func  findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, no
 	// check CategoryID
 	if existCase.CategoryID != newCase.CategoryID {
 		unit := models.HistoryTestCaseUnit{
-			ChangeType : models.HISTORY_CHANGE_TYPE_CHANGED, 
+			ChangeType : models.HistoryChangeTypeChanged, 
 			What : GetI18nMessage("priority.category"),
 			FromStr : "",
 			ToStr : "",

@@ -1,21 +1,27 @@
 package models
 
+// Execution represents an execution test
 type Execution struct {
 	BaseModel
 
-	Status        int    // ready, in progress, N/A(if a tester is not assigned)
-	ExecutionType int    //manual, automation
+	Status        int // ready, in progress, N/A(if a tester is not assigned), Done
+	ExecutionType int //manual, automation
 	Plan          TestPlan
-	PlanId        int //TODO add an index
+	PlanID        int //TODO add an index
 	Project       Project
-	ProjectId     int
+	ProjectID     int
 	Executor      User
-	ExecutorId    int
+	ExecutorID    int
 	TargetBuild   BuildItem
-	TargetBuildId int
-	Message			string	// for store a reason of deny
-	
-	PassCaseNum		int `sql:"-"`
-	FailCaseNum		int	`sql:"-"`
-	Progress		int `sql:"-"`
+	TargetBuildID int
+	//Message stores a reason of deny or comment of test execution
+	Message string
+
+	// Test result : Pass Fail if Status is Done
+	Result bool
+
+	TotalCaseNum int
+	PassCaseNum  int
+	FailCaseNum  int
+	Progress     int `sql:"-"`
 }

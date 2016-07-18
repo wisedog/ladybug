@@ -12,17 +12,7 @@ import (
 
 // Welcome renders a page to select project
 func Welcome(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
-	var user *models.User
-  log.Debug("In Hello")
-	if user = connected(c, r); user == nil {
-    log.Info("Not found login information.")
-		//c.Flash.Error("Please log in first")
-
-    http.Redirect(w, r, "/", http.StatusFound)
-
-    return nil
-	}
-
+	
   // Find Project the user is associated
   // if the project is over 10 -> make a link to show all projects
   
@@ -39,9 +29,9 @@ func Welcome(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
   }
   
   var p []user_project
-  err := c.Db.Table("user_project").Select("user_id, project_id").Where("user_id = ?", user.ID).Scan(&p)
   
-  if err.Error != nil{
+  if err := c.Db.Table("user_project").Select("user_id, project_id").
+            Where("user_id = ?", c.User.ID).Scan(&p);err.Error != nil{
     fmt.Println("Failed to select operation in Hello")
   }
 
@@ -52,38 +42,29 @@ func Welcome(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
   
   var projects []models.Project
   
-  err = c.Db.Where("id in (?)", ids).Find(&projects)
-  
-  if err.Error != nil{
+  if err := c.Db.Where("id in (?)", ids).Find(&projects); err.Error != nil{
     fmt.Println("Failed to select operation in Hello2")
     log.Error("Hello")
   }
   
   // Find Test executions for the user
   var execs []models.Execution
-  err = c.Db.Where("executor_id = ? and status = 1", user.ID).Preload("Project").Preload("Plan").Find(&execs)
   
-  if err.Error != nil{
+  if err := c.Db.Where("executor_id = ? and status = 1", c.User.ID).
+            Preload("Project").Preload("Plan").Find(&execs); err.Error != nil{
     fmt.Println("Fail to count operation in Hello")
   }
   
-  exec_count := len(execs)
-
-  items := struct {
-    User models.User
-    Projects  []models.Project
-    Execs   []models.Execution
-    Exec_count  int
-    Active_idx  int
-  }{
-    User: *user,
-    Projects : projects,
-    Execs : execs,
-    Exec_count : exec_count,
-    Active_idx : 0,
+  execCount := len(execs)
+  
+  items := map[string]interface{}{
+    "Projects" : projects,
+    "Execs" : execs,
+    "ExecCount" : execCount,
+    "Active_idx" : 0,
   }
 
   // TODO Find review for the user
 
-  return Render(w, items, "views/base.tmpl", "views/hello.tmpl")
+  return Render2(c, w, items, "views/base.tmpl", "views/hello/hello.tmpl")
 }

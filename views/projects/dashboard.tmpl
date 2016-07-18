@@ -1,0 +1,185 @@
+{{define "title"}}Dashboard{{ end }}
+{{define "more_style"}}{{end}}
+{{$project_name := .prj.Name}}  
+{{define "content"}}
+<div class="content-wrapper">
+	<section class="content-header">
+	  <h1>
+	    Dashboard
+	    <small>Project {{.Project.Name}}</small>
+	  </h1>
+	  <ol class="breadcrumb">
+	    <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+	    <li class="active">Dashboard</li>
+	  </ol>
+	</section>
+  <!-- Main content -->
+  <section class="content">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="box box-warning">
+          <div class="box-body">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="dashboard-icon-item">
+                  <span>
+                    <i class="fa fa-tasks"></i>
+                  </span>
+                </div><!-- .dashboard-icon-item -->
+                <div style="margin-left:40px;padding:5px 10px;">
+                  <span class="info-box-text">Your Task(s)</span>
+                  <span class="info-box-number">{{.TaskCount}}</span>
+                </div>
+                <div class="dashboard-icon-item">
+                  <span>
+                     <i class="glyphicon glyphicon-search"></i>
+                  </span>
+                </div><!-- .dashboard-icon-item -->
+                <div style="margin-left:40px;padding:5px 10px;">
+                  <span class="info-box-text">Review Requested</span>
+                  <span class="info-box-number">0</span>
+                </div>
+                <div class="dashboard-icon-item">
+                  <span>
+                      <i class="fa fa-bullhorn"></i>
+                  </span>
+                </div><!-- .dashboard-icon-item -->
+                <div style="margin-left:40px;padding:5px 10px;">
+                  <span class="info-box-text">Test Requested</span>
+                  <span class="info-box-number">0</span>
+                </div>
+              </div> <!-- .col --> 
+            </div> <!-- .row -->
+          </div><!-- /.box-body -->
+        </div><!-- /.box -->
+      </div><!-- /.col -->
+      <div class="col-md-4">
+        <div class="box box-warning">
+          <div class="box-body">
+            <div class="row">
+              <div class="col-md-12">
+                <small>Project Overall</small>
+                <p style="margin-bottom:-5px;">
+                  <span class="font40 right7"><strong>{{.BuildCount}}</strong></span> Build(s)
+                  <span class="font20 left7">
+                    <strong>
+                      <span class="text-green">2722</span>
+                    </strong>/
+                    <strong>
+                      <span class="text-red">25</span>
+                    </strong>
+                  </span>
+                  Test on Build
+                </p>
+                <p style="margin-bottom:-5px;">  
+                  <span class="font40 right7"><strong>{{.TestPlanCount}}</strong></span> Test Plan(s)
+                </p>
+                <p style="margin-bottom:-5px;">  
+                  <span class="font40 right7"><strong>{{.TestCaseNum}}</strong></span> Test Case(s)
+                </p> 
+              </div>
+            </div>
+          </div><!-- /.box-body -->
+        </div><!-- /.box -->
+      </div><!-- /.col -->
+      <div class="col-md-4">
+        <div class="box box-warning">
+          <div class="box-body">
+            <div class="row">
+              <div class="col-md-12">
+                <small>Next Milestone</small>
+                <p class="font25"><strong>
+                  {{if .Milestone}}
+                  {{.Milestone.Name}}
+                  {{else}}
+                  No Milestone
+                  {{end}}
+                  </Strong></p>
+                  <p class="font17"><strong>{{.DaysLeft}}</strong><small> day(s) left</small></p> 
+              </div>
+            </div>
+          </div><!-- /.box-body -->
+        </div><!-- /.box -->
+      </div><!-- /.col -->
+    </div><!-- /.row -->
+    
+    <div class="row">
+      <div class="col-md-8">
+        <div class="box box-info">
+          <div class="box-header with-border">
+            <h3 class="box-title">Test Cases Graph</h3>
+            <div class="box-tools pull-right">
+              <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+              <div class="btn-group">
+                <button class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown"><i class="fa fa-wrench"></i></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="#">Action</a></li>
+                  <li><a href="#">Another action</a></li>
+                  <li><a href="#">Something else here</a></li>
+                  <li class="divider"></li>
+                  <li><a href="#">Separated link</a></li>
+                </ul>
+              </div>
+              <button class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+            </div>
+          </div><!-- /.box-header -->
+          <div class="box-body">
+            <div class="row">
+              <div class="col-md-8">
+              
+              </div><!-- /.col -->
+            </div><!-- /.row -->
+          </div><!-- ./box-body -->
+          <div class="box-footer">
+            
+          </div><!-- /.box-footer -->
+        </div><!-- .box -->
+      </div> <!-- .col -->
+      <div class="col-md-4">
+        <div class="box box-warning">
+          <div class="box-header with-border">
+            <h3 class="box-title">Now On Executing</h3>
+            <div class="box-tools pull-right">
+              <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+              <div class="btn-group">
+                <button class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown"><i class="fa fa-wrench"></i></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="#">Action</a></li>
+                  <li><a href="#">Another action</a></li>
+                  <li><a href="#">Something else here</a></li>
+                  <li class="divider"></li>
+                  <li><a href="#">Separated link</a></li>
+                </ul>
+              </div>
+              <button class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+            </div>
+          </div><!-- /.box-header -->
+          <div class="box-body">
+            <div class="row">
+              <div class="col-sm-12">
+                <!-- Progress bars -->
+                
+                {{range .Tasks}}
+                <div class="clearfix">
+                  <span class="pull-left">{{.Plan.Title}} by {{.Executor.Name}}</span>
+                  <small class="pull-right">{{.Progress}}%</small>
+                </div>
+                <div class="progress xs">
+                  <div class="progress-bar progress-bar-green" style="width: {{.Progress}}%;"></div>
+                </div>
+                {{end}}
+              </div>
+            </div><!-- /.row -->
+          </div><!-- ./box-body -->
+          <div class="box-footer">
+            
+          </div><!-- /.box-footer -->
+        </div><!-- .box -->
+      </div> <!-- .col -->
+    </div> <!-- .row -->
+  </section><!-- /.content -->
+</div><!-- /.content-wrapper -->
+{{end}}
+{{define "more_scripts"}}{{end}}
+
+

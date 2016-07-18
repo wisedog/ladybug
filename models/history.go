@@ -1,17 +1,19 @@
 package models
-	
-const (
-    HISTORY_TYPE_TC = 1 + iota
-    )
 
+// History type defined. The type may be TC or something else	
 const (
-	HISTORY_CHANGE_TYPE_CHANGED = 1 + iota
-	HISTORY_CHANGE_TYPE_SET
-	HISTORY_CHANGE_TYPE_NOTE
-	HISTORY_CHANGE_TYPE_DIFF
+  HISTORY_TYPE_TC = 1 + iota
+  )
+
+// History change type defined.
+const (
+	HistoryChangeTypeChanged = 1 + iota
+	HistoryChangeTypeSet
+	HistoryChangeTypeNote
+	HistoryChangeTypeDiff
 	)
 
-// to store multiple changement contents via JSON string
+// HistoryTestCaseUnit is for storing multiple changement contents via JSON string
 type HistoryTestCaseUnit struct{
 	ChangeType	int
 	What		string		// thing to be changed
@@ -25,7 +27,6 @@ type HistoryTestCaseUnit struct{
 }
 
 // History is a model for history of test cases or something stuff.
-// 
 type History struct {
 	BaseModel
 

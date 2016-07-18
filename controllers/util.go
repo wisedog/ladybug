@@ -16,27 +16,27 @@ import (
 func getPriorityI18n(priority int) string{
 	str := "Unknown Status"
 	switch priority{
-		case models.PRIORITY_HIGHEST:
+		case models.PriorityHighest:
 			str = GetI18nMessage("priority.highest")
-		case models.PRIORITY_HIGH:
+		case models.PriorityHigh:
       str = GetI18nMessage("priority.high")
-		case models.PRIORITY_MEDIUM:
+		case models.PriorityMedium:
 			str = GetI18nMessage("priority.medium")
-		case models.PRIORITY_LOW:
+		case models.PriorityLow:
 			str = GetI18nMessage("priority.low")
-		case models.PRIORITY_LOWEST:
+		case models.PriorityLowest:
 			str = GetI18nMessage("priority.lowest")
 	}
 	
 	return str
 }
 
-func getErrorMap(session *sessions.Session) *map[string]string{
-  if fm := session.Flashes(ERROR_MSG); fm != nil {
+func getErrorMap(session *sessions.Session) map[string]string{
+  if fm := session.Flashes(ErrorMsg); fm != nil {
     b, ok := fm[0].(*map[string]string)
     if ok{
-      delete(session.Values, ERROR_MSG)
-      return b
+      delete(session.Values, ErrorMsg)
+      return *b
     }else{
       log.Debug("Build", "msg", "flash type assertion failed")
     }    
@@ -44,28 +44,30 @@ func getErrorMap(session *sessions.Session) *map[string]string{
   return nil
 }
 
+// Render renders templates with structure-typed interface data
 func Render(w http.ResponseWriter, data interface{},  templates ...string) error{
   t, err := template.New("base.tmpl").Funcs(funcMap).ParseFiles(templates...)
 
   if err != nil{
     log.Error("Util", "type", "rendering", "msg ", err )
-    return errors.HttpError{http.StatusInternalServerError, "Template ParseFiles error"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc: "Template ParseFiles error"}
   }
 
   if err = t.Execute(w, data); err != nil{
     log.Error("Util", "type", "rendering", "msg ", err )
-    return errors.HttpError{http.StatusInternalServerError, "Template Exection Error"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc :  "Template Exection Error"}
   }
 
   return nil
 }
 
+// Render2 renders templates with map-typed interface data
 func Render2(c *interfacer.AppContext, w http.ResponseWriter, data interface{},  templates ...string) error{
   t, err := template.New("base.tmpl").Funcs(funcMap).ParseFiles(templates...)
 
   if err != nil{
     log.Error("Util", "type", "rendering", "msg ", err )
-    return errors.HttpError{http.StatusInternalServerError, "Template ParseFiles error"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "Template ParseFiles error"}
   }
 
   item := data.(map[string]interface{})
@@ -74,19 +76,35 @@ func Render2(c *interfacer.AppContext, w http.ResponseWriter, data interface{}, 
 
   if err = t.Execute(w, item); err != nil{
     log.Error("Util", "type", "rendering", "msg ", err )
-    return errors.HttpError{http.StatusInternalServerError, "Template Exection Error"}
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc : "Template Exection Error"}
   }
 
   return nil
 }
 
-func RenderJson(w http.ResponseWriter, data interface{}) error{
+// RenderJSONWithStatus renders JSON format with data with status specified
+func RenderJSONWithStatus(w http.ResponseWriter, data interface{}, statusCode int) error{
   js, err := json.Marshal(data)
   if err != nil {
     log.Error("Builds", "msg", "Json Marshalling failed in ValidateTool")
     return err
   }
 
+  w.WriteHeader(statusCode)
+  w.Header().Set("Content-Type", "application/json")
+  w.Write(js)
+  return nil
+}
+
+// RenderJSON converts data interface to JSON and renders JSON format 
+func RenderJSON(w http.ResponseWriter, data interface{}) error{
+  js, err := json.Marshal(data)
+  if err != nil {
+    log.Error("Builds", "msg", "Json Marshalling failed in ValidateTool")
+    return err
+  }
+
+  w.WriteHeader(http.StatusOK)
   w.Header().Set("Content-Type", "application/json")
   w.Write(js)
   return nil

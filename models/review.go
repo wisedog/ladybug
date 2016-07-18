@@ -5,15 +5,15 @@ import (
 )
 
 const (
-    REVIEW_TESTCASE = 1 + iota
-    REVIEW_BUG
+    ReviewTestcase = 1 + iota
+    ReviewBug
     )
 
 const (
-    REVIEW_STATUS_READY = 1 + iota
-    REVIEW_STATUS_IN_PROGRESS
-    REVIEW_STATUS_REJECT
-    REVIEW_STATUS_DONE
+    ReviewStatusReady = 1 + iota
+    ReviewStatusInProgress
+    ReviewStatusReject
+    ReviewStatusDone
     )
 
 type Review struct {

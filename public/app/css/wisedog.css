@@ -1,0 +1,256 @@
+
+/* General purpose*/
+.vertical-align {
+  display: flex;
+  align-items: center;
+}
+
+.horizontal-align{
+  margin: auto;
+}
+
+
+.top5 { margin-top:5px; }
+.top7 { margin-top:7px; }
+.top10 { margin-top:10px; }
+.top15 { margin-top:15px; }
+.top17 { margin-top:17px; }
+.top30 { margin-top:30px; }
+
+.bottom5 { margin-bottom:5px;}
+.bottom7 { margin-bottom:7px;}
+.bottom10 { margin-bottom:10px;}
+.bottom15 { margin-bottom:15px;}
+.bottom17 { margin-bottom:17px;}
+.bottom30 { margin-bottom:30px;}
+
+
+.right5 { margin-right:5px;}
+.right7 { margin-right:7px;}
+.right10 { margin-right:10px;}
+.right15 { margin-right:15px;}
+.right17 { margin-right:17px;}
+.right30 { margin-right:30px;}
+
+.left5 { margin-left:5px;}
+.left7 { margin-left:7px;}
+.left10 {margin-left:10px;}
+.left15 { margin-left:15px;}
+.left17 { margin-left:17px;}
+.left30 { margin-left:30px;}
+
+.padtop10 {padding-top:10px;}
+.padtop15 {padding-top:15px;}
+.padtop20 {padding-top:20px;}
+
+.padright10 {padding-right:10px;}
+.padright15 { padding-right:15px;}
+.padright20 {padding-right:20px;}
+
+.padleft10{padding-left:10px;}
+.padleft15{padding-left:15px;}
+.padleft20{padding-left:20px;}
+
+.padbottom10{padding-bottom:10px;}
+.padbottom15{padding-bottom:15px;}
+.padbottom20{padding-bottom:20px;}
+
+
+.font17 { font-size:17px;}
+.font20 { font-size:20px;}
+.font25 { font-size:25px;}
+.font30 { font-size:30px;}
+.font40 { font-size:40px;}
+.font50 { font-size:50px;}
+
+.tree{
+    overflow: auto;
+    border: 1px solid silver;
+    min-height:200px;
+}
+
+.tabs-container .panel-body {
+  background: #fff;
+  border: 1px solid #e7eaec;
+  border-radius: 2px;
+  padding: 20px;
+  position: relative;
+}
+.tabs-container .nav-tabs > li.active > a,
+.tabs-container .nav-tabs > li.active > a:hover,
+.tabs-container .nav-tabs > li.active > a:focus {
+  border: 1px solid #e7eaec;
+  border-bottom-color: transparent;
+  background-color: #fff;
+}
+.tabs-container .nav-tabs > li {
+  float: left;
+  margin-bottom: -1px;
+}
+.tabs-container .tab-pane .panel-body {
+  border-top: none;
+}
+.tabs-container .nav-tabs > li.active > a,
+.tabs-container .nav-tabs > li.active > a:hover,
+.tabs-container .nav-tabs > li.active > a:focus {
+  border: 1px solid #e7eaec;
+  border-bottom-color: transparent;
+}
+.tabs-container .nav-tabs {
+  border-bottom: 1px solid #e7eaec;
+}
+.tabs-container .tab-pane .panel-body {
+  border-top: none;
+}
+.tabs-container .tabs-left .tab-pane .panel-body,
+.tabs-container .tabs-right .tab-pane .panel-body {
+  border-top: 1px solid #e7eaec;
+}
+.tabs-container .nav-tabs > li a:hover {
+  background: transparent;
+  border-color: transparent;
+}
+.tabs-container .tabs-below > .nav-tabs,
+.tabs-container .tabs-right > .nav-tabs,
+.tabs-container .tabs-left > .nav-tabs {
+  border-bottom: 0;
+}
+.tabs-container .tabs-left .panel-body {
+  position: static;
+}
+
+.tabs-container .tabs-left > .nav-tabs {
+  width: 20%;
+}
+
+.tabs-container .tabs-left .panel-body {
+  width: 80%;
+  margin-left: 20%;
+}
+
+.tabs-container .tab-content > .tab-pane,
+.tabs-container .pill-content > .pill-pane {
+  display: none;
+}
+
+.tabs-container .tab-content > .active,
+.tabs-container .pill-content > .active {
+  display: block;
+}
+
+
+.tabs-container .tabs-left > .nav-tabs > li {
+  float: none;
+}
+.tabs-container .tabs-left > .nav-tabs > li > a {
+  min-width: 74px;
+  margin-right: 0;
+  margin-bottom: 3px;
+}
+
+.tabs-container .tabs-left > .nav-tabs {
+  float: left;
+  margin-right: 19px;
+}
+.tabs-container .tabs-left > .nav-tabs > li > a {
+  margin-right: -1px;
+  -webkit-border-radius: 4px 0 0 4px;
+  -moz-border-radius: 4px 0 0 4px;
+  border-radius: 4px 0 0 4px;
+}
+.tabs-container .tabs-left > .nav-tabs .active > a,
+.tabs-container .tabs-left > .nav-tabs .active > a:hover,
+.tabs-container .tabs-left > .nav-tabs .active > a:focus {
+  border-color: #e7eaec transparent #e7eaec #e7eaec;
+  *border-right-color: #ffffff;
+}
+
+@media (max-width: 767px) {
+  .tabs-container .nav-tabs > li {
+    float: none !important;
+  }
+  .tabs-container .nav-tabs > li.active > a {
+    border-bottom: 1px solid #e7eaec !important;
+    margin: 0;
+  }
+}
+
+.tabitem-pass{color : #00A65A;}
+.tabitem-fail{color : #DD4B39;}
+
+
+/* TestExecution.Run*/
+.board-pass {color : #5CB85C;}
+.board-fail {color : #D9534F;}
+.label-normal {background : #CCCCCC;}
+
+/* blue and red circle for general purpose */
+.green-circle20{
+    background: #38CC08;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+.red-circle20{
+    background: #FF2D23;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+.gray-circle20{
+  background : #A4A4A4;
+  width : 20px;
+  height : 20px;
+  border-radius : 50%;
+  
+}
+
+/* Iteration items for hello page(Hello.Index)*/
+.iteration-item{
+  border-bottom:1px solid #ddd;
+  line-height:1.6;
+  font-size:18px;
+  margin-left:0px;
+  margin-right:0px;
+  display: flex;
+  align-items: center;
+}
+
+.iteration-item-desc{
+  font-size:16px;
+  padding:5px 0px 5px 0px;
+}
+
+
+/* belows are http://patrickdesjardins.com/blog/bootstrap-loading-spinner-with-css3*/ 
+.center-align{
+  text-align: center;
+}
+
+.glyphicon.spinning {
+    animation: spin 1s infinite linear;
+    -webkit-animation: spin2 1s infinite linear;
+}
+ 
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
+}
+ 
+.dropdown-menu>.divider{
+  margin : 3px 0;
+}
+
+.gone{
+  display : none;
+}
+
+.dashboard-icon-item > span{
+  height:45px;
+  width:45px;
+  font-size:30px;
+  float:left;
+  text-align:center;
+  line-height:60px;
+  color:#5a5c5f;
+}

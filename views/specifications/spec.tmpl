@@ -1,6 +1,6 @@
 {{define "title"}}Specification{{ end }}
 {{define "more_style"}}
-<link rel="stylesheet" href="/public/jstree/themes/default/style.min.css">
+<link rel="stylesheet" href="/public/libs/jstree/dist/themes/default/style.min.css">
 {{end}}
 {{define "content"}}
 <div class="content-wrapper">
@@ -75,7 +75,7 @@
 {{end}}
 {{define "more_scripts"}}
 
-<script src="/public/jstree/jstree.min.js"></script>
+<script src="/public/libs/jstree/dist/jstree.min.js"></script>
 
 <script>
 var ts_id = -1;
@@ -142,7 +142,7 @@ $(document).ready(function() {
           items.push("<button class='btn btn-primary btn-xs right10' id='subsection-btn' data-toggle='modal' data-target='#addSectionModal'>" + 
             "<i class='fa fa-plus right7'></i>Subsection</button>");
           }
-          items.push("<a href='/project/{{.project}}/section/"+ node_id +"/add'><button class='btn btn-primary btn-xs'>" +
+          items.push("<a href='/project/{{.ProjectName}}/section/"+ node_id +"/add'><button class='btn btn-primary btn-xs'>" +
             "<i class='fa fa-plus right7'></i>Test Case</button></a>");
 
           if(data.length == 0){
@@ -158,7 +158,7 @@ $(document).ready(function() {
               var status=["Unknown", "Active", "Inactive", "Close"];
                 items.push("<tr>"+ 
                   "<td>"+ val.ID + "</td>" + 
-                  "<td><a href='/project/{{.project}}/case/"+ val.ID + "'>" + 
+                  "<td><a href='/project/{{.ProjectName}}/spec/"+ val.ID + "'>" + 
                      val.Name + "</a></td>" + 
                   "<td>" + status[val.Status] + "</td>" + 
                   "<td>" + priority[val.Priority] + "</td>" +
@@ -178,21 +178,21 @@ $(document).ready(function() {
 
     $('body').on('click','.tc-edit',function(){
       var id = $(this).attr('id');
-      $(location).attr("href", "/project/{{.project}}/case/" + id + "/edit");
+      $(location).attr("href", "/project/{{.ProjectName}}/spec/" + id + "/edit");
     });
 
     $('body').on('click', '.tc-del', function(){
         var id = $(this).attr('id');
         var r = confirm("Delete the testcase?");
         if(r == true){
-          $('#form_tc_del').attr('action', "/project/{{.project}}/case/" + id + "/delete").submit();
+          $('#form_tc_del').attr('action', "/project/{{.ProjectName}}/spec/" + id + "/delete").submit();
         }
     });
 
     // handler for root section add button
     $('#add-root-btn').click(function(){
         $('#section-title').val('');
-      $(location).attr("href", "/project/{{.project}}/section/add?parent_id=0");
+      $(location).attr("href", "/project/{{.ProjectName}}/section/add?parent_id=0");
         });
 
     // handler for subsection add button

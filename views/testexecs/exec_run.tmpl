@@ -1,7 +1,7 @@
 {{define "title"}}Test Execution{{ end }}
 {{define "more_style"}}
 <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.css">
-<link rel="stylesheet" type="text/css" href="/public/plugins/ladda/ladda-themeless.min.css">
+<link rel="stylesheet" type="text/css" href="/public/libs/ladda/dist/ladda-themeless.min.css">
 {{end}}
 {{define "content"}}
 <div class="content-wrapper">
@@ -125,8 +125,8 @@
 {{end}}
 {{define "more_scripts"}}
 <script src="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"> </script>
-<script src="/public/plugins/ladda/spin.min.js"></script>
-<script src="/public/plugins/ladda/ladda.min.js"></script>
+<script src="/public/libs/ladda/dist/spin.min.js"></script>
+<script src="/public/libs/ladda/dist/ladda.min.js"></script>
 
 <script>
 toastr.options = {
@@ -172,7 +172,7 @@ function addScore(didPass){
 $(document).ready(function(){
 
   var arr = [
-    {{range .Results}}{"id" : {{.TestCaseId}}, "result" : {{.Status}} },
+    {{range .Results}}{"id" : {{.TestCaseID}}, "result" : {{.Status}} },
     {{end}}];
 
   //TODO iterate tabitem and change color, adjust active class
@@ -210,11 +210,10 @@ $(document).ready(function(){
     };
     
     $.post("/project/{{.ProjectName}}/exec/done", data).done(function(data){
-      if(data.status == 200){
-        window.location.href='/project/{{.ProjectName}}/exec';
-      }else{
-        alert("Error!" + data.msg);
-      }
+      window.location.href='/project/{{.ProjectName}}/exec';
+    })
+    .fail(function(data){
+      alert("Error!" + data.msg);
     });
   });
     
@@ -243,27 +242,28 @@ $(document).ready(function(){
     var l = Ladda.create(this);
     l.start();
     
-    $.post("/project/{{.ProjectName}}/exec/update", data).done(function(data){
+    $.post("/project/{{.ProjectName}}/exec/update", data).done(function(rv){
       l.stop();
-      if(data.status == 200){
-        if(didPass){
-          // TODO change color of tab
-          addScore(true);
-          $('#tabitem-' + id).addClass('tabitem-pass');
-        }else{
-          addScore(false);
-          $('#tabitem-' + id).addClass('tabitem-fail');
-        }
-        if(didPass){
-          toastr["success"]("The test case is passed!", "Pass");
-        }else{
-          toastr["error"]("The test case is failed!", "Fail");
-        }
-        
-        goNext();
+      if(didPass){
+        // TODO change color of tab
+
+        // TODO not add by javascript, reload API call
+        addScore(true);
+        $('#tabitem-' + id).addClass('tabitem-pass');
       }else{
-        console.log("Done, but an error while on POST AJAX", data.msg);
+        addScore(false);
+        $('#tabitem-' + id).addClass('tabitem-fail');
       }
+      if(didPass){
+        toastr["success"]("The test case is passed!", "Pass");
+      }else{
+        toastr["error"]("The test case is failed!", "Fail");
+      }
+      
+      goNext();
+    })
+    .fail(function(rv){
+      console.log("Done, but an error while on POST AJAX", rv.msg);
     });
   });
     

@@ -5,17 +5,17 @@ import (
 )
 
 const (
-	PRIORITY_HIGHEST = 1 + iota
-	PRIORITY_HIGH
-	PRIORITY_MEDIUM
-	PRIORITY_LOW
-	PRIORITY_LOWEST
+	PriorityHighest = 1 + iota
+	PriorityHigh
+	PriorityMedium
+	PriorityLow
+	PriorityLowest
 	)
 
 const (
-	TC_STATUS_ACTIVATE = 1 + iota
-	TC_STATUS_INACTIVE
-	TC_STATUS_DRAFT
+	TcStatusActivate = 1 + iota
+	TcStatusInactivate
+	TcStatusDraft
 	)
 
 

@@ -13,6 +13,7 @@ import (
   "golang.org/x/crypto/bcrypt"
   "github.com/robfig/config"
   "github.com/gorilla/sessions"
+  "github.com/wisedog/ladybug/errors"
   "github.com/wisedog/ladybug/models"
   "github.com/wisedog/ladybug/interfacer"
   
@@ -20,8 +21,8 @@ import (
 )
 
 const (
-  LADYBUG_SESSION = "ladybug_session"
-  FLASH_AUTH_MESSAGE = "flash_auth_msg"
+  LadybugSession = "ladybug_session"
+  FlashAuthMessage = "flash_auth_msg"
 )
 
 
@@ -47,19 +48,12 @@ func init(){
 
   // for flash messages
   gob.Register(&models.Build{})
+  gob.Register(&models.Project{})
   gob.Register(&map[string]string{})
 
   // TODO store category map to static variable. 
   // in funcMap - categorui18n function refers the var.
 }
-
-//@deprecated
-//var store = sessions.NewCookieStore([]byte("something-very-secret"))
-
-/*var cookieHandler = securecookie.New(
-  securecookie.GenerateRandomKey(64),
-  securecookie.GenerateRandomKey(32),
-  )*/
 
 // connected is private utilitiy function for checking 
 // this user id now on connected or not.
@@ -122,9 +116,6 @@ func Login(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) err
       session.Values["user"] = email
       session.Values["uid"] = user.ID
 
-      fmt.Println("user", user)
-      fmt.Println("uid", user.ID)
-
       // Save it before we write to the response/return from the handler.
       session.Save(r, w)
 
@@ -133,7 +124,7 @@ func Login(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) err
   }
 
   // not exist account or incorrect password
-  session.AddFlash("Not exist account or incorrect password", FLASH_AUTH_MESSAGE)
+  session.AddFlash("Not exist account or incorrect password", FlashAuthMessage)
   session.Save(r, w)
   http.Redirect(w, r, "/", http.StatusFound)
   return nil
@@ -169,7 +160,7 @@ func LoginPage(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
     var s string
     var logoutFlag bool
 
-    if msg := session.Flashes(FLASH_AUTH_MESSAGE); len(msg) > 0{
+    if msg := session.Flashes(FlashAuthMessage); len(msg) > 0{
       v, ok := msg[0].(string)
       if ok {
         s = v
@@ -195,73 +186,138 @@ func LogOut(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) er
     MaxAge:   -1,
   }
   log.Debug("App", "msg", "logout")
-  session.AddFlash("You just logged out.", FLASH_AUTH_MESSAGE)
+  session.AddFlash("You just logged out.", FlashAuthMessage)
 
   session.Save(r, w)
   http.Redirect(w, r, "/", http.StatusFound)
   return nil
 }
 
-/*
-func (c Application) SaveUser(user models.User, verifyPassword string) revel.Result {
-	c.Validation.Required(verifyPassword)
-	c.Validation.Required(verifyPassword == user.Password).
-		Message("Password does not match")
-	user.Validate(c.Validation)
+// Register renders just a user registration page
+func Register(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
+  dir, _ := os.Getwd()
+  target := filepath.Join(dir, "views", "application", "register.html" )
+  t, err := template.ParseFiles(target)
 
-	if c.Validation.HasErrors() {
-		c.Validation.Keep()
-		c.FlashParams()
-		return c.Redirect(routes.Application.Register())
-	}
+  if err != nil{
+    log.Error("App", "msg", "Template parse files error", "err", err)
+    return err
+  }
+  
+  session, e := c.Store.Get(r, "ladybug")
+  var errorMap map[string]string
+  if e == nil{
+    errorMap = getErrorMap(session)
+    if errorMap == nil{
+      log.Info("app", "msg", "map is nil")
+      errorMap = make(map[string]string)
+    }  
+  }else{
+    errorMap = make(map[string]string)
+  }
+  
 
-	user.HashedPassword, _ = bcrypt.GenerateFromPassword(
-		[]byte(user.Password), bcrypt.DefaultCost)
-	c.Tx.NewRecord(user)
-	c.Tx.Create(user)
-
-	c.Session["user"] = user.Email
-	c.Flash.Success("Welcome, " + user.Name)
-	return c.Redirect(routes.Users.Index(user.ID))
+  items := map[string]interface{}{
+    "Messages": "msg",
+    "ErrorMap" : errorMap,
+  }
+  
+  if err := t.Execute(w, items); err != nil{
+    log.Error("App", "msg", "Template Execute error","err", err)
+    return err
+  }
+  
+  return nil
 }
 
-func (c Application) Login(email, password string, remember bool) revel.Result {
-	user := c.getUser(email)
-	if user != nil {
-		err := bcrypt.CompareHashAndPassword(user.HashedPassword, []byte(password))
-		if err == nil {
-			c.Session["user"] = email
-			c.Session["user_id"] = strconv.Itoa(user.ID)
-			if remember {
-				c.Session.SetDefaultExpiration()
-			} else {
-				c.Session.SetNoExpiration()
-			}
-			c.Flash.Success("Welcome, " + email)
+// SaveUser is a POST handler from Register page
+func SaveUser(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error{
+  // First parse form value
+  if err := r.ParseForm(); err != nil {
+    log.Error("User", "type", "http", "msg ", err )
+  }
+  
+  password1 := r.FormValue("Password1")
+  password2 := r.FormValue("Password2")
+  
+  // check those two password is identical
+  if password1 != password2{
+    session, _ := c.Store.Get(r, "ladybug")
+    errorMap := make(map[string]string)
+    errorMap["Password"] = "The passwords are not identical."
+    session.AddFlash(errorMap, ErrorMsg)
+    
+    session.Save(r, w)
+    
+    http.Redirect(w, r, "/register", http.StatusFound)
+    return nil
+  }
+  
+  email := r.FormValue("Email")
+  name := r.FormValue("Name")
 
-			// Set language from user's preference.
-			// TODO add language field to User model
-			// language field should be string and ISO639-1 codes.
-			// Region field should be string and ISO3166-1 alpha-2 code
-			
-			cookie := http.Cookie{Name: "REVEL_LANG", Value: "en-US", Path: "/"}
-			c.SetCookie(&cookie)
-			
-			user.LastLoginAt = time.Now()
-			c.Tx.Save(&user)
-			return c.Redirect(routes.Hello.Welcome())
-		}
+  log.Debug("debug", "email", email, "name", name)
+
+  hashedPassword, _ := bcrypt.GenerateFromPassword(
+		[]byte(password1), bcrypt.DefaultCost)
+
+  usr := models.User{Email : email, Name : name, Password : password1, HashedPassword : hashedPassword }
+  log.Debug("debug", "hashed", hashedPassword)
+
+  // Validate input value
+  // if validate failed, redirect register page with Flash
+  if errorMap := usr.Validate(); len(errorMap) > 0{
+    log.Debug("debug", "msg", "in validation fail", "errormap", errorMap)
+
+    session, e := c.Store.Get(r, "ladybug")
+    if e != nil{
+      log.Warn("error ", "msg", e.Error)
+    }
+
+    session.AddFlash(usr, "LADYBUG_USER")
+    session.AddFlash(errorMap, ErrorMsg)
+
+    session.Save(r, w)
+    http.Redirect(w, r, "/register", http.StatusFound)
+    return nil
+  }
+
+  var tmpUsr models.User
+  // check duplicated email
+  if err := c.Db.Where("email = ?", email).First(&tmpUsr).Error; err == nil{
+    log.Debug("debug", "msg", "Found duplicated")
+    // Found duplicated
+    errorMap := make(map[string]string)
+    session, e := c.Store.Get(r, "ladybug")
+    if e != nil{
+      log.Warn("error ", "msg", e.Error)
+    }
+
+    errorMap["Email"] = "Duplicated Email"
+
+    session.AddFlash(usr, "LADYBUG_USER")
+    session.AddFlash(errorMap, ErrorMsg)
+
+    session.Save(r, w)
+    http.Redirect(w, r, "/register", http.StatusFound)
+    return nil 
+  }
+ 
+  // save to db
+ 	c.Db.NewRecord(usr)
+
+	if err := c.Db.Create(&usr).Error; err != nil {
+		log.Error("App", "Type", "database", "Error", err)
+    return errors.HttpError{Status : http.StatusInternalServerError, Desc :  "could not create a build model"}  
 	}
 
-	c.Flash.Out["user"] = email
-	c.Flash.Error("Login failed")
-	return c.Redirect(routes.Application.Index())
+  http.Redirect(w, r, "/login", http.StatusFound)
+	return nil 
 }
 
-func (c Application) Logout() revel.Result {
-	for k := range c.Session {
-		delete(c.Session, k)
-	}
-	return c.Redirect(routes.Application.Index())
+// LogAndHTTPError makes log messages and return http error with given status http code
+// default log level is ERROR
+func LogAndHTTPError(status int, module string, errType string, msg string) error{
+  log.Error(module, "type" , errType, "msg", msg)
+  return errors.HttpError{Status : status, Desc : msg}
 }
-*/

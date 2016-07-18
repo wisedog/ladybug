@@ -6,6 +6,7 @@ import (
   "os"
 
   "github.com/jinzhu/gorm"
+  "github.com/wisedog/ladybug/interfacer"
   "github.com/wisedog/ladybug/database"
   "github.com/wisedog/ladybug/models"
 
@@ -15,11 +16,12 @@ var Database *gorm.DB
 
 func setup(){
   fmt.Println("Setup Testing for package buildtools...")
+  cf := interfacer.LoadConfig()
+
   var err error
-  Database, err = database.InitDB() 
+  Database, err = database.InitDB(cf) 
   if err != nil{
     fmt.Println("Database initialization is failed.")
-    return
   }
   //defer Database.Close()
 }
@@ -59,7 +61,7 @@ func TestGetApiUrlTravis(t *testing.T) {
 func TestTravisConnectionTest(t *testing.T){
   var travis Travis
 
-  _, err, _ := travis.ConnectionTest("https://travis-ci.org/wisedog/ladybug")
+  _, _ , err:= travis.ConnectionTest("https://travis-ci.org/wisedog/ladybug")
   if err != nil{
     t.Fail()
     t.Log("ConnectionTest Failed with URL : ", "https://travis-ci.org/wisedog/ladybug", " Msg : ", err.Error())
@@ -70,7 +72,7 @@ func TestTravisConnectionTest(t *testing.T){
 func TestConnectionTest_Failed(t *testing.T){
   var travis Travis
 
-  _, err, _ := travis.ConnectionTest("")
+  _, _, err := travis.ConnectionTest("")
   if err == nil{
     t.Fail()
     t.Log("ConnectionTest Failed with URL : \" \" should be failed")

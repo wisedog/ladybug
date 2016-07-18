@@ -21,13 +21,10 @@ func SpecIndex(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
     http.Redirect(w, r, "/", http.StatusFound)
   }
 
-  vars := mux.Vars(r)
-  projectName := vars["projectName"]
-
 	// Project list is needed to show upper right menu for moving between projects
 	var prj models.Project
 	
-	if err := c.Db.Where("name = ?", projectName).First(&prj); err.Error != nil{
+	if err := c.Db.Where("name = ?", c.ProjectName).First(&prj); err.Error != nil{
     log.Error("Specification", "type", "database", "msg ", err.Error )
     return errors.HttpError{http.StatusInternalServerError, "Project is not found in TestDesign.Index"}
 	}
@@ -54,13 +51,11 @@ func SpecIndex(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
 	treedata := string(treedataByte)
 
   items := map[string]interface{}{
-    "User": user,
     "TreeData" : treedata,
-    "ProjectName" : projectName,
     "Active_idx" : 6,
   }
 
-  return Render(w, items, "views/base.tmpl", "views/specifications/spec.tmpl")
+  return Render2(c, w, items, "views/base.tmpl", "views/specifications/spec.tmpl")
 }
 
 
@@ -83,5 +78,5 @@ func SpecList(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
     return errors.HttpError{http.StatusInternalServerError, "Not found section"}
 	}
 	
-  return RenderJson(w, specs)
+  return RenderJSON(w, specs)
 }
