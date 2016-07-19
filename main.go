@@ -70,15 +70,29 @@ func authHandler(c *interfacer.AppContext, h handlerFunc) http.HandlerFunc {
 }
 
 // notFound handles 404 error and render custom page.
-// see views/errors/404.html
-func notFound(w http.ResponseWriter, r *http.Request) {
-	log.Warn("Router", "404", r.URL.Path)
-	t, err := template.ParseFiles("views/errors/404.html")
+// see views/errors/404.tmpl
+func notFound(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+	t, err := template.New("base.tmpl").ParseFiles("views/base.tmpl", "views/errors/404.tmpl")
+
 	if err != nil {
-		log.Warn("Router", "Template ParsesFiles is failed in notFound", "msg", err)
+		log.Error("Util", "type", "rendering", "msg ", err)
+	}
+	var user *models.User
+	if user = connected2(c, r); user == nil {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return nil
 	}
 
-	t.Execute(w, nil)
+	item := map[string]interface{}{
+		"Active_idx": 0,
+		"User":       c.User,
+	}
+
+	if err = t.Execute(w, item); err != nil {
+		log.Error("Util", "type", "rendering", "msg ", err)
+	}
+
+	return nil
 }
 
 // main is entry point of this application
@@ -212,7 +226,7 @@ func main() {
 
 	r.PathPrefix("/public/").Handler(http.StripPrefix("/public/",
 		http.FileServer(http.Dir("public/"))))
-	r.NotFoundHandler = http.HandlerFunc(notFound)
+	r.NotFoundHandler = http.HandlerFunc(authHandler(ctx, notFound))
 
 	log.Info("APP", "Binding Address", ctx.Config.GetBindAddress())
 	// Bind to a port and pass our router in
