@@ -162,8 +162,43 @@ func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
 	}
 
 	// counting testcases
-	tcCount := 0
-	c.Db.Model(models.TestCase{}).Where("project_id = ?", prj.ID).Count(&tcCount)
+	var testcases []models.TestCase
+	c.Db.Where("project_id = ?", prj.ID).Order("created_at desc").Find(&testcases)
+	tcCount := len(testcases)
+
+	// generate graph data only before 4 weeks
+	now := time.Now()
+	n1 := now.AddDate(0, 0, -7)
+	n2 := now.AddDate(0, 0, -14)
+	n3 := now.AddDate(0, 0, -21)
+	n4 := now.AddDate(0, 0, -28)
+	var dataset [4]int
+	for _, v := range testcases {
+		if v.CreatedAt.After(n1) {
+			dataset[3]++
+		} else if v.CreatedAt.After(n2) {
+			dataset[3]++
+			dataset[2]++
+		} else if v.CreatedAt.After(n3) {
+			dataset[3]++
+			dataset[2]++
+			dataset[1]++
+		} else if v.CreatedAt.After(n4) {
+			dataset[3]++
+			dataset[2]++
+			dataset[1]++
+			dataset[0]++
+		}
+	}
+
+	// make string be parsed by GraphJS
+	dataSetString := []string{}
+	for i := range dataset {
+		num := dataset[i]
+		txt := strconv.Itoa(num)
+		dataSetString = append(dataSetString, txt)
+	}
+	dataArray := strings.Join(dataSetString, ",")
 
 	// deal with test executions
 	var execs []models.Execution
@@ -206,6 +241,7 @@ func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
 		"TestCaseNum":   tcCount,
 		"Milestone":     milestone,
 		"DaysLeft":      int(daysLeft.Hours() / 24),
+		"DataSet":       dataArray,
 		"Active_idx":    1,
 	}
 

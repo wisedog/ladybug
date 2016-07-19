@@ -125,7 +125,10 @@
           </div><!-- /.box-header -->
           <div class="box-body">
             <div class="row">
-              <div class="col-md-8">
+              <div class="col-md-12">
+                <div class="chart" style="position:relative; overflow:hidden; width:100%;">
+                  <canvas id="lineChart" style="height: 250px; width: 509px;" width="509" height="250"></canvas>
+                </div>
               
               </div><!-- /.col -->
             </div><!-- /.row -->
@@ -180,6 +183,73 @@
   </section><!-- /.content -->
 </div><!-- /.content-wrapper -->
 {{end}}
-{{define "more_scripts"}}{{end}}
+{{define "more_scripts"}}
+<script src="/public/libs/Chart.js/dist/Chart.min.js"></script>
+<script>
+    var renderingData = {{.DataSet}};
+    var arr = renderingData.split(",");
+
+    var config = {
+        type: 'line',
+        data: {
+            labels: ["-4week", "-3 week", "-2 week", "-1 week"],
+            datasets: [{
+                label: "Number of Test Case(s)",
+                data: arr,
+                fill: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            legend: {
+                position: 'bottom',
+            },
+            hover: {
+                mode: 'label'
+            },
+            scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Period'
+                    }
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Number'
+                    },
+                    ticks: {
+                      stepSize: 1
+                    },
+                    gridLines : {
+                      display : false
+                    }
+                }]
+            },
+            title: {
+                display: true,
+                text: 'Test Case(s) Chart'
+            },
+        }
+    };
+
+    $.each(config.data.datasets, function(i, dataset) {
+        var background = 'rgba(60,141,188,0.9)';
+        dataset.borderColor = background;
+        dataset.backgroundColor = background;
+        dataset.pointBorderColor = background;
+        dataset.pointBackgroundColor = background;
+        dataset.pointBorderWidth = 1;
+    });
+
+    window.onload = function() {
+        var ctx = document.getElementById("lineChart").getContext("2d");
+        window.myLine = new Chart(ctx, config);
+    };
+</script>
+{{end}}
 
 
