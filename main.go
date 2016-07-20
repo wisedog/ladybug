@@ -159,7 +159,7 @@ func main() {
 	project.HandleFunc("/{projectName}/dashboard", authHandler(ctx, controllers.Dashboard)).Methods("GET")
 	project.HandleFunc("/{projectName}/design", authHandler(ctx, controllers.DesignIndex)).Methods("GET")
 	project.HandleFunc("/{projectName}/build", authHandler(ctx, controllers.BuildsIndex)).Methods("GET")
-	project.HandleFunc("/{projectName}/spec", authHandler(ctx, controllers.SpecIndex)).Methods("GET")
+	project.HandleFunc("/{projectName}/req", authHandler(ctx, controllers.RequirementIndex)).Methods("GET")
 	project.HandleFunc("/{projectName}/testplan", authHandler(ctx, controllers.PlanIndex)).Methods("GET")
 	project.HandleFunc("/{projectName}/exec", authHandler(ctx, controllers.ExecIndex)).Methods("GET")
 	project.HandleFunc("/{projectName}/milestone", authHandler(ctx, controllers.MilestoneIndex)).Methods("GET")
@@ -206,9 +206,9 @@ func main() {
 	plan.HandleFunc("/run/{id:[0-9]+}", authHandler(ctx, controllers.PlanRun)).Methods("GET")
 
 	// specification
-	spec := project.PathPrefix("/{projectName}/spec").Subrouter()
-	spec.HandleFunc("/", authHandler(ctx, controllers.SpecIndex)).Methods("GET")
-	spec.HandleFunc("/list/{id:[0-9]+}", authHandler(ctx, controllers.SpecList)).Methods("GET")
+	req := project.PathPrefix("/{projectName}/req").Subrouter()
+	req.HandleFunc("/", authHandler(ctx, controllers.RequirementIndex)).Methods("GET")
+	req.HandleFunc("/list/{id:[0-9]+}", authHandler(ctx, controllers.RequirementList)).Methods("GET")
 
 	// testexec
 	exec := project.PathPrefix("/{projectName}/exec").Subrouter()

@@ -40,7 +40,7 @@ func InitDB(conf *interfacer.AppConfig) (*gorm.DB, error) {
 	Database.AutoMigrate(&models.TestCaseResult{})
 	Database.AutoMigrate(&models.Review{})
 	Database.AutoMigrate(&models.Category{})
-	Database.AutoMigrate(&models.Specification{})
+	Database.AutoMigrate(&models.Requirement{})
 	Database.AutoMigrate(&models.Milestone{})
 	createDummy()
 
@@ -87,7 +87,7 @@ func createDummy() {
 	Database.DropTable(&models.Review{})
 	Database.DropTable(&models.TestCaseResult{})
 	Database.DropTable(&models.Category{})
-	Database.DropTable(&models.Specification{})
+	Database.DropTable(&models.Requirement{})
 	Database.DropTable(&models.Activity{})
 	Database.DropTable(&models.History{})
 	Database.DropTable(&models.Milestone{})
@@ -264,7 +264,7 @@ func createDummy() {
 			Prefix: prj1.Prefix, ProjectID: prj1.ID, ForTestCase: true},
 		&models.Section{Seq: 1, Title: "ddd", RootNode: false, ParentsID: 10,
 			Prefix: prj1.Prefix, ProjectID: prj1.ID, ForTestCase: true},
-		&models.Section{Seq: 1, Title: "Test Specifications", RootNode: true,
+		&models.Section{Seq: 1, Title: "Requirements", RootNode: true,
 			Prefix: prj.Prefix, ProjectID: prj.ID, ForTestCase: false},
 		&models.Section{Seq: 1, Title: "Functional", RootNode: false,
 			Prefix: prj.Prefix, ProjectID: prj.ID, ForTestCase: false,
@@ -298,17 +298,17 @@ func createDummy() {
 		Database.Create(&ct)
 	}
 
-	Database.AutoMigrate(&models.Specification{})
+	Database.AutoMigrate(&models.Requirement{})
 
-	specs := []*models.Specification{
-		&models.Specification{Name: "Hello, world", SectionID: 13,
-			Status: models.SpecStatusActivate, Priority: models.PriorityHigh,
+	specs := []*models.Requirement{
+		&models.Requirement{Name: "Hello, world", SectionID: 13,
+			Status: models.ReqStatusActivate, Priority: models.PriorityHigh,
 		},
-		&models.Specification{Name: "Hello, stranger", SectionID: 14,
-			Status: models.SpecStatusActivate, Priority: models.PriorityMedium,
+		&models.Requirement{Name: "Hello, stranger", SectionID: 14,
+			Status: models.ReqStatusActivate, Priority: models.PriorityMedium,
 		},
-		&models.Specification{Name: "Good bye", SectionID: 14,
-			Status: models.SpecStatusActivate, Priority: models.PriorityLow,
+		&models.Requirement{Name: "Good bye", SectionID: 14,
+			Status: models.ReqStatusActivate, Priority: models.PriorityLow,
 		},
 	}
 

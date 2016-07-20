@@ -65,7 +65,7 @@
                   </td>
                   <td><a href='/project/{{$.ProjectName}}/testplan/view/{{.Plan.ID}}'>{{.Plan.Title}}</a></td>
                   <td>{{.Plan.ExecCaseNum}}</td>
-                  <td>{{.Executor.Name}}</td>
+                  <td><a href="/user/profile/{{.Executor.ID}}">{{.Executor.Name}}</a></td>
                   <td>
                     <a href='/project/{{$.ProjectName}}/testplan/view/{{.TargetBuild.BuildProjectID }}'>
                       {{.TargetBuild.FullDisplayName}}

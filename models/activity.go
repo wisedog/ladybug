@@ -3,15 +3,17 @@ package models
 // Activity only belongs to user
 type Activity struct {
 	BaseModel
-	User            User
-	UserID      	int
-	
-	Content         string  `sql:"size:1000"`
+
+	User    User
+	UserID  int
+	Content string `sql:"size:1000"`
 }
 
-/*func (activity *Activity) Validate(v *revel.Validation) {
-	v.Check(activity.UserID,
-		revel.Required{},
-	)
+// Validate function checks all input values are validated
+func (activity *Activity) Validate() error {
+	if activity.UserID == 0 {
+		//TODO make an error
+	}
+
+	return nil
 }
-*/

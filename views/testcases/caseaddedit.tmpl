@@ -17,7 +17,7 @@
   </section>
   <!-- Main content -->
   <section class="content">
-    <form method="POST" action="/project/{{.ProjectName}}/case/{{if eq .IsEdit true}}update/{{.Id}}{{else}}save{{end}}">
+    <form method="POST" action="/project/{{.ProjectName}}/case/{{if eq .IsEdit true}}update/{{.ID}}{{else}}save{{end}}">
       <div class="row">
         <input type="hidden" name="SectionID" value="{{.TestCase.SectionID}}"></input>
         <input type="hidden" name="ID" value="{{.TestCase.ID}}"></input>

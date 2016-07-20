@@ -12,17 +12,6 @@ import (
 	log "gopkg.in/inconshreveable/log15.v2"
 )
 
-//status for test execution
-const (
-	ExecStatusReady = 1 + iota
-	ExecStatusInProgress
-	ExecStatusNotAvailable
-	ExecStatusDone
-	ExecStatusDeny
-	ExecStatusPass
-	ExecStatusFail
-)
-
 const (
 	ProjectFlashKey = "LADYBUG_PROJECT"
 )
@@ -208,9 +197,9 @@ func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
 	taskCount := 0
 	for idx := 0; idx < len(execs); idx++ {
 		element := execs[idx]
-		if element.Status == ExecStatusReady {
+		if element.Status == models.ExecStatusReady {
 			taskCount++
-		} else if element.Status == ExecStatusInProgress {
+		} else if element.Status == models.ExecStatusInProgress {
 			prg := float32(element.PassCaseNum+element.FailCaseNum) / float32(element.TotalCaseNum) * 100
 			execs[idx].Progress = int(prg)
 			taskCount++
