@@ -1,81 +1,73 @@
 package models
 
-import(
+import (
 	"testing"
 )
 
-func TestUserValidation(t *testing.T) {
-  // test data is defined at database/gorm.go
-  user := User{Name:"", Email:"aaa@bbb.com"}
-  errorMap := user.Validate()
-  
-  if len(errorMap) == 0{
-    t.Errorf(`User{Name:"", Email:"aaa@bbb.com"}`)
-  }
-  
-  if errorMap["Name"] != "Name is required." {
-    t.Errorf(`(User{Name:"", Email:"aaa@bbb.com"}) errorMap['name'] = %q expected %q`, errorMap["Name"], "Name is required.") 
-  }
-  
-  user = User{Name : "Brünhild", Email:""}
-  errorMap = user.Validate()
-  
-  if len(errorMap) == 0{
-    t.Error(`User{Name : "Brünhild", Email:""}`)
-  }
-  
-  if errorMap["Email"] != "Email is required." {
-    t.Errorf(`User{Name : "Brünhild", Email:""} errorMap['Email'] = %q expected %q `, errorMap["Email"], "Email is required.")
-  }
-  
-  user.Email = "asdadsasda"
-  errorMap = user.Validate()
-  if len(errorMap) == 0{
-    t.Error(`User{Name : "Brünhild", Email:"asdasdad"})`)
-  }
-  
-  if errorMap["Email"] != "Invalid email address"{
-    t.Errorf(`User{Name : "Brünhild", Email:"asdadsasda"} errorMap['Email'] = %q expected %q `, errorMap["Email"], "Invalid email address")
-  }
-  
-   
-  // check empty project name
-  /*
-  // normal condition
-  prj = Project{Name : "Lübeck", Prefix:"HL"}
-  errorMap = prj.Validate()
+// TestUserValidateAbsenseName tests when user name is blank
+func TestUserValidateAbsenseName(t *testing.T) {
+	user := User{Name: "", Email: "aaa@bbb.com", Password: "Destory_Rome"}
+	errorMap := user.Validate()
 
-  if len(errorMap) > 0{
-    t.Errorf(`models.Project.Validate() error ({Name : "Lübeck", Prefix:"HL"})`)
-  }
+	if len(errorMap) == 0 {
+		t.Errorf(`User{Name:"", Email:"aaa@bbb.com"}`)
+	}
 
-  if errorMap["Name"] != "" {
-    t.Errorf(`({Name : "Lübeck", Prefix:"HL"}) errorMap['name'] = %q expected %q`, errorMap["Name"], "") 
-  }
+	if errorMap["Name"] != "Name is required." {
+		t.Errorf(`(User{Name:"", Email:"aaa@bbb.com"}) errorMap['name'] = %q expected %q`, errorMap["Name"], "Name is required.")
+	}
+}
 
-  // check empty prefix
-  prj = Project{Name : "Hamburg", Prefix:""}
-  errorMap = prj.Validate()
+// TestUserValidateAbsenseName tests absense of email address
+func TestUserValidateAbsenseEmail(t *testing.T) {
+	user := User{Name: "Brünhild", Email: "", Password: "Destory_Rome"}
+	errorMap := user.Validate()
 
-  if len(errorMap) == 0{
-    t.Errorf(`models.Project.Validate() error ({Name : "Hamburg", Prefix:""})`)
-  }
+	if len(errorMap) == 0 {
+		t.Error(`User{Name : "Brünhild", Email:""}`)
+	}
 
-  if errorMap["Prefix"] != "Prefix is required." {
-    t.Errorf(`({Name : "Hamburg", Prefix:""}) errorMap["Prefix"] = %q expected %q`, errorMap["Prefix"], "Prefix is required.") 
-  }
+	if errorMap["Email"] != "Email is required." {
+		t.Errorf(`User{Name : "Brünhild", Email:""} errorMap['Email'] = %q expected %q `,
+			errorMap["Email"], "Email is required.")
+	}
+}
 
+// TestUserValidateInformalEmail tests informal email input
+func TestUserValidateInformalEmail(t *testing.T) {
+	user := User{Name: "Brünhild", Email: "asdadsasda", Password: "Destory_Rome"}
+	errorMap := user.Validate()
+	if len(errorMap) == 0 {
+		t.Error(`User{Name : "Brünhild", Email:"asdasdad"})`)
+	}
 
-  // check max size of prefix
-    // check empty prefix
-  prj = Project{Name : "Kiel", Prefix:"kielkielkielkiel"}
-  errorMap = prj.Validate()
+	if errorMap["Email"] != "Invalid email address" {
+		t.Errorf(`User{Name : "Brünhild", Email:"asdadsasda"} errorMap['Email'] = %q expected %q `,
+			errorMap["Email"], "Invalid email address")
+	}
+}
 
-  if len(errorMap) == 0{
-    t.Errorf(`models.Project.Validate() error ({Name : "Kiel", Prefix:"kielkielkielkiel"})`)
-  }
+// TestUserValidateAbsensePassword tests absense password
+func TestUserValidateAbsensePassword(t *testing.T) {
+	user := User{Name: "Attilla", Email: "attilla@hun.com"}
+	errorMap := user.Validate()
 
-  if errorMap["Prefix"] != " Size of Prefix exceeds 12 characters." {
-    t.Errorf(`({Name : "Kiel", Prefix:"kielkielkielkiel"}) errorMap["Prefix"] = %q expected %q`, errorMap["Prefix"], " Size of Prefix exceeds 12 characters.") 
-  }*/
+	if len(errorMap) == 0 {
+		t.Errorf(`User{Name: "Attilla", Email: "attilla@hun.com"`)
+	}
+
+	if errorMap["Password"] != "Password is required" {
+		t.Errorf(`User{Name: "Attilla", Email: "attilla@hun.com"} errorMap['Password'] = %q expected %q `,
+			errorMap["Password"], "Password is required")
+	}
+}
+
+// TestUserValidateNormalCondition tests normal condition of User
+func TestUserValidateNormalCondition(t *testing.T) {
+	user := User{Name: "Attilla", Email: "attilla@hun.com", Password: "Destory_Rome"}
+	errorMap := user.Validate()
+
+	if len(errorMap) > 0 {
+		t.Errorf(`User{Name: "Attilla", Email: "attilla@hun.com", Password: "Destory_Rome"}`)
+	}
 }
