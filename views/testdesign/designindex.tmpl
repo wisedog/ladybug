@@ -122,14 +122,13 @@ $(document).ready(function() {
         "'><button class='btn btn-primary btn-xs btn-flat'>" +
         "<i class='fa fa-plus right7'></i>Test Case</button></a>");
 
+      items.push("<div class='table-responsive'><table class='table table-striped'>");
+      items.push("<thead><tr><th>#</th><th>Title</th><th>Status</th><th>Priority</th><th>Category</th><th>Action</th></tr></thead>");
+      items.push("<tbody>");
       if(data.length == 0){
-        items.push("<div>No Data</div>");
-        $('#tc_list').html(items.join(""));
+        items.push("<tr><td></td><td></td><td></td></tr>");
       }
       else{
-        items.push("<div class='table-responsive'><table class='table table-striped'>");
-        items.push("<thead><tr><th>#</th><th>Title</th><th>Status</th><th>Priority</th><th>Category</th><th>Action</th></tr></thead>");
-        items.push("<tbody>");
         $.each(data, function(key, val){
           var priority = ["Unknown", "Highest", "High", "Medium", "Low", "Lowest"];
           var status=["Unknown", "Active", "Inactive", "Close"];
@@ -147,10 +146,11 @@ $(document).ready(function() {
               "' style='cursor:pointer;'></span>"+
               "</td>" +
               "</tr>");
-        $('#tc_list').html(items.join(""));
+        
         });
+      } // end of if
+      $('#tc_list').html(items.join(""));
         items.push("</tbody></table></div>");
-      }
     }); // end of testtree click event binding
 });
 
