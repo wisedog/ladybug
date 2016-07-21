@@ -205,10 +205,11 @@ func main() {
 	plan.HandleFunc("/view/{id:[0-9]+}", authHandler(ctx, controllers.PlanView)).Methods("GET")
 	plan.HandleFunc("/run/{id:[0-9]+}", authHandler(ctx, controllers.PlanRun)).Methods("GET")
 
-	// specification
+	// requirements
 	req := project.PathPrefix("/{projectName}/req").Subrouter()
 	req.HandleFunc("/", authHandler(ctx, controllers.RequirementIndex)).Methods("GET")
 	req.HandleFunc("/list/{id:[0-9]+}", authHandler(ctx, controllers.RequirementList)).Methods("GET")
+	// TODO VIEW : req.HandleFunc("/view/{id:[0-9]+}", authHandler(ctx, controllers.RequirementList)).Methods("GET")
 
 	// testexec
 	exec := project.PathPrefix("/{projectName}/exec").Subrouter()
