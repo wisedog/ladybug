@@ -18,7 +18,7 @@ func TestUserValidateAbsenseName(t *testing.T) {
 	}
 }
 
-// TestUserValidateAbsenseName tests absense of email address
+// TestUserValidateAbsenseEmail tests absense of email address
 func TestUserValidateAbsenseEmail(t *testing.T) {
 	user := User{Name: "Brünhild", Email: "", Password: "Destory_Rome"}
 	errorMap := user.Validate()

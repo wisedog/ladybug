@@ -43,7 +43,7 @@ func TestPlanValidateInvalidProjectID(t *testing.T) {
 
 }
 
-// TestPlanValidateInvalidProjectID tests that TestPlan.Validate() function
+// TestPlanValidateInvalidCreatorID tests that TestPlan.Validate() function
 // returns error on invalid creator id
 func TestPlanValidateInvalidCreatorID(t *testing.T) {
 	// check status

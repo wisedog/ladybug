@@ -17,7 +17,7 @@ func TestExecutionValidateNormalCondition(t *testing.T) {
 	}
 }
 
-// TestExecutionValidateAbsensePlanID tests ProjectID is not set
+// TestExecutionValidateAbsenseProjectID tests ProjectID is not set
 func TestExecutionValidateAbsenseProjectID(t *testing.T) {
 
 	exec := Execution{Status: ExecStatusReady, PlanID: 2}

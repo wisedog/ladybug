@@ -72,3 +72,15 @@ func RequirementList(c *interfacer.AppContext, w http.ResponseWriter, r *http.Re
 
 	return RenderJSONWithStatus(w, reqs, http.StatusOK)
 }
+
+// ViewRequirement renders a page of information of the requirements.
+// This page should be a detail of requested requirement and related testcases
+func ViewRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+// AddRequirement renders a page that a user can add a requirement
+// This page should be a detail of requested requirement and related testcases
+func AddRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+	return nil
+}

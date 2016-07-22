@@ -4,7 +4,8 @@ import (
 	"testing"
 )
 
-func TestMilestoneValidation(t *testing.T) {
+// TestMilestoneValidateEmptyName tests empty milestone name
+func TestMilestoneValidateEmptyName(t *testing.T) {
 
 	milestone := Milestone{Name: ""}
 

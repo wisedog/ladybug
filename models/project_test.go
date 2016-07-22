@@ -4,6 +4,7 @@ import (
 	"testing"
 )
 
+// TestProjectValidationEmptyProjectName tests empty project name
 func TestProjectValidationEmptyProjectName(t *testing.T) {
 
 	// check empty project name
@@ -19,7 +20,9 @@ func TestProjectValidationEmptyProjectName(t *testing.T) {
 	}
 }
 
-func TestProjectValidateEmptyNormalCondition(t *testing.T) {
+// TestProjectValidateNormalCondition tests normal condition
+// No error should be
+func TestProjectValidateNormalCondition(t *testing.T) {
 	// normal condition
 	prj := Project{Name: "Lübeck", Prefix: "HL"}
 	errorMap := prj.Validate()
@@ -34,6 +37,7 @@ func TestProjectValidateEmptyNormalCondition(t *testing.T) {
 
 }
 
+// TestProjectValidateEmptyPrefix tests empty prefix
 func TestProjectValidateEmptyPrefix(t *testing.T) {
 	// check empty prefix
 	prj := Project{Name: "Hamburg", Prefix: ""}
@@ -49,6 +53,7 @@ func TestProjectValidateEmptyPrefix(t *testing.T) {
 
 }
 
+// TestProjectValidatePrefix tests long prefix
 func TestProjectValidatePrefix(t *testing.T) {
 	// check max size of prefix
 	// check empty prefix

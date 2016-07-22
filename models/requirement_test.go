@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-// TestRequirementValidationErrorMap tests that Requirement.Validate() function
+// TestRequirementValidateErrorMap tests that Requirement.Validate() function
 // returns error map
 func TestRequirementValidateErrorMap(t *testing.T) {
 
