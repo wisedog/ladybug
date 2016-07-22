@@ -70,15 +70,29 @@ func authHandler(c *interfacer.AppContext, h handlerFunc) http.HandlerFunc {
 }
 
 // notFound handles 404 error and render custom page.
-// see views/errors/404.html
-func notFound(w http.ResponseWriter, r *http.Request) {
-	log.Warn("Router", "404", r.URL.Path)
-	t, err := template.ParseFiles("views/errors/404.html")
+// see views/errors/404.tmpl
+func notFound(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+	t, err := template.New("base.tmpl").ParseFiles("views/base.tmpl", "views/errors/404.tmpl")
+
 	if err != nil {
-		log.Warn("Router", "Template ParsesFiles is failed in notFound", "msg", err)
+		log.Error("Util", "type", "rendering", "msg ", err)
+	}
+	var user *models.User
+	if user = connected2(c, r); user == nil {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return nil
 	}
 
-	t.Execute(w, nil)
+	item := map[string]interface{}{
+		"Active_idx": 0,
+		"User":       c.User,
+	}
+
+	if err = t.Execute(w, item); err != nil {
+		log.Error("Util", "type", "rendering", "msg ", err)
+	}
+
+	return nil
 }
 
 // main is entry point of this application
@@ -145,7 +159,7 @@ func main() {
 	project.HandleFunc("/{projectName}/dashboard", authHandler(ctx, controllers.Dashboard)).Methods("GET")
 	project.HandleFunc("/{projectName}/design", authHandler(ctx, controllers.DesignIndex)).Methods("GET")
 	project.HandleFunc("/{projectName}/build", authHandler(ctx, controllers.BuildsIndex)).Methods("GET")
-	project.HandleFunc("/{projectName}/spec", authHandler(ctx, controllers.SpecIndex)).Methods("GET")
+	project.HandleFunc("/{projectName}/req", authHandler(ctx, controllers.RequirementIndex)).Methods("GET")
 	project.HandleFunc("/{projectName}/testplan", authHandler(ctx, controllers.PlanIndex)).Methods("GET")
 	project.HandleFunc("/{projectName}/exec", authHandler(ctx, controllers.ExecIndex)).Methods("GET")
 	project.HandleFunc("/{projectName}/milestone", authHandler(ctx, controllers.MilestoneIndex)).Methods("GET")
@@ -191,10 +205,11 @@ func main() {
 	plan.HandleFunc("/view/{id:[0-9]+}", authHandler(ctx, controllers.PlanView)).Methods("GET")
 	plan.HandleFunc("/run/{id:[0-9]+}", authHandler(ctx, controllers.PlanRun)).Methods("GET")
 
-	// specification
-	spec := project.PathPrefix("/{projectName}/spec").Subrouter()
-	spec.HandleFunc("/", authHandler(ctx, controllers.SpecIndex)).Methods("GET")
-	spec.HandleFunc("/list/{id:[0-9]+}", authHandler(ctx, controllers.SpecList)).Methods("GET")
+	// requirements
+	req := project.PathPrefix("/{projectName}/req").Subrouter()
+	req.HandleFunc("/", authHandler(ctx, controllers.RequirementIndex)).Methods("GET")
+	req.HandleFunc("/list/{id:[0-9]+}", authHandler(ctx, controllers.RequirementList)).Methods("GET")
+	// TODO VIEW : req.HandleFunc("/view/{id:[0-9]+}", authHandler(ctx, controllers.RequirementList)).Methods("GET")
 
 	// testexec
 	exec := project.PathPrefix("/{projectName}/exec").Subrouter()
@@ -212,7 +227,7 @@ func main() {
 
 	r.PathPrefix("/public/").Handler(http.StripPrefix("/public/",
 		http.FileServer(http.Dir("public/"))))
-	r.NotFoundHandler = http.HandlerFunc(notFound)
+	r.NotFoundHandler = http.HandlerFunc(authHandler(ctx, notFound))
 
 	log.Info("APP", "Binding Address", ctx.Config.GetBindAddress())
 	// Bind to a port and pass our router in

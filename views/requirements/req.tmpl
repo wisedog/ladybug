@@ -7,8 +7,8 @@
   <!-- Content header -->
     <section class="content-header">
     <h1>
-      Specification
-      <small>Manage specifications</small>
+      Requirements
+      <small>Manage requirements</small>
     </h1>
     <ol class="breadcrumb">
       <li><a href="/project/{{.ProjectName}}/dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -135,7 +135,7 @@ $(document).ready(function() {
         var level = data.node.parents.length;
 
         // run AJAX and render
-        $.getJSON('/project/{{.ProjectName}}/spec/list/'+ node_id, function(data){
+        $.getJSON('/project/{{.ProjectName}}/req/list/'+ node_id, function(data){
           $('#tc_list').html('');
           var items = [];
           if(level < 3){
@@ -158,7 +158,7 @@ $(document).ready(function() {
               var status=["Unknown", "Active", "Inactive", "Close"];
                 items.push("<tr>"+ 
                   "<td>"+ val.ID + "</td>" + 
-                  "<td><a href='/project/{{.ProjectName}}/spec/"+ val.ID + "'>" + 
+                  "<td><a href='/project/{{.ProjectName}}/req/"+ val.ID + "'>" + 
                      val.Name + "</a></td>" + 
                   "<td>" + status[val.Status] + "</td>" + 
                   "<td>" + priority[val.Priority] + "</td>" +
@@ -178,14 +178,14 @@ $(document).ready(function() {
 
     $('body').on('click','.tc-edit',function(){
       var id = $(this).attr('id');
-      $(location).attr("href", "/project/{{.ProjectName}}/spec/" + id + "/edit");
+      $(location).attr("href", "/project/{{.ProjectName}}/req/" + id + "/edit");
     });
 
     $('body').on('click', '.tc-del', function(){
         var id = $(this).attr('id');
         var r = confirm("Delete the testcase?");
         if(r == true){
-          $('#form_tc_del').attr('action', "/project/{{.ProjectName}}/spec/" + id + "/delete").submit();
+          $('#form_tc_del').attr('action', "/project/{{.ProjectName}}/req/" + id + "/delete").submit();
         }
     });
 

@@ -1,9 +1,7 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/wisedog/ladybug/errors"
@@ -18,8 +16,9 @@ func MilestoneIndex(c *interfacer.AppContext, w http.ResponseWriter, r *http.Req
 	var milestones []models.Milestone
 
 	if err := c.Db.Find(&milestones); err.Error != nil {
-		log.Error("TestPlan", "type", "database", "msg ", err.Error)
-		return errors.HttpError{Status: http.StatusInternalServerError, Desc: "An error while select all Milestone in MilestoneIndex"}
+		log.Error("Milestone", "type", "database", "msg ", err.Error)
+		return errors.HttpError{Status: http.StatusInternalServerError,
+			Desc: "An error while select all Milestone in MilestoneIndex"}
 	}
 
 	items := map[string]interface{}{
@@ -29,9 +28,11 @@ func MilestoneIndex(c *interfacer.AppContext, w http.ResponseWriter, r *http.Req
 	return Render2(c, w, items, "views/base.tmpl", "views/milestone/milestone_index.tmpl")
 }
 
-// PlanAdd is a Handler for rendering add testplan page
+// MilestoneAdd is a Handler for rendering add testplan page
 func MilestoneAdd(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
-	testplan := new(models.TestPlan)
+	// not yet
+	return nil
+	/*testplan := new(models.TestPlan)
 	var prj models.Project
 
 	if err := c.Db.Preload("Users").Where("name = ?", c.ProjectName).Find(&prj); err.Error != nil {
@@ -73,12 +74,14 @@ func MilestoneAdd(c *interfacer.AppContext, w http.ResponseWriter, r *http.Reque
 		"Builds":     builds,
 		"Active_idx": 4,
 	}
-	return Render2(c, w, items, "views/base.tmpl", "views/testplans/planadd.tmpl")
+	return Render2(c, w, items, "views/base.tmpl", "views/testplans/planadd.tmpl")*/
 }
 
-// PlanSave is a POST handler for save testplan
+// MilestoneSave is a POST handler for save milestone
 func MilestoneSave(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
-	var prj models.Project
+	// not yet
+	return nil
+	/*var prj models.Project
 
 	if err := c.Db.Where("name = ?", c.ProjectName).First(&prj); err.Error != nil {
 		log.Error("TestPlan", "type", "database", "msg ", err.Error)
@@ -114,26 +117,10 @@ func MilestoneSave(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
 	}
 
 	http.Redirect(w, r, "/project/"+c.ProjectName+"/testplan", http.StatusFound)
-	return nil
+	return nil*/
 }
 
-/*
-//Render an edit page for test plans
-func (c TestPlans) Edit(project string, id int) revel.Result {
-	// TODO merge edit to add
-	testplan := models.TestPlan{}
-
-	r := c.Db.Where("id = ?", id).First(&testplan)
-	if r.Error != nil {
-		revel.ERROR.Println("An Error while SELECT operation for TestCase.Edit", r.Error)
-		c.Response.Status = 500
-		return c.Render(routes.TestPlans.Index(project))
-	}
-
-	return c.Render(project, id, testplan)
-}*/
-
-//PlanView renders a test plan page for viewing
+//MilestoneView renders a milestone page for viewing
 func MilestoneView(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
 
 	vars := mux.Vars(r)
@@ -171,26 +158,28 @@ func MilestoneView(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
 	return Render2(c, w, items, "views/base.tmpl", "views/testplans/planview.tmpl")
 }
 
-//PlanDelete is a POST handler for DELETE operation for testplan
+//MilestoneDelete is a POST handler for DELETE operation for milestone
 func MilestoneDelete(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
 	if err := r.ParseForm(); err != nil {
-		log.Error("TestPlan", "type", "http", "msg ", err)
+		log.Error("Milestone", "type", "http", "msg ", err)
 		return errors.HttpError{Status: http.StatusInternalServerError, Desc: "ParseForm failed"}
 	}
 
-	planId := r.FormValue("id")
+	msID := r.FormValue("id")
 
-	var plan models.TestPlan
+	var milestone models.Milestone
 
-	if err := c.Db.Where("id = ?", planId).First(&plan); err.Error != nil {
-		log.Error("TestPlan", "type", "database", "msg", err.Error)
-		return errors.HttpError{Status: http.StatusInternalServerError, Desc: "An error while select testplan operation in TestPlans.PlanDelete"}
+	if err := c.Db.Where("id = ?", msID).First(&milestone); err.Error != nil {
+		log.Error("Milestone", "type", "database", "msg", err.Error)
+		return errors.HttpError{Status: http.StatusInternalServerError,
+			Desc: "An error while select testplan operation in TestPlans.PlanDelete"}
 	}
 
-	if err := c.Db.Delete(plan); err.Error != nil {
-		log.Error("TestPlan", "type", "database", "msg", err.Error)
-		return errors.HttpError{Status: http.StatusInternalServerError, Desc: "An error while delete operation in TestPlans.PlanDelete"}
+	if err := c.Db.Delete(milestone); err.Error != nil {
+		log.Error("Milestone", "type", "database", "msg", err.Error)
+		return errors.HttpError{Status: http.StatusInternalServerError,
+			Desc: "An error while delete operation in TestPlans.PlanDelete"}
 	}
 
-	return RenderJSON(w, Resp{Msg: "OK"})
+	return RenderJSONWithStatus(w, Resp{Msg: "OK"}, http.StatusOK)
 }

@@ -8,8 +8,11 @@
   <!-- Content header -->
   <section class="content-header">
     <h1>
-      Running test
-      <small>Run a test plan</small>
+      On Testing
+        <a href="/project/{{.ProjectName}}/testplan/view/{{.TestExec.Plan.ID}}">{{.TestExec.Plan.Title}}</a>
+        on  <a href='/project/{{.ProjectName}}/build/view/{{.TestExec.TargetBuild.BuildProjectID}}'>
+              {{.TestExec.TargetBuild.FullDisplayName}}
+            </a> build
     </h1>
     <ol class="breadcrumb">
       <li><a href="/project/{{.ProjectName}}/dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -21,31 +24,6 @@
 
   <!-- Main content -->
   <section class="content">
-    <div class="box box-primary">
-      <div class="box-body">
-        <div class="row vertical-align bottom10">
-          <div class="col-md-1">
-            <h4><strong>{{msg "title"}}</strong></h4>
-          </div>
-          <div class="col-md-8">
-            <h4><strong>{{.TestExec.Plan.Title}}</strong></h4>
-          </div>
-        </div> <!-- .row -->
-        <div class="row">
-          <div class="col-md-4">
-            <label class="right10">Build/Release</label>
-            <a href='/project/{{.ProjectName}}/build/view/{{.TestExec.TargetBuild.BuildProjectID}}'>
-              {{.TestExec.TargetBuild.FullDisplayName}}
-            </a>
-          </div>
-        </div> <!-- .row -->
-        <div class="row form-group padleft15">
-          <h4>{{msg "description"}}</h4>
-          <div><span>{{nl2br .TestExec.Plan.Description}}</span></div>
-        </div>
-      </div>
-    </div>
-
     <div class="row">
       <div class="col-md-12">
         <div class="tabs-container">

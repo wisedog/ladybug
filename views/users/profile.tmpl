@@ -93,25 +93,25 @@
                   <div class="form-group">
                     <label for="inputName" class="col-sm-2 control-label">Name</label>
                     <div class="col-sm-10">
-                      <input type="text" class="form-control" value="{{.TargetUser.Name}}">
+                      <input type="text" class="form-control" value="{{.TargetUser.Name}}" name="Name">
                     </div>
                   </div>
                   <div class="form-group">
                     <label for="inputEmail" class="col-sm-2 control-label">Email</label>
                     <div class="col-sm-10">
-                      <input type="email" class="form-control" value="{{.TargetUser.Email}}">
+                      <input type="email" class="form-control" value="{{.TargetUser.Email}}" name="Email">
                     </div>
                   </div>
                   <div class="form-group">
                     <label for="inputName" class="col-sm-2 control-label">Location</label>
                     <div class="col-sm-10">
-                      <input type="text" class="form-control" value="{{.TargetUser.Location}}">
+                      <input type="text" class="form-control" value="{{.TargetUser.Location}}" name="Location">
                     </div>
                   </div>
                   <div class="form-group">
                     <label for="inputExperience" class="col-sm-2 control-label">Notes</label>
                     <div class="col-sm-10">
-                      <textarea class="form-control">{{.TargetUser.Notes}}</textarea>
+                      <textarea class="form-control" name="Notes">{{.TargetUser.Notes}}</textarea>
                     </div>
                   </div>
                   <div class="form-group">

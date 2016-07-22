@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -14,6 +15,7 @@ import (
 	log "gopkg.in/inconshreveable/log15.v2"
 )
 
+// Database is an instance of connection to DB
 var Database *gorm.DB
 
 // InitDB initialize the database and create dummies if it needs
@@ -38,7 +40,7 @@ func InitDB(conf *interfacer.AppConfig) (*gorm.DB, error) {
 	Database.AutoMigrate(&models.TestCaseResult{})
 	Database.AutoMigrate(&models.Review{})
 	Database.AutoMigrate(&models.Category{})
-	Database.AutoMigrate(&models.Specification{})
+	Database.AutoMigrate(&models.Requirement{})
 	Database.AutoMigrate(&models.Milestone{})
 	createDummy()
 
@@ -85,7 +87,7 @@ func createDummy() {
 	Database.DropTable(&models.Review{})
 	Database.DropTable(&models.TestCaseResult{})
 	Database.DropTable(&models.Category{})
-	Database.DropTable(&models.Specification{})
+	Database.DropTable(&models.Requirement{})
 	Database.DropTable(&models.Activity{})
 	Database.DropTable(&models.History{})
 	Database.DropTable(&models.Milestone{})
@@ -143,6 +145,8 @@ func createDummy() {
 	// Create dummy testcases
 	Database.AutoMigrate(&models.TestCase{})
 
+	now := time.Now()
+
 	testcases := []*models.TestCase{
 		&models.TestCase{
 			Prefix: prj.Prefix, Seq: 1,
@@ -190,15 +194,21 @@ func createDummy() {
 		Database.Create(&tc)
 	}
 
-	/*var tempTestCase []models.TestCase
-	  Database.Find(&tempTestCase)
+	// belows are for sample purpose
+	var tempTestCase []models.TestCase
+	Database.Find(&tempTestCase)
 
-	  now := time.Now()
-	  for i, iter := range tempTestCase{
-	    then := now.AddDate(0, 0, -i)
-	    fmt.Println("then:", then)
-	    tc.CreatedAt = then
-	  }*/
+	n1 := now.AddDate(0, 0, -3)
+	n2 := now.AddDate(0, 0, -7)
+	n3 := now.AddDate(0, 0, -13)
+	n4 := now.AddDate(0, 0, -20)
+	timeArray := [4]time.Time{n1, n2, n3, n4}
+
+	for i := 0; i < len(tempTestCase); i++ {
+		k := tempTestCase[i]
+		n := timeArray[rand.Intn(4)]
+		Database.Model(&k).Update("created_at", n)
+	}
 
 	// Create dummy testplan
 	Database.AutoMigrate(&models.TestPlan{})
@@ -254,7 +264,7 @@ func createDummy() {
 			Prefix: prj1.Prefix, ProjectID: prj1.ID, ForTestCase: true},
 		&models.Section{Seq: 1, Title: "ddd", RootNode: false, ParentsID: 10,
 			Prefix: prj1.Prefix, ProjectID: prj1.ID, ForTestCase: true},
-		&models.Section{Seq: 1, Title: "Test Specifications", RootNode: true,
+		&models.Section{Seq: 1, Title: "Requirements", RootNode: true,
 			Prefix: prj.Prefix, ProjectID: prj.ID, ForTestCase: false},
 		&models.Section{Seq: 1, Title: "Functional", RootNode: false,
 			Prefix: prj.Prefix, ProjectID: prj.ID, ForTestCase: false,
@@ -288,17 +298,17 @@ func createDummy() {
 		Database.Create(&ct)
 	}
 
-	Database.AutoMigrate(&models.Specification{})
+	Database.AutoMigrate(&models.Requirement{})
 
-	specs := []*models.Specification{
-		&models.Specification{Name: "Hello, world", SectionID: 13,
-			Status: models.SpecStatusActivate, Priority: models.PriorityHigh,
+	specs := []*models.Requirement{
+		&models.Requirement{Name: "Hello, world", SectionID: 13,
+			Status: models.ReqStatusActivate, Priority: models.PriorityHigh,
 		},
-		&models.Specification{Name: "Hello, stranger", SectionID: 14,
-			Status: models.SpecStatusActivate, Priority: models.PriorityMedium,
+		&models.Requirement{Name: "Hello, stranger", SectionID: 14,
+			Status: models.ReqStatusActivate, Priority: models.PriorityMedium,
 		},
-		&models.Specification{Name: "Good bye", SectionID: 14,
-			Status: models.SpecStatusActivate, Priority: models.PriorityLow,
+		&models.Requirement{Name: "Good bye", SectionID: 14,
+			Status: models.ReqStatusActivate, Priority: models.PriorityLow,
 		},
 	}
 
@@ -325,7 +335,6 @@ func createDummy() {
 	Database.AutoMigrate(&models.History{})
 
 	Database.AutoMigrate(&models.Milestone{})
-	now := time.Now()
 	oneMonthFromNow := time.Hour * 24 * 30
 
 	next := now.Add(oneMonthFromNow)

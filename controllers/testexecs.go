@@ -79,9 +79,9 @@ func ExecDone(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 	}
 
 	if testexec.FailCaseNum > 0 {
-		testexec.Status = ExecStatusFail
+		testexec.Status = models.ExecStatusFail
 	} else {
-		testexec.Status = ExecStatusPass
+		testexec.Status = models.ExecStatusPass
 	}
 
 	if err := c.Db.Model(&testexec).Update("status", testexec.Status); err.Error != nil {
@@ -142,7 +142,7 @@ func ExecUpdateResult(c *interfacer.AppContext, w http.ResponseWriter, r *http.R
 		}
 
 		//set exec's status ready to in progress
-		exec.Status = ExecStatusInProgress
+		exec.Status = models.ExecStatusInProgress
 		if rv.Status == true {
 			exec.PassCaseNum = exec.PassCaseNum + 1
 		} else {
@@ -282,7 +282,7 @@ func ExecDeny(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 		return RenderJSONWithStatus(w, Resp{Msg: "Not found Test Execution"}, http.StatusInternalServerError)
 	}
 
-	testexec.Status = ExecStatusDeny
+	testexec.Status = models.ExecStatusDeny
 	testexec.Message = msg
 	if err := c.Db.Save(testexec); err.Error != nil {
 		return RenderJSONWithStatus(w, Resp{Msg: "Error while saving"}, http.StatusInternalServerError)
