@@ -301,14 +301,17 @@ func createDummy() {
 	Database.AutoMigrate(&models.Requirement{})
 
 	specs := []*models.Requirement{
-		&models.Requirement{Name: "Hello, world", SectionID: 13,
-			Status: models.ReqStatusActivate, Priority: models.PriorityHigh,
+		&models.Requirement{Title: "Hello, world", SectionID: 13,
+			Description: "hello",
+			Status:      models.ReqStatusActivate, Priority: models.PriorityHigh, ProjectID: prj.ID,
 		},
-		&models.Requirement{Name: "Hello, stranger", SectionID: 14,
-			Status: models.ReqStatusActivate, Priority: models.PriorityMedium,
+		&models.Requirement{Title: "Hello, stranger", SectionID: 14,
+			Description: "blahblah",
+			Status:      models.ReqStatusActivate, Priority: models.PriorityMedium, ProjectID: prj.ID,
 		},
-		&models.Requirement{Name: "Good bye", SectionID: 14,
-			Status: models.ReqStatusActivate, Priority: models.PriorityLow,
+		&models.Requirement{Title: "Good bye", SectionID: 14,
+			Description: "aaaa",
+			Status:      models.ReqStatusActivate, Priority: models.PriorityLow, ProjectID: prj.ID,
 		},
 	}
 

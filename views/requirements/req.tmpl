@@ -1,4 +1,4 @@
-{{define "title"}}Specification{{ end }}
+{{define "title"}}Requirements{{ end }}
 {{define "more_style"}}
 <link rel="stylesheet" href="/public/libs/jstree/dist/themes/default/style.min.css">
 {{end}}
@@ -142,8 +142,8 @@ $(document).ready(function() {
           items.push("<button class='btn btn-primary btn-xs right10' id='subsection-btn' data-toggle='modal' data-target='#addSectionModal'>" + 
             "<i class='fa fa-plus right7'></i>Subsection</button>");
           }
-          items.push("<a href='/project/{{.ProjectName}}/section/"+ node_id +"/add'><button class='btn btn-primary btn-xs'>" +
-            "<i class='fa fa-plus right7'></i>Test Case</button></a>");
+          items.push("<a href='/project/{{.ProjectName}}/req/add?section_id="+ node_id +"'><button class='btn btn-primary btn-xs'>" +
+            "<i class='fa fa-plus right7'></i>Requirement</button></a>");
 
           if(data.length == 0){
             items.push("<div>No Data</div>");
@@ -158,7 +158,7 @@ $(document).ready(function() {
               var status=["Unknown", "Active", "Inactive", "Close"];
                 items.push("<tr>"+ 
                   "<td>"+ val.ID + "</td>" + 
-                  "<td><a href='/project/{{.ProjectName}}/req/"+ val.ID + "'>" + 
+                  "<td><a href='/project/{{.ProjectName}}/req/view/"+ val.ID + "'>" + 
                      val.Name + "</a></td>" + 
                   "<td>" + status[val.Status] + "</td>" + 
                   "<td>" + priority[val.Priority] + "</td>" +
