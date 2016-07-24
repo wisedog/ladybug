@@ -61,26 +61,48 @@ func RequirementList(c *interfacer.AppContext, w http.ResponseWriter, r *http.Re
 
 	var prj models.Project
 	if err := c.Db.Where("name = ?", c.ProjectName).First(&prj); err.Error != nil {
-		log.Error("Build", "type", "database", "msg ", err.Error)
+		log.Error("Requirment", "type", "database", "msg ", err.Error)
 		return errors.HttpError{Status: http.StatusInternalServerError, Desc: "Not found project"}
 	}
 
 	if err := c.Db.Where("section_id = ?", sectionID).Find(&reqs); err.Error != nil {
-		log.Error("Build", "type", "database", "msg ", err.Error)
+		log.Error("Requirement", "type", "database", "msg ", err.Error)
 		return errors.HttpError{Status: http.StatusInternalServerError, Desc: "Not found section"}
 	}
 
 	return RenderJSONWithStatus(w, reqs, http.StatusOK)
 }
 
-// ViewRequirement renders a page of information of the requirements.
-// This page should be a detail of requested requirement and related testcases
-func ViewRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
-	return nil
-}
-
 // AddRequirement renders a page that a user can add a requirement
 // This page should be a detail of requested requirement and related testcases
 func AddRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
 	return nil
+}
+
+// ViewRequirement renders a page of information of the requirements.
+// This page should be a detail of requested requirement and related testcases
+func ViewRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+	var req models.Requirement
+
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	var prj models.Project
+	if err := c.Db.Where("name = ?", c.ProjectName).First(&prj); err.Error != nil {
+		log.Error("Requirement", "type", "database", "msg ", err.Error)
+		return errors.HttpError{Status: http.StatusBadRequest, Desc: "Not found project"}
+	}
+
+	log.Debug("aaa", "aaa", prj.ID, "bbb", id)
+	if err := c.Db.Where("project_id = ?", prj.ID).Where("id = ?", id).First(&req); err.Error != nil {
+		log.Error("Requirement", "type", "database", "msg ", err.Error)
+		return errors.HttpError{Status: http.StatusBadRequest, Desc: "Not found requirements"}
+	}
+
+	items := map[string]interface{}{
+		"Requirement": req,
+		"Active_idx":  6,
+	}
+
+	return Render2(c, w, items, "views/base.tmpl", "views/requirements/reqview.tmpl")
 }
