@@ -95,13 +95,40 @@
                   No Milestone
                   {{end}}
                   </Strong></p>
-                  <p class="font17"><strong>{{.DaysLeft}}</strong><small> day(s) left</small></p> 
+                  <p class="font17"><strong>{{.DaysLeft}}</strong><small> day(s) left</small></p>
               </div>
             </div>
           </div><!-- /.box-body -->
         </div><!-- /.box -->
       </div><!-- /.col -->
     </div><!-- /.row -->
+    
+    <div class="row">
+      <div class="col-md-12">
+        <div class="box box-info">
+          <div class="box-header with-border">
+            <h3 class="box-title">Requirement-TestCase Coverage</h3>
+          </div><!-- /.box-header -->
+          <div class="box-body">
+            <div class="row">
+              <div class="col-md-8">
+                <div class="chart1" style="position:relative; overflow:hidden; width:100%;">
+                  <canvas id="lineChart1" style="height: 200px; width: 509px;" width="509" height="200"></canvas>
+                </div>
+              </div><!-- /.col -->
+              <div class="col-md-4">
+                <p class="text-center">
+                  <strong>Current Coverage</strong>
+                </p>
+                <div class="text-center">
+                  <span style="font-size:68px;">{{.Coverage}}%</span>
+                </div>
+              </div><!-- .col -->
+            </div><!-- /.row -->
+          </div><!-- ./box-body -->
+        </div><!-- .box -->
+      </div> <!-- .col -->
+    </div><!-- .row -->
     
     <div class="row">
       <div class="col-md-8">
@@ -133,9 +160,6 @@
               </div><!-- /.col -->
             </div><!-- /.row -->
           </div><!-- ./box-body -->
-          <div class="box-footer">
-            
-          </div><!-- /.box-footer -->
         </div><!-- .box -->
       </div> <!-- .col -->
       <div class="col-md-4">
@@ -174,9 +198,6 @@
               </div>
             </div><!-- /.row -->
           </div><!-- ./box-body -->
-          <div class="box-footer">
-            
-          </div><!-- /.box-footer -->
         </div><!-- .box -->
       </div> <!-- .col -->
     </div> <!-- .row -->
@@ -186,16 +207,24 @@
 {{define "more_scripts"}}
 <script src="/public/libs/Chart.js/dist/Chart.min.js"></script>
 <script>
-    var renderingData = {{.DataSet}};
+
+    // belows are the graph for #testcase, #requirement
+    var renderingData = {{.TestCaseDataSet}};
+    var renderingDataReq = {{.ReqDataSet}};
     var arr = renderingData.split(",");
+    var reqArr = renderingDataReq.split(",");
 
     var config = {
         type: 'line',
         data: {
-            labels: ["-4week", "-3 week", "-2 week", "-1 week"],
+            labels: ["-3 weeks", "-2 weeks", "-1 week", "Now"],
             datasets: [{
                 label: "Number of Test Case(s)",
                 data: arr,
+                fill: false,
+            }, {
+              label: "Number of Requirement(s)",
+                data: reqArr,
                 fill: false,
             }]
         },
@@ -228,15 +257,72 @@
                       display : false
                     }
                 }]
-            },
-            title: {
-                display: true,
-                text: 'Test Case(s) Chart'
-            },
+            }, 
         }
     };
 
     $.each(config.data.datasets, function(i, dataset) {
+        var background = '';
+        if(i == 0){
+          background = 'rgba(60,141,188,0.9)'; 
+        }else{
+          background = 'rgba(188,141,60,0.9)'; 
+        }
+        dataset.borderColor = background;
+        dataset.backgroundColor = background;
+        dataset.pointBorderColor = background;
+        dataset.pointBackgroundColor = background;
+        dataset.pointBorderWidth = 1;
+    });
+
+    // belows are the graph for requirement-testcase coverage
+    var renderingDataCoverage = {{.CoverageDataSet}};
+    var arrCoverage = renderingDataCoverage.split(",");
+    var configArea = {
+        type: 'line',
+        data: {
+            labels: ["-3week", "-2 week", "-1 week", "Now"],
+            datasets: [{
+                label: "Coverage(%)",
+                data: arrCoverage,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            legend: {
+                position: 'bottom',
+            },
+            hover: {
+                mode: 'label'
+            },
+            scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Period'
+                    }
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: '%'
+                    },
+                    ticks: {
+                      stepSize: 10
+                    },
+                    gridLines : {
+                      display : false
+                    }
+                }]
+            },
+        }
+    };
+
+    
+    $.each(configArea.data.datasets, function(i, dataset) {
         var background = 'rgba(60,141,188,0.9)';
         dataset.borderColor = background;
         dataset.backgroundColor = background;
@@ -245,9 +331,13 @@
         dataset.pointBorderWidth = 1;
     });
 
+    // load both
     window.onload = function() {
         var ctx = document.getElementById("lineChart").getContext("2d");
         window.myLine = new Chart(ctx, config);
+
+        var ctx2 = document.getElementById("lineChart1").getContext("2d");
+        window.myLine = new Chart(ctx2, configArea);
     };
 </script>
 {{end}}

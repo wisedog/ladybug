@@ -76,6 +76,7 @@ func RequirementList(c *interfacer.AppContext, w http.ResponseWriter, r *http.Re
 // AddRequirement renders a page that a user can add a requirement
 // This page should be a detail of requested requirement and related testcases
 func AddRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+
 	return nil
 }
 
@@ -93,15 +94,26 @@ func ViewRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.Re
 		return errors.HttpError{Status: http.StatusBadRequest, Desc: "Not found project"}
 	}
 
-	log.Debug("aaa", "aaa", prj.ID, "bbb", id)
 	if err := c.Db.Where("project_id = ?", prj.ID).Where("id = ?", id).First(&req); err.Error != nil {
 		log.Error("Requirement", "type", "database", "msg ", err.Error)
 		return errors.HttpError{Status: http.StatusBadRequest, Desc: "Not found requirements"}
 	}
 
+	// Find related Test Cases with this requirement
+	var testcases []models.TestCase
+	if err := c.Db.Model(&req).Association("RelatedTestCases").Find(&testcases); err.Error != nil {
+		log.Error("Requirement", "type", "database", "msg ", err.Error)
+		return errors.HttpError{Status: http.StatusBadRequest, Desc: "Not found related testcases"}
+	}
+
+	for i := 0; i < len(testcases); i++ {
+		testcases[i].PriorityStr = getPriorityI18n(testcases[i].Priority)
+	}
+
 	items := map[string]interface{}{
-		"Requirement": req,
-		"Active_idx":  6,
+		"Requirement":      req,
+		"RelatedTestCases": testcases,
+		"Active_idx":       6,
 	}
 
 	return Render2(c, w, items, "views/base.tmpl", "views/requirements/reqview.tmpl")

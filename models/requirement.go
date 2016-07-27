@@ -15,12 +15,28 @@ type Requirement struct {
 
 	Title       string
 	Description string
-	Status      int // Draft, In Review, Not Testable, Deprecated,
-	Priority    int
-	SectionID   int
-	ProjectID   int
-	Version     int
-	ReqType     int // Use Case, Information, Feature, User Interface, Non Functional, Constraint, System Function...
+	// Status of this requirement. Status may be one of below items
+	// Draft, In Review, Not Testable, Deprecated ....
+	Status   int
+	Priority int
+
+	// Each requirements are belongs to section
+	SectionID int
+
+	// ProjectID represents Project ID of this requirement. Each Requirement are belongs to project
+	ProjectID int
+
+	// Version or history of this Requirement
+	Version int
+
+	// ReqType is type of this requirement
+	// Requirement type may be one of below
+	// Use Case, Information, Feature, User Interface, Non Functional, Constraint, System Function...
+	ReqType int
+
+	// RelatedTestCase stores relationship between this requirement and related testcases
+	// The relationship has many to many
+	RelatedTestCases []TestCase `gorm:"many2many:testcases_reqs;"`
 }
 
 // Validate check input value and return error map
