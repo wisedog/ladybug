@@ -22,8 +22,8 @@ var Database *gorm.DB
 func InitDB(conf *interfacer.AppConfig) (*gorm.DB, error) {
 
 	args := getDialectArgs(conf)
+
 	var err error
-	//Database, err = gorm.Open("postgres", "user=ladybug dbname=ladybug port=5432 sslmode=disable")
 	Database, err = gorm.Open("postgres", args)
 	if err != nil {
 		log.Info("Database", "msg", err.Error())
@@ -50,7 +50,6 @@ func InitDB(conf *interfacer.AppConfig) (*gorm.DB, error) {
 // getDialectArgs returns argument of dialect database.
 func getDialectArgs(conf *interfacer.AppConfig) string {
 	driver := conf.GetValue("db.driver")
-
 	username := conf.GetValue("db.username")
 	pwd := conf.GetValue("db.password")
 	port := conf.GetValue("db.port")
@@ -91,6 +90,7 @@ func createDummy() {
 	Database.DropTable(&models.Activity{})
 	Database.DropTable(&models.History{})
 	Database.DropTable(&models.Milestone{})
+	Database.DropTable(&models.TcReqRelationHistory{})
 
 	// Create dummy users
 	Database.AutoMigrate(&models.User{})
@@ -199,9 +199,9 @@ func createDummy() {
 	Database.Find(&tempTestCase)
 
 	n1 := now.AddDate(0, 0, -3)
-	n2 := now.AddDate(0, 0, -7)
-	n3 := now.AddDate(0, 0, -13)
-	n4 := now.AddDate(0, 0, -20)
+	n2 := now.AddDate(0, 0, -8)
+	n3 := now.AddDate(0, 0, -15)
+	n4 := now.AddDate(0, 0, -22)
 	timeArray := [4]time.Time{n1, n2, n3, n4}
 
 	for i := 0; i < len(tempTestCase); i++ {
@@ -300,21 +300,37 @@ func createDummy() {
 
 	Database.AutoMigrate(&models.Requirement{})
 
-	specs := []*models.Requirement{
-		&models.Requirement{Name: "Hello, world", SectionID: 13,
-			Status: models.ReqStatusActivate, Priority: models.PriorityHigh,
+	reqs := []*models.Requirement{
+		&models.Requirement{Title: "Hello, world", SectionID: 13,
+			Description: "hello",
+			Status:      models.ReqStatusActivate, Priority: models.PriorityHigh, ProjectID: prj.ID,
 		},
-		&models.Requirement{Name: "Hello, stranger", SectionID: 14,
-			Status: models.ReqStatusActivate, Priority: models.PriorityMedium,
+		&models.Requirement{Title: "Hello, stranger", SectionID: 14,
+			Description: "blahblah",
+			Status:      models.ReqStatusActivate, Priority: models.PriorityMedium, ProjectID: prj.ID,
+			RelatedTestCases: []models.TestCase{*testcases[1], *testcases[4]},
 		},
-		&models.Requirement{Name: "Good bye", SectionID: 14,
-			Status: models.ReqStatusActivate, Priority: models.PriorityLow,
+		&models.Requirement{Title: "Good bye", SectionID: 14,
+			Description: "aaaa",
+			Status:      models.ReqStatusActivate, Priority: models.PriorityLow, ProjectID: prj.ID,
+			RelatedTestCases: []models.TestCase{*testcases[1], *testcases[2]},
 		},
 	}
 
-	for _, sp := range specs {
+	for _, sp := range reqs {
 		Database.NewRecord(sp)
 		Database.Create(&sp)
+	}
+
+	var tmpReqs []models.Requirement
+	Database.Find(&tmpReqs)
+
+	timeArrayReq := [3]time.Time{n4, n3, n2}
+
+	for i := 0; i < len(tmpReqs); i++ {
+		k := tmpReqs[i]
+		n := timeArrayReq[i]
+		Database.Model(&k).Update("created_at", n)
 	}
 
 	// for creating dummy for Activity
@@ -347,6 +363,47 @@ func createDummy() {
 	for _, ms := range Milestones {
 		Database.NewRecord(ms)
 		Database.Create(&ms)
+	}
+
+	// for testcase-requirement relationship
+	Database.AutoMigrate(&models.TcReqRelationHistory{})
+
+	relations := []*models.TcReqRelationHistory{
+		&models.TcReqRelationHistory{
+			RequirementID: 1, TestCaseID: 2,
+			Kind:      models.TcReqRelationHistoryLink,
+			ProjectID: prj.ID,
+		},
+		&models.TcReqRelationHistory{
+			RequirementID: 2, TestCaseID: 2,
+			Kind:      models.TcReqRelationHistoryLink,
+			ProjectID: prj.ID,
+		},
+		&models.TcReqRelationHistory{
+			RequirementID: 2, TestCaseID: 3,
+			Kind:      models.TcReqRelationHistoryUnlink,
+			ProjectID: prj.ID,
+		},
+		&models.TcReqRelationHistory{
+			RequirementID: 3, TestCaseID: 4,
+			Kind:      models.TcReqRelationHistoryLink,
+			ProjectID: prj.ID,
+		},
+	}
+
+	for _, ac := range relations {
+		Database.NewRecord(ac)
+		Database.Create(&ac)
+	}
+
+	var tempRelation []models.TcReqRelationHistory
+	Database.Find(&tempRelation)
+
+	tmpTimeArray := []time.Time{n4, n3, n3, n2}
+	for i := 0; i < len(tempRelation); i++ {
+		k := tempRelation[i]
+		n := tmpTimeArray[i]
+		Database.Model(&k).Update("created_at", n)
 	}
 
 }

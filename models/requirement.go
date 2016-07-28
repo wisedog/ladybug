@@ -12,10 +12,31 @@ const (
 // Requirement Model
 type Requirement struct {
 	BaseModel
-	Name      string
-	Status    int
-	Priority  int
+
+	Title       string
+	Description string
+	// Status of this requirement. Status may be one of below items
+	// Draft, In Review, Not Testable, Deprecated ....
+	Status   int
+	Priority int
+
+	// Each requirements are belongs to section
 	SectionID int
+
+	// ProjectID represents Project ID of this requirement. Each Requirement are belongs to project
+	ProjectID int
+
+	// Version or history of this Requirement
+	Version int
+
+	// ReqType is type of this requirement
+	// Requirement type may be one of below
+	// Use Case, Information, Feature, User Interface, Non Functional, Constraint, System Function...
+	ReqType int
+
+	// RelatedTestCase stores relationship between this requirement and related testcases
+	// The relationship has many to many
+	RelatedTestCases []TestCase `gorm:"many2many:testcases_reqs;"`
 }
 
 // Validate check input value and return error map
@@ -24,8 +45,8 @@ type Requirement struct {
 // you may consider invoke 500 internal error.
 func (req *Requirement) Validate() (map[string]string, error) {
 	errorMap := make(map[string]string)
-	if !req.Required(req.Name) {
-		errorMap["Name"] = "Name is required."
+	if !req.Required(req.Title) {
+		errorMap["Title"] = "Title is required."
 	}
 	var err error
 

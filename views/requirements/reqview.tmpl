@@ -1,0 +1,112 @@
+{{define "title"}}View Requirement{{ end }}
+{{define "more_style"}}{{end}}
+{{define "content"}}
+<div class="content-wrapper">
+  <!-- Content header -->
+  <section class="content-header">
+	  <h1>
+	    Requirement
+	    <small></small>
+	  </h1>
+	  <ol class="breadcrumb">
+	    <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+	    <li class="active">Dashboard</li>
+      <li>Here</li>
+	  </ol>
+	</section>
+  <!-- Main content -->
+  <section class="content">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="box box-primary">
+          <div class="box-header with-border">
+            <h3 class="box-title"><strong>REQ-{{.Requirement.ID}} {{.Requirement.Title}}</strong></h3>
+          </div><!-- .box-header -->
+
+          <div class="box-body">
+            <div class="row  vertical-align">
+              <div class="col-md-2">
+                <h4><strong>Status</strong></h4>
+              </div>
+              <div class="col-md-2">
+                {{.Requirement.Status}}
+              </div>
+              <div class="col-md-2">
+                <h4><strong>Version</strong></h4>
+              </div>
+              <div class="col-md-2">
+                {{.Requirement.Version}}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-5">
+                <h4><strong>{{msg "description"}}</strong></h4>
+              </div>
+            </div><!-- .row -->
+            <div class="row">
+              <div class="col-md-12">
+                {{nl2br .Requirement.Description}}
+              </div>
+            </div><!-- .row -->
+            <div class="row">
+              <!-- TODO show related Test Cases -->
+            </div>
+          </div><!-- .box-body -->
+        </div><!-- .box -->
+      </div> <!-- .col -->
+    </div> <!-- .row -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="box box-primary">
+          <div class="box-header with-border">
+            <h3 class="box-title"><strong>Related Test Case(s)</strong></h3>
+          </div><!-- .box-header -->
+          <div class="box-body">
+            <div class='table-responsive'>
+              <table class='table table-striped'>
+                <thead>
+                  <tr>
+                    <th>#</th><th>Title</th><th>Status</th><th>Priority</th>
+                    <th>Category</th><th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{range .RelatedTestCases}}
+                  <tr>
+                    <td>{{.ID}}</td><td>{{.Title}}</td>
+                    <td>{{if eq .Status 1}}
+                        {{msg "testcase.status.active"}}
+                        {{else if eq .Status 2}}
+                        {{msg "testcase.status.inactive"}}
+                        {{else}}
+                        {{msg "testcase.status.close"}}
+                        {{end}}</td>
+                    <td>{{.PriorityStr}}</td>
+                    <td>{{.Category}}</td>
+                    <td>
+                      <a href='javascript:unlink({{.ID}});' class="fa fa-unlink"></a>
+                    </td>
+                  </tr>
+                  {{end}}
+                </tbody>
+              </table>
+            </div>
+          </div> <!-- .box-body -->
+        </div> <!-- .box -->
+      </div> <!-- .col -->  
+    </div><!-- .row -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="box box-primary">
+          <div class="box-header with-border">
+            <h3 class="box-title"><strong>History</strong></h3>
+          </div><!-- .box-header -->
+          <div class="box-body">
+          </div> <!-- .box-body -->
+        </div> <!-- .box -->
+      </div> <!-- .col -->  
+    </div><!-- .row -->
+  </section>
+</div><!-- /.content-wrapper -->
+{{end}}
+{{define "more_scripts"}}{{end}}

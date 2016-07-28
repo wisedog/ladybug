@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -220,18 +221,32 @@ func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
 		daysLeft = milestone.DueDate.Sub(time.Now())
 	}
 
+	// TODO show Requirements graph. Now shows dummy
+	reqDataSet := "0,1,4,7"
+
+	// to show Requirements coverage.
+	// Showing coverage graph is difficult. Because relationship between test cases and requirements
+	// changes every time. So we need to consider more how to get it.
+	currentCoverage, _ := getCurrentReqTestCaseCoverage(c)
+
+	periodCoverage, _ := getPeriodReqTestCaseCoverage(c, prj.ID, currentCoverage)
+	fmt.Println("AA", periodCoverage)
+
 	items := map[string]interface{}{
-		"Project":       prj,
-		"ExecCount":     execCount,
-		"BuildCount":    buildCount,
-		"TaskCount":     taskCount,
-		"Tasks":         execs,
-		"TestPlanCount": testPlanCount,
-		"TestCaseNum":   tcCount,
-		"Milestone":     milestone,
-		"DaysLeft":      int(daysLeft.Hours() / 24),
-		"DataSet":       dataArray,
-		"Active_idx":    1,
+		"Project":         prj,
+		"ExecCount":       execCount,
+		"BuildCount":      buildCount,
+		"TaskCount":       taskCount,
+		"Tasks":           execs,
+		"TestPlanCount":   testPlanCount,
+		"TestCaseNum":     tcCount,
+		"Milestone":       milestone,
+		"DaysLeft":        int(daysLeft.Hours() / 24),
+		"TestCaseDataSet": dataArray,
+		"ReqDataSet":      reqDataSet,
+		"Coverage":        currentCoverage,
+		"CoverageDataSet": periodCoverage,
+		"Active_idx":      1,
 	}
 
 	return Render2(c, w, items, "views/base.tmpl", "views/projects/dashboard.tmpl")
@@ -257,4 +272,126 @@ func GetProjectList(c *interfacer.AppContext, w http.ResponseWriter, r *http.Req
 
 	//TODO renderJson to cover "Show All Projects", Clicking all project in the right upper menu
 	return RenderJSON(w, prjs)
+}
+
+//getPeriodReqTestCaseCoverage calculates coverage(%) of requirement by testcases in particular period
+func getPeriodReqTestCaseCoverage(c *interfacer.AppContext, projectID, currentCov int) (string, error) {
+	// req-testcase coverage is calculated by dealing with TcReqRelationHistory, Requirement table
+	// This is pretty complex, if you have good idea to solve it : VERY WELCOME : )
+
+	// first get all requirements in this project
+	var reqs []models.Requirement
+	if err := c.Db.Where("project_id = ?", projectID).Order("created_at").Find(&reqs); err.Error != nil {
+		return "", err.Error
+	}
+	// second get all TcReqRelationHistory in this project
+	var relations []models.TcReqRelationHistory
+	if err := c.Db.Where("project_id = ?", projectID).Order("created_at").Find(&relations); err.Error != nil {
+		return "", err.Error
+	}
+
+	// iteration and count pre-4weeks requirement count and relationship history
+	// 1. get target requirements by period
+	// 2. put their IDs to map (int, int)
+	// 3. get target relationship by period
+	// 4. find map item with requirement ID and increase value
+
+	now := time.Now()
+	n1 := now.AddDate(0, 0, -7)
+	n2 := now.AddDate(0, 0, -14)
+	n3 := now.AddDate(0, 0, -21)
+
+	timeArray := [3]time.Time{n3, n2, n1}
+
+	periodMap := make(map[int]int)
+
+	covArray := []int{}
+
+	// Question : querying is faster? or fetch all and three-dimension looping is faster?
+	for _, t := range timeArray {
+		for _, req := range reqs {
+			if req.CreatedAt.Before(t) {
+				periodMap[req.ID] = 0
+			} else {
+				continue
+			}
+
+			for _, rel := range relations {
+				if rel.CreatedAt.Before(t) && req.ID == rel.RequirementID {
+					count := periodMap[req.ID]
+					if rel.Kind == models.TcReqRelationHistoryLink {
+						periodMap[req.ID] = count + 1
+					} else if rel.Kind == models.TcReqRelationHistoryUnlink {
+						periodMap[req.ID] = count - 1
+					}
+				}
+			}
+		}
+		var totalReq int
+		var relatedReq int
+		// dump map
+		for _, v := range periodMap {
+			totalReq++
+			if v > 0 {
+				relatedReq++
+			}
+		}
+
+		fmt.Println("Map", periodMap)
+		if totalReq == 0 {
+			covArray = append(covArray, 0)
+		} else {
+			covArray = append(covArray, int(relatedReq*100/totalReq))
+		}
+
+	}
+
+	covArray = append(covArray, currentCov)
+
+	// make string be parsed by GraphJS
+	dataSetString := []string{}
+	for i := range covArray {
+		num := covArray[i]
+		txt := strconv.Itoa(num)
+		dataSetString = append(dataSetString, txt)
+	}
+	dataArray := strings.Join(dataSetString, ",")
+	return dataArray, nil
+}
+
+// getCurrentReqTestCaseCoverage calculates coverage(%) of requirement by testcases
+func getCurrentReqTestCaseCoverage(c *interfacer.AppContext) (int, error) {
+	type testcasesReqs struct {
+		RequirementID int
+		TestCAseID    int
+	}
+
+	var p []testcasesReqs
+
+	// First get req-case join table. using half-raw query to fwtch
+	if err := c.Db.Table("testcases_reqs").Select("requirement_id, test_case_id").
+		Scan(&p); err.Error != nil {
+		fmt.Println("Failed to select operation in Hello")
+	}
+
+	// Second, get requirements table
+	var reqs []models.Requirement
+	if err := c.Db.Find(&reqs); err.Error != nil {
+		log.Error("Dashboard", "type", "database", "msg", "not found requirement")
+		return 0, err.Error
+	}
+
+	// match, just counting unique requirement IDs
+	matched := make(map[int]int)
+	for _, req := range reqs {
+		for _, record := range p {
+			if req.ID == record.RequirementID {
+				matched[req.ID] = 1
+			}
+		}
+	}
+
+	percent := int(len(matched) * 100 / len(reqs))
+
+	return percent, nil
 }
