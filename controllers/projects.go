@@ -227,7 +227,7 @@ func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
 	// to show Requirements coverage.
 	// Showing coverage graph is difficult. Because relationship between test cases and requirements
 	// changes every time. So we need to consider more how to get it.
-	currentCoverage, _ := getCurrentReqTestCaseCoverage(c)
+	currentCoverage, _ := getCurrentReqTestCaseCoverage(c, prj.ID)
 
 	periodCoverage, _ := getPeriodReqTestCaseCoverage(c, prj.ID, currentCoverage)
 	fmt.Println("AA", periodCoverage)
@@ -337,7 +337,6 @@ func getPeriodReqTestCaseCoverage(c *interfacer.AppContext, projectID, currentCo
 			}
 		}
 
-		fmt.Println("Map", periodMap)
 		if totalReq == 0 {
 			covArray = append(covArray, 0)
 		} else {
@@ -360,7 +359,7 @@ func getPeriodReqTestCaseCoverage(c *interfacer.AppContext, projectID, currentCo
 }
 
 // getCurrentReqTestCaseCoverage calculates coverage(%) of requirement by testcases
-func getCurrentReqTestCaseCoverage(c *interfacer.AppContext) (int, error) {
+func getCurrentReqTestCaseCoverage(c *interfacer.AppContext, projectID int) (int, error) {
 	type testcasesReqs struct {
 		RequirementID int
 		TestCAseID    int
@@ -376,7 +375,7 @@ func getCurrentReqTestCaseCoverage(c *interfacer.AppContext) (int, error) {
 
 	// Second, get requirements table
 	var reqs []models.Requirement
-	if err := c.Db.Find(&reqs); err.Error != nil {
+	if err := c.Db.Where("project_id = ?", projectID).Find(&reqs); err.Error != nil {
 		log.Error("Dashboard", "type", "database", "msg", "not found requirement")
 		return 0, err.Error
 	}
@@ -389,6 +388,10 @@ func getCurrentReqTestCaseCoverage(c *interfacer.AppContext) (int, error) {
 				matched[req.ID] = 1
 			}
 		}
+	}
+
+	if len(reqs) == 0 {
+		return 0, nil
 	}
 
 	percent := int(len(matched) * 100 / len(reqs))
