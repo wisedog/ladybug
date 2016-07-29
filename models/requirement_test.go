@@ -35,7 +35,7 @@ func TestRequirementValidateSectionID(t *testing.T) {
 // returns error on invalid status
 func TestRequirementValidateStatus(t *testing.T) {
 	// check status
-	req := Requirement{Title: "test", SectionID: 1, Status: 6}
+	req := Requirement{Title: "test", SectionID: 1, Status: 10}
 	_, err := req.Validate()
 
 	if err == nil {

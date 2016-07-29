@@ -73,11 +73,33 @@ func RequirementList(c *interfacer.AppContext, w http.ResponseWriter, r *http.Re
 	return RenderJSONWithStatus(w, reqs, http.StatusOK)
 }
 
-// AddRequirement renders a page that a user can add a requirement
-// This page should be a detail of requested requirement and related testcases
+// AddRequirement renders just a page that a user can add a requirement
 func AddRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+	strSectionID := r.URL.Query().Get("section_id")
 
-	return nil
+	sectionID, err := strconv.Atoi(strSectionID)
+	if err != nil {
+		return LogAndHTTPError(http.StatusBadRequest, "Requirement", "http", "can not convert section id")
+	}
+
+	var req models.Requirement
+	req.SectionID = sectionID
+
+	// get ReqTypes values like Use Case, Information, Feature....
+	var reqTypes []models.ReqType
+	if err := c.Db.Find(&reqTypes); err.Error != nil {
+		return LogAndHTTPError(http.StatusInternalServerError, "Requirement", "db", "empty reqtype")
+	}
+
+	items := map[string]interface{}{
+		"Requirement": req,
+		"SectionID":   sectionID,
+		"ReqType":     reqTypes,
+		"IsEdit":      false,
+		"Active_idx":  6,
+	}
+
+	return Render2(c, w, items, "views/base.tmpl", "views/requirements/reqadd.tmpl")
 }
 
 // ViewRequirement renders a page of information of the requirements.
@@ -94,10 +116,12 @@ func ViewRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.Re
 		return errors.HttpError{Status: http.StatusBadRequest, Desc: "Not found project"}
 	}
 
-	if err := c.Db.Where("project_id = ?", prj.ID).Where("id = ?", id).First(&req); err.Error != nil {
+	if err := c.Db.Where("project_id = ?", prj.ID).Where("id = ?", id).Preload("ReqType").First(&req); err.Error != nil {
 		log.Error("Requirement", "type", "database", "msg ", err.Error)
 		return errors.HttpError{Status: http.StatusBadRequest, Desc: "Not found requirements"}
 	}
+
+	req.StatusStr = getReqStatusI18n(req.Status)
 
 	// Find related Test Cases with this requirement
 	var testcases []models.TestCase
@@ -117,4 +141,28 @@ func ViewRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.Re
 	}
 
 	return Render2(c, w, items, "views/base.tmpl", "views/requirements/reqview.tmpl")
+}
+
+// EditRequirement just renders a page that user can edit the requirement.
+func EditRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+
+	return nil
+}
+
+// SaveRequirement just renders a page that user can edit the requirement.
+func SaveRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+
+	return nil
+}
+
+// DeleteRequirement just renders a page that user can edit the requirement.
+func DeleteRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+
+	return nil
+}
+
+// UnlinkTestcaseRelation unlink a requirement and a related testcase
+func UnlinkTestcaseRelation(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+
+	return nil
 }

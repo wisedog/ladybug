@@ -16,3 +16,11 @@ priority.lowest=Lowest
 testcase.status.active=Active
 testcase.status.inactive=Inactive
 testcase.status.close=Close
+
+#requirements
+requirement.status.draft=Draft
+requirement.status.inreview=In Review
+requirement.status.rework=Rework
+requirement.status.finished=Finished
+requirement.status.nottestable=Not Testable
+requirement.status.deprecated=deprecated

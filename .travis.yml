@@ -15,6 +15,6 @@ before_script:
 install:
 - export PATH=$PATH:$HOME/gopath/bin
 - go get -t -d -v ./...
-
+    
 notifications:
   slack: ladybugdev:dGWtXjXTstY63pMo2yLvvOHy

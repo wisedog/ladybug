@@ -18,7 +18,7 @@
 
   <!-- Main content -->
 <section class="content">
-  <form id="form_tc_del" method="POST">
+  <form id="form_req_del" method="POST">
   </form>
   <div class="row">
     <div class="col-md-12">
@@ -151,21 +151,22 @@ $(document).ready(function() {
           }
           else{
             items.push("<div class='table-responsive'><table class='table table-striped'>");
-            items.push("<thead><tr><th>#</th><th>Title</th><th>Status</th><th>Priority</th><th>Action</th></tr></thead>");
+            items.push("<thead><tr><th>#</th><th>Title</th><th>Status</th><th>Type</th><th>Action</th></tr></thead>");
             items.push("<tbody>");
-            $.each(data, function(key, val){
-              var priority = ["Unknown", "Highest", "High", "Medium", "Low", "Lowest"];
-              var status=["Unknown", "Active", "Inactive", "Close"];
+            var priority = ["Unknown", "Highest", "High", "Medium", "Low", "Lowest"];
+            var status= ["Draft", "In Review", "Rework", "Finished", "Not Testable", "Deprecated"];
+            var type = ["Use Case", "Information", "Feature", "User Interface", "Non Functional", "Constraint", "System Function"];
+            $.each(data, function(key, val){  
                 items.push("<tr>"+ 
                   "<td>"+ val.ID + "</td>" + 
                   "<td><a href='/project/{{.ProjectName}}/req/view/"+ val.ID + "'>" + 
                      val.Title + "</a></td>" + 
                   "<td>" + status[val.Status] + "</td>" + 
-                  "<td>" + priority[val.Priority] + "</td>" +
+                  "<td>" + type[val.ReqTypeID] + "</td>" +
                   "<td>" + 
-                  "<span class='glyphicon glyphicon-edit fa-fw right7 tc-edit' id='"+ val.ID
+                  "<span class='glyphicon glyphicon-edit fa-fw right7 req-edit' id='"+ val.ID
                   +"' style='cursor:pointer;'></span>"+
-                  "<span class='glyphicon glyphicon-remove tc-del' id='"+val.ID + 
+                  "<span class='glyphicon glyphicon-remove req-del' id='"+val.ID + 
                   "' style='cursor:pointer;'></span>"+
                   "</td>" +
                   "</tr>");
@@ -176,16 +177,16 @@ $(document).ready(function() {
         }); // end of testtree click event binding
     });
 
-    $('body').on('click','.tc-edit',function(){
+    $('body').on('click','.req-edit',function(){
       var id = $(this).attr('id');
-      $(location).attr("href", "/project/{{.ProjectName}}/req/" + id + "/edit");
+      $(location).attr("href", "/project/{{.ProjectName}}/req/edit/" + id);
     });
 
-    $('body').on('click', '.tc-del', function(){
+    $('body').on('click', '.req-del', function(){
         var id = $(this).attr('id');
         var r = confirm("Delete the testcase?");
         if(r == true){
-          $('#form_tc_del').attr('action', "/project/{{.ProjectName}}/req/" + id + "/delete").submit();
+          $('#form_req_del').attr('action', "/project/{{.ProjectName}}/req/delete/" + id ).submit();
         }
     });
 

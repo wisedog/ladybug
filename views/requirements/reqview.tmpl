@@ -26,16 +26,22 @@
           <div class="box-body">
             <div class="row  vertical-align">
               <div class="col-md-2">
+                <h4><strong>Type</strong></h4>
+              </div>
+              <div class="col-md-2">
+                {{.Requirement.ReqType.Name}}
+              </div>
+              <div class="col-md-2">
                 <h4><strong>Status</strong></h4>
               </div>
               <div class="col-md-2">
-                {{.Requirement.Status}}
+                {{.Requirement.StatusStr}}
               </div>
               <div class="col-md-2">
                 <h4><strong>Version</strong></h4>
               </div>
               <div class="col-md-2">
-                {{.Requirement.Version}}
+                {{.Requirement.Version}} View All
               </div>
             </div>
             <div class="row">

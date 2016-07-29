@@ -208,9 +208,12 @@ func main() {
 	// requirements
 	req := project.PathPrefix("/{projectName}/req").Subrouter()
 	req.HandleFunc("/", authHandler(ctx, controllers.RequirementIndex)).Methods("GET")
-	req.HandleFunc("/list/{id:[0-9]+}", authHandler(ctx, controllers.RequirementList)).Methods("GET")
+	req.HandleFunc("/add", authHandler(ctx, controllers.AddRequirement)).Methods("GET")
 	req.HandleFunc("/view/{id:[0-9]+}", authHandler(ctx, controllers.ViewRequirement)).Methods("GET")
-	// TODO ADD
+	req.HandleFunc("/edit/{id:[0-9]+}", authHandler(ctx, controllers.EditRequirement)).Methods("GET")
+	req.HandleFunc("/list/{id:[0-9]+}", authHandler(ctx, controllers.RequirementList)).Methods("GET")
+	req.HandleFunc("/save/{id:[0-9]+}", authHandler(ctx, controllers.SaveRequirement)).Methods("POST")
+	req.HandleFunc("/delete/{id:[0-9]+}", authHandler(ctx, controllers.DeleteRequirement)).Methods("POST")
 
 	// testexec
 	exec := project.PathPrefix("/{projectName}/exec").Subrouter()
