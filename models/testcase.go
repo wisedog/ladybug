@@ -4,6 +4,7 @@ import (
 	"errors"
 )
 
+// The priority of TestCase
 const (
 	PriorityHighest = 1 + iota
 	PriorityHigh
@@ -12,6 +13,7 @@ const (
 	PriorityLowest
 )
 
+// The status of TestCase
 const (
 	TcStatusActivate = 1 + iota
 	TcStatusInactivate
@@ -69,6 +71,7 @@ type TestCase struct {
 
 }
 
+// Validate checks whether the testcase is valid or not
 func (testcase *TestCase) Validate() error {
 	rv := testcase.Required(testcase.Title)
 	if rv {

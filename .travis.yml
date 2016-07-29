@@ -14,16 +14,7 @@ before_script:
 - bower install  
 install:
 - export PATH=$PATH:$HOME/gopath/bin
-- go get -v gopkg.in/fsnotify.v1
-- go get -v github.com/gorilla/mux
-- go get -v github.com/gorilla/sessions
-- go get -v github.com/gorilla/schema
-- go get -v github.com/jinzhu/gorm
-- go get -v github.com/lib/pq
-- go get -v golang.org/x/crypto/bcrypt
-- go get -v gopkg.in/inconshreveable/log15.v2
-- go get -v github.com/robfig/config
-
+- go get -t -d -v ./...
 
 notifications:
   slack: ladybugdev:dGWtXjXTstY63pMo2yLvvOHy

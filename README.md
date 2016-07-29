@@ -47,7 +47,8 @@ This app uses now only Postgresql. Various databases(MySQL, MarinaDB ....) will 
 ### Run
 
 ```
-$ bower install 
+$ bower install
+$ go get -t -d -v ./... 
 $ go build
 $ ./ladybug 
 ```
