@@ -3,6 +3,8 @@ package database
 import (
 	"fmt"
 	"math/rand"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -22,7 +24,13 @@ var Database *gorm.DB
 // InitDB initialize the database and create dummies if it needs
 func InitDB(conf *interfacer.AppConfig) (*gorm.DB, error) {
 
-	args := getDialectArgs(conf)
+	var args string
+	// heroku support
+	if strings.Contains(conf.GetMode(), "heroku") {
+		args = os.Getenv("DATABASE_URL")
+	} else {
+		args = getDialectArgs(conf)
+	}
 
 	var err error
 	Database, err = gorm.Open("postgres", args)

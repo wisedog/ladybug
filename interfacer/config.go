@@ -1,7 +1,10 @@
 package interfacer
 
 import (
+	"flag"
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/robfig/config"
 	log "gopkg.in/inconshreveable/log15.v2"
@@ -31,11 +34,12 @@ func LoadConfig() *AppConfig {
 	var appConf AppConfig
 	var conf conf
 
-	if rv, err := loader.String("", "app.mode"); err != nil {
-		// load to default
-	} else {
-		conf.Mode = rv
-	}
+	modePtr := flag.String("mode", "dev", "a string")
+
+	flag.Parse()
+
+	conf.Mode = *modePtr
+	log.Info("Config", "Starting Mode", conf.Mode)
 
 	if rv, err := loader.String("", "app.secret"); err != nil {
 		log.Error("conf", "msg", "fail to load app secret")
@@ -76,6 +80,15 @@ func (conf AppConfig) GetBindAddress() string {
 		log.Error("conf", "msg", "fail to load port")
 	} else {
 		bindPort = rv
+	}
+
+	// heroku support
+	if strings.Contains(conf.GetMode(), "heroku") {
+		bindIP = ""
+		bindPort = os.Getenv("PORT")
+		if bindPort == "" {
+			log.Error("Config", "msg", "Fail to get PORT environment")
+		}
 	}
 
 	s := fmt.Sprintf("%s:%s", bindIP, bindPort)
