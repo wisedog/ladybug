@@ -3,8 +3,6 @@ package database
 import (
 	"fmt"
 	"math/rand"
-	"os"
-	"strings"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -24,16 +22,8 @@ var Database *gorm.DB
 // InitDB initialize the database and create dummies if it needs
 func InitDB(conf *interfacer.AppConfig) (*gorm.DB, error) {
 
-	var args string
-	// heroku support
-	if strings.Contains(conf.GetMode(), "heroku") {
-		args = os.Getenv("DATABASE_URL")
-	} else {
-		args = getDialectArgs(conf)
-	}
-
 	var err error
-	Database, err = gorm.Open("postgres", args)
+	Database, err = gorm.Open("postgres", getDialectArgs(conf))
 	if err != nil {
 		log.Info("Database", "msg", err.Error())
 		return Database, err
@@ -63,23 +53,28 @@ func loadDefault() error {
 
 // getDialectArgs returns argument of dialect database.
 func getDialectArgs(conf *interfacer.AppConfig) string {
-	driver := conf.GetValue("db.driver")
-	username := conf.GetValue("db.username")
-	pwd := conf.GetValue("db.password")
-	port := conf.GetValue("db.port")
-	address := conf.GetValue("db.address")
-	dbname := conf.GetValue("db.database_name")
-	//extraParam := conf.GetValue("db.extra_param")
-
 	var args string
-	switch driver {
-	case "postgres":
-		args = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", username, pwd, address, port, dbname)
-	case "mysql":
-		args = "" //TODO
+	// not set by argument
+	if conf.GetDialect() == "" {
+		driver := conf.GetValue("db.driver")
+		username := conf.GetValue("db.username")
+		pwd := conf.GetValue("db.password")
+		port := conf.GetValue("db.port")
+		address := conf.GetValue("db.address")
+		dbname := conf.GetValue("db.database_name")
+		//extraParam := conf.GetValue("db.extra_param")
+		switch driver {
+		case "postgres":
+			args = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", username, pwd, address, port, dbname)
+		case "mysql":
+			args = "" //TODO
 
-	default:
-		args = ""
+		default:
+			args = ""
+		}
+	} else {
+		// set by argument
+		args = conf.GetDialect()
 	}
 
 	return args

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"html/template"
 	"net/http"
 
@@ -106,8 +107,16 @@ func main() {
 	// create application context
 	ctx := &interfacer.AppContext{}
 
+	// parse program argument
+	modePtr := flag.String("mode", "", "mode")
+	portPtr := flag.Int("port", 8000, "(optional)binding port. default value is 8000")
+	addrPtr := flag.String("addr", "localhost", "(optional)binding address. default value is localhost")
+	databasePtr := flag.String("db", "", "(optional)database url(dialect)")
+	flag.Parse()
+	log.Info("APP", "Starting Mode", *modePtr)
+
 	// load config
-	ctx.Config = interfacer.LoadConfig()
+	ctx.Config = interfacer.LoadConfigWithArgs(*modePtr, *addrPtr, *portPtr, *databasePtr, "./ladybug.conf")
 
 	log.Info("Initialize Database...")
 	if db, err := database.InitDB(ctx.Config); err != nil {

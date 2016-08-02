@@ -1,10 +1,7 @@
 package interfacer
 
 import (
-	"flag"
 	"fmt"
-	"os"
-	"strings"
 
 	"github.com/robfig/config"
 	log "gopkg.in/inconshreveable/log15.v2"
@@ -19,14 +16,19 @@ type AppConfig struct {
 type conf struct {
 	Mode     string
 	BindIP   string
-	BindPort string
+	BindPort int
+	Dialect  string
 	Language string
 	Secret   string
 }
 
-// LoadConfig loads application configuration from file and return Config object
-func LoadConfig() *AppConfig {
-	loader, err := config.ReadDefault("./ladybug.conf")
+// LoadConfigWithArgs initializes with addr, port, db dialect
+// and other options with application configuration from file and return Config object
+// if mode is empty, load only default options (root section)
+// mode is a string indicates section of config file.
+// filename is config file, especially used by unit testing
+func LoadConfigWithArgs(mode, addr string, port int, dialect, filename string) *AppConfig {
+	loader, err := config.ReadDefault(filename)
 	if err != nil {
 		log.Error("conf", "msg", err.Error())
 	}
@@ -34,18 +36,49 @@ func LoadConfig() *AppConfig {
 	var appConf AppConfig
 	var conf conf
 
-	modePtr := flag.String("mode", "dev", "a string")
-
-	flag.Parse()
-
-	conf.Mode = *modePtr
-	log.Info("Config", "Starting Mode", conf.Mode)
+	conf.Mode = mode
 
 	if rv, err := loader.String("", "app.secret"); err != nil {
 		log.Error("conf", "msg", "fail to load app secret")
 	} else {
 		conf.Secret = rv
 	}
+	// filtering default values
+	conf.BindIP = addr
+	conf.BindPort = port
+	conf.Dialect = dialect
+
+	appConf.cf = &conf
+	appConf.loader = loader
+
+	return &appConf
+}
+
+// LoadConfig loads application configuration from file and return Config object
+// mode is a string indicates section of config file.
+// filename is config file, used by unit testing
+// Binding address, port are initialized by localhost, 8000
+func LoadConfig(mode, filename string) *AppConfig {
+	loader, err := config.ReadDefault(filename)
+	if err != nil {
+		log.Error("conf", "msg", err.Error())
+	}
+
+	var appConf AppConfig
+	var conf conf
+
+	conf.Mode = mode
+
+	if rv, err := loader.String("", "app.secret"); err != nil {
+		log.Error("conf", "msg", "fail to load app secret")
+	} else {
+		conf.Secret = rv
+	}
+
+	// filtering default values
+	conf.BindIP = "localhost"
+	conf.BindPort = 8000
+	conf.Dialect = ""
 
 	appConf.cf = &conf
 	appConf.loader = loader
@@ -68,30 +101,8 @@ func (conf AppConfig) GetBindAddress() string {
 	if conf.cf == nil {
 		return "localhost:8080"
 	}
-	var bindIP string
-	var bindPort string
-	if rv, err := conf.loader.String(conf.cf.Mode, "http.addr"); err != nil {
-		log.Error("conf", "msg", "fail to load address")
-	} else {
-		bindIP = rv
-	}
 
-	if rv, err := conf.loader.String(conf.cf.Mode, "http.port"); err != nil {
-		log.Error("conf", "msg", "fail to load port")
-	} else {
-		bindPort = rv
-	}
-
-	// heroku support
-	if strings.Contains(conf.GetMode(), "heroku") {
-		bindIP = ""
-		bindPort = os.Getenv("PORT")
-		if bindPort == "" {
-			log.Error("Config", "msg", "Fail to get PORT environment")
-		}
-	}
-
-	s := fmt.Sprintf("%s:%s", bindIP, bindPort)
+	s := fmt.Sprintf("%s:%d", conf.cf.BindIP, conf.cf.BindPort)
 	return s
 }
 
@@ -99,9 +110,14 @@ func (conf AppConfig) GetBindAddress() string {
 // if any value matched the given key, returns empty string
 func (conf AppConfig) GetValue(key string) string {
 	if rv, err := conf.loader.String(conf.cf.Mode, key); err != nil {
-		log.Error("conf", "msg", "fail to load port")
+		log.Error("conf", "msg", "fail to load key", "key", key, "mode", conf.cf.Mode)
 	} else {
 		return rv
 	}
 	return ""
+}
+
+// GetDialect returns database dialect
+func (conf AppConfig) GetDialect() string {
+	return conf.cf.Dialect
 }

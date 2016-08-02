@@ -6,7 +6,7 @@ import (
 
 // TestLoadConfig validates loading config feature
 func TestLoadConfig(t *testing.T) {
-	cf := LoadConfig()
+	cf := LoadConfig("dev", "dummy_ladybug.conf")
 
 	if cf == nil {
 		t.Error("config load failed")
@@ -15,7 +15,7 @@ func TestLoadConfig(t *testing.T) {
 
 // TestMode validates GetMode() method
 func TestMode(t *testing.T) {
-	cf := LoadConfig()
+	cf := LoadConfig("dev", "dummy_ladybug.conf")
 
 	if cf == nil {
 		t.Error("config load failed")
@@ -28,7 +28,7 @@ func TestMode(t *testing.T) {
 
 // TestBindAddress validates BindAddress() method
 func TestBindAddress(t *testing.T) {
-	cf := LoadConfig()
+	cf := LoadConfig("dev", "dummy_ladybug.conf")
 
 	if cf == nil {
 		t.Error("config load failed")

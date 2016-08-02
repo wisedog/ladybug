@@ -16,7 +16,7 @@ var Database *gorm.DB
 
 func setup() {
 	fmt.Println("Setup Testing for package buildtools...")
-	cf := interfacer.LoadConfig()
+	cf := interfacer.LoadConfig("test", "./dummy_ladybug.conf")
 
 	var err error
 	Database, err = database.InitDB(cf)
