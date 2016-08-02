@@ -1,6 +1,6 @@
 language: go
 go:
-- 1.5
+- 1.6
 sudo: false
 services:
 - memcache
@@ -18,3 +18,12 @@ install:
     
 notifications:
   slack: ladybugdev:dGWtXjXTstY63pMo2yLvvOHy
+
+deploy:
+  provider: heroku
+  api_key:
+    secure: MzIDS5d0/M62UB9FSWIWEc5VZ6g4G0jBoblm9y1iO5JZhFQL6DLH8ZnolDHeVV9weQfP++TkSP782U+w8HfcVWqMVkY7T/S8WPMLbni3WuR+gDXOCk6gzOG79AOoF6nbD1Q50EinihpcblW+oJyWRWR9UXlgehbfWugKWKiuzFYsLw+V5c7Y55MTIaRy+7AgUv25a4aJf/R6OLpElV2DjnvUf5sGwzo9Hkhm2iokW3SqcjV1Ut5iC2tNaLZlzjFNxvpAPLMVsFnIO85rhpnq1F3Ne94X8VUIVRKiRxn+RA4WtayHhkeaVufSesEN4BnVnnHTqfeDhRqzd3TwDrU+GijkBKrrdrGSZX4GmPTkfTRmoOWMQGOiQfyPFr4gBAN+aY7TwN2BrwQmLSqa29Gb1q31ButkmhvX4Dtl+yJ1yGO6wXr83To/c1vX3Csa6zPDkJ9lwqwuVP03dxfdNox/a2HVEnAoMHM3qTU0t8ixyWdJf/OAhwemoai0DTUKMezxNWh9dBJgE5fixUd7UnTsHVZBD43oue7CMWzoC74QKY41fhHYpfONvDN6gIjJFsw1uC4vLQQWRRh7ozgUsQAg+hBjQU83vUdzparGfU4d1bquB3fY7zz1B8aYlH1Vw2IdzrBW8MiRu4K9L3fSKmSUz2GPZjbw5vNALtEKKNY/IFo=
+  app: ladybug-dev
+  on:
+    repo: wisedog/ladybug
+    branch : heroku-deploy
