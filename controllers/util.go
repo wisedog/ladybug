@@ -129,3 +129,23 @@ func RenderJSON(w http.ResponseWriter, data interface{}) error {
 	w.Write(js)
 	return nil
 }
+
+// ValidationFailAndRedirect store errors and redirect if there are error messages
+func ValidationFailAndRedirect(c *interfacer.AppContext, w http.ResponseWriter,
+	r *http.Request, errorMap map[string]string, url string, value interface{}) {
+	if len(errorMap) > 0 {
+		log.Debug("Validation failed")
+
+		session, e := c.Store.Get(r, "ladybug")
+		if e != nil {
+			log.Warn("error ", "msg", e.Error)
+		}
+
+		session.AddFlash(value, "LADYBUG_BUILD")
+		session.AddFlash(errorMap, ErrorMsg)
+
+		session.Save(r, w)
+		http.Redirect(w, r, url, http.StatusFound)
+	}
+
+}

@@ -135,14 +135,14 @@ func createDummy() {
 	prj := models.Project{
 		Name:        "Koblentz",
 		Status:      1,
-		Description: "A test project",
+		Description: "A sample project. If you are used to Ladybug, remove this project",
 		Prefix:      "TC",
 		Users:       []models.User{*demoUser, *demoUser1},
 	}
 	prj1 := models.Project{
 		Name:        "bremen",
 		Status:      1,
-		Description: "A test project2",
+		Description: "Second sample project. If you are used to Ladybug, remove this project",
 		Prefix:      "wise",
 		Users:       []models.User{*demoUser, *demoUser1},
 	}

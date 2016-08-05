@@ -1,0 +1,104 @@
+{{define "title"}}Requirement Add{{ end }}
+{{define "more_style"}}{{end}}
+{{define "content"}}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+  <!-- Content header -->
+  <section class="content-header">
+    <h1>
+      {{if eq .IsEdit true}}Edit Requirement{{else}}Add Requirement{{end}}
+      <small></small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="/project/{{.ProjectName}}/dashboard}}"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li><a href="/project/{{.ProjectName}}/req">Requirement</a></li>
+      <li class="active">Here</li>
+    </ol>
+  </section>
+  <!-- Main content -->
+  <section class="content">
+    <form id="req-save-form" method="POST" action="/project/{{.ProjectName}}/req/{{if eq .IsEdit true}}update/{{.Requirement.ID}}{{else}}save{{end}}">
+      <div class="row">
+        <input type="hidden" name="SectionID" value="{{.Requirement.SectionID}}"></input>
+        <input type="hidden" name="ID" value="{{.Requirement.ID}}"></input>
+        <div class="col-md-12 top10">
+          <div class="row vertical-align bottom10">
+            <div class="col-md-1"><strong>Title</strong></div>
+            <div class="col-md-8">
+              <input class="form-control" name="Title" value="{{.Requirement.Title}}">
+            </div>
+          </div> <!-- .row -->
+          <div class="row vertical-align bottom10">
+            <div class="col-md-1">
+              <label>Type</label>
+            </div>
+            <div class="col-md-3">
+              <select class="form-control" name="ReqTypeID">
+                {{range $type := .ReqType}}
+                <option value="{{$type.ID}}" {{if eq $type.ID $.Requirement.ReqTypeID}}selected{{end}}>{{.Name}}</option>
+                {{end}}
+              </select>
+            </div> <!-- col-md-2 -->
+            <div class="col-md-1">
+              <strong>Status</strong>
+            </div>
+            <div class="col-md-3">
+              <select class="form-control" name="Status">
+                <option value="1" {{if eq .Requirement.Status 1}}selected{{end}}>{{msg "requirement.status.draft"}}</option>
+                <option value="2" {{if eq .Requirement.Status 2}}selected{{end}}>{{msg "requirement.status.inreview"}}</option>
+                <option value="3" {{if eq .Requirement.Status 3}}selected{{end}}>{{msg "requirement.status.rework"}}</option>
+                <option value="4" {{if eq .Requirement.Status 4}}selected{{end}}>{{msg "requirement.status.finished"}}</option>
+                <option value="5" {{if eq .Requirement.Status 5}}selected{{end}}>{{msg "requirement.status.nottestable"}}</option>
+                <option value="6" {{if eq .Requirement.Status 6}}selected{{end}}>{{msg "requirement.status.deprecated"}}</option>
+              </select>
+            </div>
+          </div> <!-- .row -->
+
+          <div class="row vertical-align bottom10">
+            <div class="col-md-2">
+              <strong>Review to</strong>
+            </div>
+            <div class="col-md-2">
+            </div>
+          </div> <!-- .row -->
+
+          <div class="row form-group bottom10">
+            <div class="col-md-12">
+              <label>{{msg "description"}}</label>
+              <textarea class="form-control" rows="4" name="Description">{{.Requirement.Description}}</textarea>
+            </div>
+          </div> <!-- .row -->
+
+          {{if eq .IsEdit true}}
+          <div class="row col-md-12">
+            <div class="box box-primary">
+              <div class="box-header with-border">
+                <h3 class="box-title">Add a note</h3>
+              </div>
+              <div class="box-body">
+                <textarea class="form-control" rows=3 name="Note"></textarea>
+              </div>
+            </div>
+          </div>
+          {{end}}
+        
+          <div class="row col-md-12">
+            <button type="submit" class="btn btn-primary btn-flat btn-sm" id="btn-submit">
+              {{if eq .IsEdit true}}Update{{else}}Add{{end}}
+            </button>
+            <button type="button" class="btn btn-danger btn-flat btn-sm" id="btn-cancel">Cancel</button>
+          </div>
+        </div> <!-- .col-md -->
+      </div> <!-- .row -->
+    </form>
+  </section><!-- /.content -->
+</div><!-- /.content-wrapper -->
+{{end}}
+{{define "more_scripts"}}
+<script>
+    $("#btn-cancel").click(function(){
+        //TODO scan dirty
+        window.history.back();
+    });
+</script>
+{{end}}

@@ -83,27 +83,6 @@ var parent_id = -1;
 var node_id = -1;
 var from_subsection = false;
 
-function del_suite(){
-  if(ts_id == -1){
-    alert("select testsuite");
-    return;
-  }
-
-  var r = confirm("Delete the testsuite?");
-  if(r == true){
-    $('#form_ts_del').attr('action', "/project/{{.project}}/suite/" + ts_id + "/delete").submit();
-  }
-}
-
-function edit_suite(){
-  if(ts_id == -1){
-    alert("select testsuite");
-    return;
-  }
-  $(location).attr("href", "/project/{{.project}}/suite/" + ts_id + "/edit");
-
-}
-
 $(document).ready(function() {
     $('#testtree').jstree({
       "core" : {
@@ -154,8 +133,8 @@ $(document).ready(function() {
             items.push("<thead><tr><th>#</th><th>Title</th><th>Status</th><th>Type</th><th>Action</th></tr></thead>");
             items.push("<tbody>");
             var priority = ["Unknown", "Highest", "High", "Medium", "Low", "Lowest"];
-            var status= ["Draft", "In Review", "Rework", "Finished", "Not Testable", "Deprecated"];
-            var type = ["Use Case", "Information", "Feature", "User Interface", "Non Functional", "Constraint", "System Function"];
+            var status= ["Unknown", "Draft", "In Review", "Rework", "Finished", "Not Testable", "Deprecated"];
+            var type = ["Unknown", "Use Case", "Information", "Feature", "User Interface", "Non Functional", "Constraint", "System Function"];
             $.each(data, function(key, val){  
                 items.push("<tr>"+ 
                   "<td>"+ val.ID + "</td>" + 
@@ -186,7 +165,12 @@ $(document).ready(function() {
         var id = $(this).attr('id');
         var r = confirm("Delete the testcase?");
         if(r == true){
-          $('#form_req_del').attr('action', "/project/{{.ProjectName}}/req/delete/" + id ).submit();
+          $.post("/project/{{.ProjectName}}/req/delete", {"id": id})
+            .done(function(data){
+              console.log("Result : ", data);
+              location.reload();
+          });
+          //$('#form_req_del').attr('action', "/project/{{.ProjectName}}/req/delete/" + id ).submit();
         }
     });
 

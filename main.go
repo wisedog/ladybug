@@ -221,8 +221,9 @@ func main() {
 	req.HandleFunc("/view/{id:[0-9]+}", authHandler(ctx, controllers.ViewRequirement)).Methods("GET")
 	req.HandleFunc("/edit/{id:[0-9]+}", authHandler(ctx, controllers.EditRequirement)).Methods("GET")
 	req.HandleFunc("/list/{id:[0-9]+}", authHandler(ctx, controllers.RequirementList)).Methods("GET")
-	req.HandleFunc("/save/{id:[0-9]+}", authHandler(ctx, controllers.SaveRequirement)).Methods("POST")
-	req.HandleFunc("/delete/{id:[0-9]+}", authHandler(ctx, controllers.DeleteRequirement)).Methods("POST")
+	req.HandleFunc("/save", authHandler(ctx, controllers.SaveRequirement)).Methods("POST")
+	req.HandleFunc("/update/{id:[0-9]+}", authHandler(ctx, controllers.UpdateRequirement)).Methods("POST")
+	req.HandleFunc("/delete", authHandler(ctx, controllers.DeleteRequirement)).Methods("POST")
 
 	// testexec
 	exec := project.PathPrefix("/{projectName}/exec").Subrouter()
