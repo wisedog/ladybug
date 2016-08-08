@@ -18,16 +18,22 @@
   <!-- Main content -->
   <section class="content">
     <form id="req-save-form" method="POST" action="/project/{{.ProjectName}}/req/{{if eq .IsEdit true}}update/{{.Requirement.ID}}{{else}}save{{end}}">
+    <input type="hidden" name="SectionID" value="{{.Requirement.SectionID}}"></input>
+    <input type="hidden" name="ID" value="{{.Requirement.ID}}"></input>
+    <input type="hidden" name="ProjectID" value="{{.Requirement.ProjectID}}"></input>
       <div class="row">
-        <input type="hidden" name="SectionID" value="{{.Requirement.SectionID}}"></input>
-        <input type="hidden" name="ID" value="{{.Requirement.ID}}"></input>
         <div class="col-md-12 top10">
-          <div class="row vertical-align bottom10">
-            <div class="col-md-1"><strong>Title</strong></div>
-            <div class="col-md-8">
-              <input class="form-control" name="Title" value="{{.Requirement.Title}}">
-            </div>
-          </div> <!-- .row -->
+          <div class="form-group {{$val := index .ErrorMap "Title"}} {{if ne $val ""}}has-error{{end}}">
+            <div class="row vertical-align bottom10">
+                <div class="col-md-1"><strong>Title</strong></div>
+                <div class="col-md-8">
+                    <input class="form-control" name="Title" value="{{.Requirement.Title}}">
+                </div>
+                <div class="col-md-3">
+                    <label>{{$val}}</label>
+                </div>
+            </div> <!-- .row -->
+          </div><!-- .form-group -->
           <div class="row vertical-align bottom10">
             <div class="col-md-1">
               <label>Type</label>

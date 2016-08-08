@@ -127,69 +127,90 @@ func EditRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.Re
 // addEditRequirement renders a page that user can edit or add the requirement
 // Adding and Editing are somewhat similar, this function can handle both
 func addEditRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request, isEdit bool) error {
+	var errorMap map[string]string
+	var req models.Requirement
 
-	var id int
-	var sectionID int
-	var err error
+	session, e := c.Store.Get(r, "ladybug")
 
-	// only addRequirement has get a parameter
-	if isEdit {
-		// find [add|save]/{id}
-		vars := mux.Vars(r)
-		idStr := vars["id"]
-		id, err = strconv.Atoi(idStr)
-		if err != nil {
-			return LogAndHTTPError(http.StatusBadRequest, "Requirement", "http", "can not convert req id")
-		}
-	} else {
-		strSectionID := r.URL.Query().Get("section_id")
-
-		sectionID, err = strconv.Atoi(strSectionID)
-		if err != nil {
-			return LogAndHTTPError(http.StatusBadRequest, "Requirement", "http", "can not convert section id")
-		}
+	if e != nil {
+		log.Info("error ", "msg", e.Error())
 	}
 
-	// get ReqTypes values like Use Case, Information, Feature....
+	// Check if there are invalid form values from SAVE/UPDATE
+	if fm := session.Flashes(BuildFlashKey); fm != nil {
+		b, ok := fm[0].(*models.Requirement)
+		if ok {
+			req = *b
+		} else {
+			log.Debug("Build", "msg", "flash type assertion failed")
+		}
+
+		delete(session.Values, BuildFlashKey)
+		errorMap = getErrorMap(session)
+		session.Save(r, w)
+
+	} else {
+		var id int
+		var sectionID int
+		var err error
+
+		// only addRequirement has get a parameter
+		if isEdit {
+			// find [add|save]/{id}
+			vars := mux.Vars(r)
+			idStr := vars["id"]
+			id, err = strconv.Atoi(idStr)
+			if err != nil {
+				return LogAndHTTPError(http.StatusBadRequest, "Requirement", "http", "can not convert req id")
+			}
+		} else {
+			strSectionID := r.URL.Query().Get("section_id")
+
+			sectionID, err = strconv.Atoi(strSectionID)
+			if err != nil {
+				return LogAndHTTPError(http.StatusBadRequest, "Requirement", "http", "can not convert section id")
+			}
+		}
+
+		if isEdit {
+			if err := c.Db.Where("id = ?", id).First(&req); err.Error != nil {
+				var msg string
+				var status int
+				if err.RecordNotFound() {
+					msg = "Bad request. Record not found"
+					status = http.StatusBadRequest
+				} else {
+					msg = "An Error while SELECT operation for Requirement.Edit"
+					status = http.StatusInternalServerError
+				}
+				log.Error("req", "type", "database", "msg", err.Error)
+				return LogAndHTTPError(status, "requirement", "database", msg)
+			}
+		} else {
+			var prj models.Project
+			if err := c.Db.Where("name = ?", c.ProjectName).First(&prj); err.Error != nil {
+				log.Error("requirement", "type", "database", "msg", err.Error)
+				return errors.HttpError{Status: http.StatusInternalServerError,
+					Desc: "An Error while SELECT project operation for Requirement.Add"}
+			}
+			req.SectionID = sectionID
+			req.ProjectID = prj.ID
+		}
+
+	}
+
+	// get ReqTypes values like Use Case, Information, Feature .. to render
 	var reqTypes []models.ReqType
 	if err := c.Db.Find(&reqTypes); err.Error != nil {
 		return LogAndHTTPError(http.StatusInternalServerError, "Requirement", "db", "empty reqtype")
 	}
 
-	var req models.Requirement
-	var projectID int
-	if isEdit {
-		if err := c.Db.Where("id = ?", id).First(&req); err.Error != nil {
-			var msg string
-			var status int
-			if err.RecordNotFound() {
-				msg = "Bad request. Record not found"
-				status = http.StatusBadRequest
-			} else {
-				msg = "An Error while SELECT operation for Requirement.Edit"
-				status = http.StatusInternalServerError
-			}
-			log.Error("req", "type", "database", "msg", err.Error)
-			return LogAndHTTPError(status, "requirement", "database", msg)
-		}
-	} else {
-		var prj models.Project
-		if err := c.Db.Where("name = ?", c.ProjectName).First(&prj); err.Error != nil {
-			log.Error("requirement", "type", "database", "msg", err.Error)
-			return errors.HttpError{Status: http.StatusInternalServerError,
-				Desc: "An Error while SELECT project operation for Requirement.Add"}
-		}
-		projectID = prj.ID
-		req.SectionID = sectionID
-	}
-
 	items := map[string]interface{}{
 		"Requirement": req,
-		"ProjectID":   projectID,
-		"SectionID":   sectionID,
 		"ReqType":     reqTypes,
 		"IsEdit":      isEdit,
 		"Active_idx":  6,
+		"ErrorMap":    errorMap,
 	}
 
 	return Render2(c, w, items, "views/base.tmpl", "views/requirements/reqaddedit.tmpl")
@@ -224,7 +245,6 @@ func saveUpdateRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *h
 			}
 		}
 
-		log.Debug("Go ahead!!")
 		if err := c.Db.Save(&req); err.Error != nil {
 			return LogAndHTTPError(http.StatusInternalServerError, "Requirement", "database", "update failed")
 		}
@@ -254,7 +274,14 @@ func saveUpdateRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *h
 		}
 
 		req.ProjectID = prj.ID
-		// TODO validate here!
+		if errorMap, err := req.Validate(); len(errorMap) > 0 {
+			if err != nil {
+				return LogAndHTTPError(http.StatusInternalServerError, "Requirement", "validation",
+					err.Error())
+			}
+			ValidationFailAndRedirect(c, w, r, errorMap, "/project/"+c.ProjectName+"/req/add?section_id="+sectionIDStr, req)
+			return nil
+		}
 
 		// Create!
 		c.Db.NewRecord(req)
