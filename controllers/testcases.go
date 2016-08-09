@@ -80,10 +80,20 @@ func CaseView(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 		log.Debug("testcases", "res", histories[i].Changes)
 	}
 
+	// Find related Test Cases with this requirement
+	var reqs []models.Requirement
+	//var req models.Requirement
+	//var dummyTestCase models.TestCase
+	if err := c.Db.Model(&tc).Association("RelatedRequirements").Find(&reqs); err.Error != nil {
+		log.Error("TestCase", "type", "database", "msg ", err.Error)
+		return errors.HttpError{Status: http.StatusBadRequest, Desc: "Not found related testcases"}
+	}
+
 	items := map[string]interface{}{
-		"TestCase":   tc,
-		"Histories":  histories,
-		"Active_idx": 2,
+		"TestCase":    tc,
+		"Histories":   histories,
+		"RelatedReqs": reqs,
+		"Active_idx":  2,
 	}
 
 	return Render2(c, w, items, "views/base.tmpl", "views/testcases/caseindex.tmpl")
