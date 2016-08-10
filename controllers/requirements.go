@@ -340,6 +340,43 @@ func DeleteRequirement(c *interfacer.AppContext, w http.ResponseWriter, r *http.
 // UnlinkTestcaseRelation unlink a requirement and a related testcase
 // Return in JSON
 func UnlinkTestcaseRelation(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+	// get requirement, testcase ID from post
+	if err := r.ParseForm(); err != nil {
+		log.Error("Requirement", "type", "app", "msg ", err.Error())
+		return RenderJSONWithStatus(w, Resp{Msg: "Parse form is not valid"}, http.StatusBadRequest)
+	}
 
-	return nil
+	reqIDStr := r.FormValue("req_id")
+	tcIDStr := r.FormValue("tc_id")
+
+	reqID, err := strconv.Atoi(reqIDStr)
+	if err != nil {
+		log.Error("Requirement", "type", "app", "msg ", err.Error())
+		return RenderJSONWithStatus(w, Resp{Msg: err.Error()}, http.StatusBadRequest)
+	}
+
+	tcID, err := strconv.Atoi(tcIDStr)
+	if err != nil {
+		log.Error("Requirement", "type", "app", "msg ", err.Error())
+		return RenderJSONWithStatus(w, Resp{Msg: err.Error()}, http.StatusBadRequest)
+	}
+
+	var targetTestCase models.TestCase
+	if err := c.Db.Where("id = ?", tcID).First(&targetTestCase); err.Error != nil {
+		log.Error("Requirement", "type", "database", "msg ", err.Error.Error())
+		return RenderJSONWithStatus(w,
+			Resp{Msg: "Not found or something wrong while unlinking requirement and related testcase"},
+			http.StatusInternalServerError)
+	}
+
+	var req models.Requirement
+	req.ID = reqID
+
+	// Find related Test Cases with this requirement
+	//var reqs []models.Requirement
+	if err := c.Db.Model(&req).Association("RelatedTestCases").Delete(targetTestCase); err.Error != nil {
+		log.Error("Requirement", "type", "database", "msg ", err.Error)
+		return RenderJSONWithStatus(w, Resp{Msg: "Error while delete linking"}, http.StatusInternalServerError)
+	}
+	return RenderJSONWithStatus(w, Resp{Msg: "OK"}, http.StatusOK)
 }

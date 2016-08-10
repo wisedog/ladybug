@@ -186,6 +186,7 @@ func main() {
 	testcase.HandleFunc("/add", authHandler(ctx, controllers.CaseAdd)).Methods("GET")
 	testcase.HandleFunc("/save", authHandler(ctx, controllers.CaseSave)).Methods("POST")
 	testcase.HandleFunc("/delete", authHandler(ctx, controllers.CaseDelete)).Methods("POST")
+	testcase.HandleFunc("/unlink", authHandler(ctx, controllers.UnlinkRequirementRelation)).Methods("POST")
 
 	// builds
 	build := project.PathPrefix("/{projectName}/build").Subrouter()
@@ -224,6 +225,7 @@ func main() {
 	req.HandleFunc("/save", authHandler(ctx, controllers.SaveRequirement)).Methods("POST")
 	req.HandleFunc("/update/{id:[0-9]+}", authHandler(ctx, controllers.UpdateRequirement)).Methods("POST")
 	req.HandleFunc("/delete", authHandler(ctx, controllers.DeleteRequirement)).Methods("POST")
+	req.HandleFunc("/unlink", authHandler(ctx, controllers.UnlinkTestcaseRelation)).Methods("POST")
 
 	// testexec
 	exec := project.PathPrefix("/{projectName}/exec").Subrouter()

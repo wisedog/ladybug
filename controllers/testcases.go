@@ -82,8 +82,6 @@ func CaseView(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 
 	// Find related Test Cases with this requirement
 	var reqs []models.Requirement
-	//var req models.Requirement
-	//var dummyTestCase models.TestCase
 	if err := c.Db.Model(&tc).Association("RelatedRequirements").Find(&reqs); err.Error != nil {
 		log.Error("TestCase", "type", "database", "msg ", err.Error)
 		return errors.HttpError{Status: http.StatusBadRequest, Desc: "Not found related testcases"}
@@ -403,4 +401,47 @@ func findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, not
 
 	c.Db.NewRecord(his)
 	c.Db.Create(&his)
+}
+
+// UnlinkRequirementRelation unlinks a relationship between Test Case and Requirement
+func UnlinkRequirementRelation(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+	// get requirement, testcase ID from post
+	if err := r.ParseForm(); err != nil {
+		log.Error("TestCase", "type", "app", "msg ", err.Error())
+		return RenderJSONWithStatus(w, Resp{Msg: "Parse form is not valid"}, http.StatusBadRequest)
+	}
+
+	reqIDStr := r.FormValue("req_id")
+	tcIDStr := r.FormValue("tc_id")
+
+	reqID, err := strconv.Atoi(reqIDStr)
+	if err != nil {
+		log.Error("TestCase", "type", "app", "msg ", err.Error())
+		return RenderJSONWithStatus(w, Resp{Msg: err.Error()}, http.StatusBadRequest)
+	}
+
+	tcID, err := strconv.Atoi(tcIDStr)
+	if err != nil {
+		log.Error("TestCase", "type", "app", "msg ", err.Error())
+		return RenderJSONWithStatus(w, Resp{Msg: err.Error()}, http.StatusBadRequest)
+	}
+
+	var targetReq models.Requirement
+	if err := c.Db.Where("id = ?", reqID).First(&targetReq); err.Error != nil {
+		log.Error("TestCase", "type", "database", "msg ", err.Error.Error())
+		return RenderJSONWithStatus(w,
+			Resp{Msg: "Not found or something wrong while unlinking testcase and related requirement"},
+			http.StatusInternalServerError)
+	}
+
+	var tc models.TestCase
+	tc.ID = tcID
+
+	// Find related Test Cases with this requirement
+	//var reqs []models.Requirement
+	if err := c.Db.Model(&tc).Association("RelatedRequirements").Delete(targetReq); err.Error != nil {
+		log.Error("TestCase", "type", "database", "msg ", err.Error)
+		return RenderJSONWithStatus(w, Resp{Msg: "Error while delete linking"}, http.StatusInternalServerError)
+	}
+	return RenderJSONWithStatus(w, Resp{Msg: "hi"}, http.StatusOK)
 }

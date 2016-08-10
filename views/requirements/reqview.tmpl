@@ -78,7 +78,7 @@
                 </thead>
                 <tbody>
                   {{range .RelatedTestCases}}
-                  <tr>
+                  <tr id="tr-{{.ID}}">
                     <td>{{.ID}}</td><td>{{.Title}}</td>
                     <td>{{if eq .Status 1}}
                         {{msg "testcase.status.active"}}
@@ -90,7 +90,7 @@
                     <td>{{.PriorityStr}}</td>
                     <td>{{.Category}}</td>
                     <td>
-                      <a href='javascript:unlink({{.ID}});' class="fa fa-unlink"></a>
+                      <a href='javascript:unlink({{.ID}}, {{$.Requirement.ID}});' class="fa fa-unlink"></a>
                     </td>
                   </tr>
                   {{end}}
@@ -115,4 +115,17 @@
   </section>
 </div><!-- /.content-wrapper -->
 {{end}}
-{{define "more_scripts"}}{{end}}
+{{define "more_scripts"}}
+<script>
+function unlink(testcase_id, req_id){
+  // Post  
+  $.post( "/project/{{.ProjectName}}/req/unlink", {"req_id" : req_id, "tc_id" : testcase_id}, 
+    function() {
+      $("#tr-" + testcase_id).fadeOut(300, function(){ $(this).remove();});
+  })
+  .fail(function() {
+    alert( "error" );
+  });
+} 
+</script>
+{{end}}
