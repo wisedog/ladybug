@@ -2,12 +2,9 @@
 
 The simple and straightforward testcase management tools.
 
-Branch | Travis-CI Status
--------|-----------------|
-Master | [![Build Status](https://secure.travis-ci.org/wisedog/ladybug.svg?branch=master)](http://travis-ci.org/wisedog/ladybug)
-Develop | [![Build Status](https://secure.travis-ci.org/wisedog/ladybug.svg?branch=develop)](http://travis-ci.org/wisedog/ladybug)
-
+[![Build Status](https://secure.travis-ci.org/wisedog/ladybug.svg?branch=master)](http://travis-ci.org/wisedog/ladybug)
 [![Code Climate](https://codeclimate.com/github/wisedog/ladybug/badges/gpa.svg)](https://codeclimate.com/github/wisedog/ladybug)
+[![Open Source Love](https://badges.frapsoft.com/os/gpl/gpl.svg?v=102)](https://github.com/ellerbrock/open-source-badge/)
 
 ## Description
 
@@ -16,7 +13,7 @@ Project Ladybug can
 * support dashboard
 * manage test case
 * manage builds
-* manage requirements(soon)
+* manage requirements
 * support reports(soon)
 
 ## I need any kind of help! 
@@ -46,17 +43,20 @@ This app uses now only Postgresql. Various databases(MySQL, MarinaDB ....) will 
 
 ### Run
 
+for development. Try to connect http://localhost:8000 after executing commands below 
 ```
-$ bower install 
+$ bower install
+$ go get -t -d -v ./... 
 $ go build
 $ ./ladybug 
 ```
 
-Try to connect http://localhost:8000
+for deployment to Heroku 
+```
+$ ./ladybug -mode=dev -addr= -port=$PORT -db=$DATABASE_URL
+``` 
 
 ### Features Next
-
-* Requirements management
 * Reports
 * Test environment
 * Milestone

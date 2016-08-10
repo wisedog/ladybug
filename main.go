@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"html/template"
 	"net/http"
 
@@ -106,8 +107,16 @@ func main() {
 	// create application context
 	ctx := &interfacer.AppContext{}
 
+	// parse program argument
+	modePtr := flag.String("mode", "", "mode")
+	portPtr := flag.Int("port", 8000, "(optional)binding port. default value is 8000")
+	addrPtr := flag.String("addr", "localhost", "(optional)binding address. default value is localhost")
+	databasePtr := flag.String("db", "", "(optional)database url(dialect)")
+	flag.Parse()
+	log.Info("APP", "Starting Mode", *modePtr)
+
 	// load config
-	ctx.Config = interfacer.LoadConfig()
+	ctx.Config = interfacer.LoadConfigWithArgs(*modePtr, *addrPtr, *portPtr, *databasePtr, "./ladybug.conf")
 
 	log.Info("Initialize Database...")
 	if db, err := database.InitDB(ctx.Config); err != nil {
@@ -177,6 +186,7 @@ func main() {
 	testcase.HandleFunc("/add", authHandler(ctx, controllers.CaseAdd)).Methods("GET")
 	testcase.HandleFunc("/save", authHandler(ctx, controllers.CaseSave)).Methods("POST")
 	testcase.HandleFunc("/delete", authHandler(ctx, controllers.CaseDelete)).Methods("POST")
+	testcase.HandleFunc("/unlink", authHandler(ctx, controllers.UnlinkRequirementRelation)).Methods("POST")
 
 	// builds
 	build := project.PathPrefix("/{projectName}/build").Subrouter()
@@ -208,9 +218,14 @@ func main() {
 	// requirements
 	req := project.PathPrefix("/{projectName}/req").Subrouter()
 	req.HandleFunc("/", authHandler(ctx, controllers.RequirementIndex)).Methods("GET")
-	req.HandleFunc("/list/{id:[0-9]+}", authHandler(ctx, controllers.RequirementList)).Methods("GET")
+	req.HandleFunc("/add", authHandler(ctx, controllers.AddRequirement)).Methods("GET")
 	req.HandleFunc("/view/{id:[0-9]+}", authHandler(ctx, controllers.ViewRequirement)).Methods("GET")
-	// TODO ADD
+	req.HandleFunc("/edit/{id:[0-9]+}", authHandler(ctx, controllers.EditRequirement)).Methods("GET")
+	req.HandleFunc("/list/{id:[0-9]+}", authHandler(ctx, controllers.RequirementList)).Methods("GET")
+	req.HandleFunc("/save", authHandler(ctx, controllers.SaveRequirement)).Methods("POST")
+	req.HandleFunc("/update/{id:[0-9]+}", authHandler(ctx, controllers.UpdateRequirement)).Methods("POST")
+	req.HandleFunc("/delete", authHandler(ctx, controllers.DeleteRequirement)).Methods("POST")
+	req.HandleFunc("/unlink", authHandler(ctx, controllers.UnlinkTestcaseRelation)).Methods("POST")
 
 	// testexec
 	exec := project.PathPrefix("/{projectName}/exec").Subrouter()

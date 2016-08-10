@@ -3,15 +3,12 @@ package controllers
 import (
 	"net/http"
 
-  "github.com/wisedog/ladybug/interfacer"
+	"github.com/wisedog/ladybug/interfacer"
 )
 
-
-//TODO template first
-//Save(project string, section models.Section) error {
-//
+//Save is not implemented. Template first
 func Save(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
-  return nil
+	return nil
 	/*if user := c.connected(); user == nil {
 		c.Flash.Error("Please log in first")
 		return c.Redirect(routes.Application.Index())
@@ -41,44 +38,44 @@ func Save(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) erro
 
 }
 
-//(project string, id int, parent_id int, title string, edit bool) revel.Result {
-func  SectionAdd(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
-  return nil
-/*
-	type Reply struct {
-		Status int    `json:"status"`
-		Msg    string `json:"msg"`
-	}
+// SectionAdd is not implemented.
+func SectionAdd(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+	return nil
+	/*
+		type Reply struct {
+			Status int    `json:"status"`
+			Msg    string `json:"msg"`
+		}
 
-	var s models.Section
-	var e Reply
-	if user := c.connected(); user == nil {
-		e = Reply{Status: 500, Msg: "Please log in first"}
-		return c.RenderJson(e)
-	}
+		var s models.Section
+		var e Reply
+		if user := c.connected(); user == nil {
+			e = Reply{Status: 500, Msg: "Please log in first"}
+			return c.RenderJson(e)
+		}
 
-	var prj models.Project
-	r := c.Tx.Where("name = ?", project).First(&prj)
-	if r.Error != nil {
-		e = Reply{Status: 500, Msg: "Invalid project"}
-		return c.RenderJson(e)
-	}
+		var prj models.Project
+		r := c.Tx.Where("name = ?", project).First(&prj)
+		if r.Error != nil {
+			e = Reply{Status: 500, Msg: "Invalid project"}
+			return c.RenderJson(e)
+		}
 
-	if parent_id == 0 {
-		s = models.Section{Prefix: "Temp", Title: title, RootNode: true, ProjectID: prj.ID}
-	} else {
-		s = models.Section{Prefix: "Temp", Title: title, RootNode: false, ParentsID: parent_id, ProjectID: prj.ID}
-	}
+		if parent_id == 0 {
+			s = models.Section{Prefix: "Temp", Title: title, RootNode: true, ProjectID: prj.ID}
+		} else {
+			s = models.Section{Prefix: "Temp", Title: title, RootNode: false, ParentsID: parent_id, ProjectID: prj.ID}
+		}
 
-	c.Tx.NewRecord(s)
-	r = c.Tx.Create(&s)
+		c.Tx.NewRecord(s)
+		r = c.Tx.Create(&s)
 
-	if r.Error != nil {
-		revel.ERROR.Println("An error while Insert opreation in Sections.Insert", r.Error)
-		e = Reply{Status: 500, Msg: "An error while Insert operation in Sections.Insert"}
-	} else {
-		e = Reply{Status: 200, Msg: "OK"}
-	}
+		if r.Error != nil {
+			revel.ERROR.Println("An error while Insert opreation in Sections.Insert", r.Error)
+			e = Reply{Status: 500, Msg: "An error while Insert operation in Sections.Insert"}
+		} else {
+			e = Reply{Status: 200, Msg: "OK"}
+		}
 
-	return c.RenderJson(e)*/
+		return c.RenderJson(e)*/
 }

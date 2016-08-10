@@ -136,6 +136,38 @@
         {{else}}
           <p> no data! </p>
         {{end}}
+
+        
+        <div class="box box-primary">
+          <div class="box-header with-border">
+            <h3 class="box-title">Related TestCase</h3>
+          </div>
+          <div class="box-body">
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>#</th><th>Title</th><th>Status</th><th>Priority</th>
+                    <th>Category</th><th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{range .RelatedReqs}}
+                  <tr id="tr-{{.ID}}">
+                    <td>{{.ID}}</td><td>{{.Title}}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                      <a href="javascript:unlink({{.ID}}, {{$.TestCase.ID}});" class="fa fa-unlink"></a>
+                    </td>
+                  </tr>
+                  {{end}}
+                </tbody>
+              </table>
+            </div> <!-- .table-responsive -->
+          </div> <!-- .box-body -->
+        </div>
         
         <div class="box box-primary">
           <div class="box-header with-border">
@@ -185,4 +217,17 @@
   </section><!-- /.content -->
 </div><!-- /.content-wrapper -->
 {{end}}
-{{define "more_scripts"}}{{end}}
+{{define "more_scripts"}}
+<script>
+function unlink(req_id, testcase_id){
+  // Post  
+  $.post( "/project/{{.ProjectName}}/case/unlink", {"req_id" : req_id, "tc_id" : testcase_id}, 
+    function() {
+      $("#tr-" + req_id).fadeOut(300, function(){ $(this).remove();});
+  })
+  .fail(function() {
+    alert( "error" );
+  });
+} 
+</script>
+{{end}}

@@ -4,6 +4,7 @@ import (
 	"errors"
 )
 
+// The priority of TestCase
 const (
 	PriorityHighest = 1 + iota
 	PriorityHigh
@@ -12,6 +13,7 @@ const (
 	PriorityLowest
 )
 
+// The status of TestCase
 const (
 	TcStatusActivate = 1 + iota
 	TcStatusInactivate
@@ -55,20 +57,25 @@ type TestCase struct {
 	Priority     int    // 1 to 5. 1 is highest priority
 	PriorityStr  string `sql:"-"`
 	Estimated    int    // unit : min(s)
-	RelatedReq   int    // TODO
-	Version      int
-	Steps        string `sql:"size:1000"`
-	Expected     string `sql:"size:1000"`
-	Project      Project
-	ProjectID    int
-	Category     Category
-	CategoryID   int
 
-	// need many-to-many releationship between specification and testcase.
-	// Specifications       []Specification `gorm:"many2many:spec_cases;"`
+	// Version is current version of this testcase.
+	// Not implemented now.
+	Version int
 
+	// Steps describes how to run this test step by step
+	Steps string `sql:"size:1000"`
+	// Expected describes what the tester wants
+	Expected   string `sql:"size:1000"`
+	Project    Project
+	ProjectID  int
+	Category   Category
+	CategoryID int
+
+	// need many-to-many releationship between requirements and testcases.
+	RelatedRequirements []Requirement `gorm:"many2many:testcases_reqs;"`
 }
 
+// Validate checks whether the testcase is valid or not
 func (testcase *TestCase) Validate() error {
 	rv := testcase.Required(testcase.Title)
 	if rv {

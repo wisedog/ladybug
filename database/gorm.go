@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
+	// pq library is used by gorm
 	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 
@@ -21,10 +22,8 @@ var Database *gorm.DB
 // InitDB initialize the database and create dummies if it needs
 func InitDB(conf *interfacer.AppConfig) (*gorm.DB, error) {
 
-	args := getDialectArgs(conf)
-
 	var err error
-	Database, err = gorm.Open("postgres", args)
+	Database, err = gorm.Open("postgres", getDialectArgs(conf))
 	if err != nil {
 		log.Info("Database", "msg", err.Error())
 		return Database, err
@@ -42,30 +41,40 @@ func InitDB(conf *interfacer.AppConfig) (*gorm.DB, error) {
 	Database.AutoMigrate(&models.Category{})
 	Database.AutoMigrate(&models.Requirement{})
 	Database.AutoMigrate(&models.Milestone{})
+	Database.AutoMigrate(&models.ReqType{})
 	createDummy()
 
 	return Database, nil
 }
 
+func loadDefault() error {
+	return nil
+}
+
 // getDialectArgs returns argument of dialect database.
 func getDialectArgs(conf *interfacer.AppConfig) string {
-	driver := conf.GetValue("db.driver")
-	username := conf.GetValue("db.username")
-	pwd := conf.GetValue("db.password")
-	port := conf.GetValue("db.port")
-	address := conf.GetValue("db.address")
-	dbname := conf.GetValue("db.database_name")
-	//extraParam := conf.GetValue("db.extra_param")
-
 	var args string
-	switch driver {
-	case "postgres":
-		args = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", username, pwd, address, port, dbname)
-	case "mysql":
-		args = "" //TODO
+	// not set by argument
+	if conf.GetDialect() == "" {
+		driver := conf.GetValue("db.driver")
+		username := conf.GetValue("db.username")
+		pwd := conf.GetValue("db.password")
+		port := conf.GetValue("db.port")
+		address := conf.GetValue("db.address")
+		dbname := conf.GetValue("db.database_name")
+		//extraParam := conf.GetValue("db.extra_param")
+		switch driver {
+		case "postgres":
+			args = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", username, pwd, address, port, dbname)
+		case "mysql":
+			args = "" //TODO
 
-	default:
-		args = ""
+		default:
+			args = ""
+		}
+	} else {
+		// set by argument
+		args = conf.GetDialect()
 	}
 
 	return args
@@ -91,6 +100,7 @@ func createDummy() {
 	Database.DropTable(&models.History{})
 	Database.DropTable(&models.Milestone{})
 	Database.DropTable(&models.TcReqRelationHistory{})
+	Database.DropTable(&models.ReqType{})
 
 	// Create dummy users
 	Database.AutoMigrate(&models.User{})
@@ -125,14 +135,14 @@ func createDummy() {
 	prj := models.Project{
 		Name:        "Koblentz",
 		Status:      1,
-		Description: "A test project",
+		Description: "A sample project. If you are used to Ladybug, remove this project",
 		Prefix:      "TC",
 		Users:       []models.User{*demoUser, *demoUser1},
 	}
 	prj1 := models.Project{
 		Name:        "bremen",
 		Status:      1,
-		Description: "A test project2",
+		Description: "Second sample project. If you are used to Ladybug, remove this project",
 		Prefix:      "wise",
 		Users:       []models.User{*demoUser, *demoUser1},
 	}
@@ -302,17 +312,17 @@ func createDummy() {
 
 	reqs := []*models.Requirement{
 		&models.Requirement{Title: "Hello, world", SectionID: 13,
-			Description: "hello",
-			Status:      models.ReqStatusActivate, Priority: models.PriorityHigh, ProjectID: prj.ID,
+			Description: "hello", ReqTypeID: 1,
+			Status: models.ReqStatusDraft, Priority: models.PriorityHigh, ProjectID: prj.ID,
 		},
 		&models.Requirement{Title: "Hello, stranger", SectionID: 14,
-			Description: "blahblah",
-			Status:      models.ReqStatusActivate, Priority: models.PriorityMedium, ProjectID: prj.ID,
+			Description: "blahblah", ReqTypeID: 2,
+			Status: models.ReqStatusDraft, Priority: models.PriorityMedium, ProjectID: prj.ID,
 			RelatedTestCases: []models.TestCase{*testcases[1], *testcases[4]},
 		},
 		&models.Requirement{Title: "Good bye", SectionID: 14,
-			Description: "aaaa",
-			Status:      models.ReqStatusActivate, Priority: models.PriorityLow, ProjectID: prj.ID,
+			Description: "aaaa", ReqTypeID: 3,
+			Status: models.ReqStatusDraft, Priority: models.PriorityLow, ProjectID: prj.ID,
 			RelatedTestCases: []models.TestCase{*testcases[1], *testcases[2]},
 		},
 	}
@@ -406,6 +416,22 @@ func createDummy() {
 		Database.Model(&k).Update("created_at", n)
 	}
 
+	Database.AutoMigrate(&models.ReqType{})
+
+	reqtypes := []*models.ReqType{
+		&models.ReqType{Name: "Use Case"},
+		&models.ReqType{Name: "Information"},
+		&models.ReqType{Name: "Feature"},
+		&models.ReqType{Name: "User Interface"},
+		&models.ReqType{Name: "Non Functional"},
+		&models.ReqType{Name: "Constraint"},
+		&models.ReqType{Name: "System Function"},
+	}
+
+	for _, t := range reqtypes {
+		Database.NewRecord(t)
+		Database.Create(&t)
+	}
 }
 
 /*

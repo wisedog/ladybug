@@ -17,22 +17,28 @@
   </section>
   <!-- Main content -->
   <section class="content">
-    <form method="POST" action="/project/{{.ProjectName}}/req/{{if eq .IsEdit true}}update/{{.ID}}{{else}}save{{end}}">
+    <form id="req-save-form" method="POST" action="/project/{{.ProjectName}}/req/{{if eq .IsEdit true}}update/{{.Requirement.ID}}{{else}}save{{end}}">
+    <input type="hidden" name="SectionID" value="{{.Requirement.SectionID}}"></input>
+    <input type="hidden" name="ID" value="{{.Requirement.ID}}"></input>
+    <input type="hidden" name="ProjectID" value="{{.Requirement.ProjectID}}"></input>
       <div class="row">
-        <input type="hidden" name="SectionID" value="{{.Requirement.SectionID}}"></input>
-        <input type="hidden" name="ID" value="{{.Requirement.ID}}"></input>
         <div class="col-md-12 top10">
-          <div class="row vertical-align bottom10">
-            <div class="col-md-1"><strong>Title</strong></div>
-            <div class="col-md-8">
-              <input class="form-control" name="Title" value="{{.Requirement.Title}}">
-            </div>
-          </div> <!-- .row -->
+          <div class="form-group {{$val := index .ErrorMap "Title"}} {{if ne $val ""}}has-error{{end}}">
+            <div class="row vertical-align bottom10">
+                <div class="col-md-1"><strong>Title</strong></div>
+                <div class="col-md-8">
+                    <input class="form-control" name="Title" value="{{.Requirement.Title}}">
+                </div>
+                <div class="col-md-3">
+                    <label>{{$val}}</label>
+                </div>
+            </div> <!-- .row -->
+          </div><!-- .form-group -->
           <div class="row vertical-align bottom10">
             <div class="col-md-1">
               <label>Type</label>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
               <select class="form-control" name="ReqTypeID">
                 {{range $type := .ReqType}}
                 <option value="{{$type.ID}}" {{if eq $type.ID $.Requirement.ReqTypeID}}selected{{end}}>{{.Name}}</option>
@@ -47,9 +53,9 @@
                 <option value="1" {{if eq .Requirement.Status 1}}selected{{end}}>{{msg "requirement.status.draft"}}</option>
                 <option value="2" {{if eq .Requirement.Status 2}}selected{{end}}>{{msg "requirement.status.inreview"}}</option>
                 <option value="3" {{if eq .Requirement.Status 3}}selected{{end}}>{{msg "requirement.status.rework"}}</option>
-                <option value="4" {{if eq .Requirement.Status 2}}selected{{end}}>{{msg "requirement.status.finished"}}</option>
-                <option value="5" {{if eq .Requirement.Status 2}}selected{{end}}>{{msg "requirement.status.nottestable"}}</option>
-                <option value="6" {{if eq .Requirement.Status 2}}selected{{end}}>{{msg "requirement.status.deprecated"}}</option>
+                <option value="4" {{if eq .Requirement.Status 4}}selected{{end}}>{{msg "requirement.status.finished"}}</option>
+                <option value="5" {{if eq .Requirement.Status 5}}selected{{end}}>{{msg "requirement.status.nottestable"}}</option>
+                <option value="6" {{if eq .Requirement.Status 6}}selected{{end}}>{{msg "requirement.status.deprecated"}}</option>
               </select>
             </div>
           </div> <!-- .row -->
@@ -83,10 +89,10 @@
           {{end}}
         
           <div class="row col-md-12">
-            <button type="submit" class="btn btn-primary btn-flat btn-sm">
+            <button type="submit" class="btn btn-primary btn-flat btn-sm" id="btn-submit">
               {{if eq .IsEdit true}}Update{{else}}Add{{end}}
             </button>
-            <button type="button" class="btn btn-danger btn-flat btn-sm">Cancel</button>
+            <button type="button" class="btn btn-danger btn-flat btn-sm" id="btn-cancel">Cancel</button>
           </div>
         </div> <!-- .col-md -->
       </div> <!-- .row -->
@@ -96,9 +102,9 @@
 {{end}}
 {{define "more_scripts"}}
 <script>
-  $(".btn-danger").click(function(){
-    //TODO scan dirty
-    window.history.back();
-  });
+    $("#btn-cancel").click(function(){
+        //TODO scan dirty
+        window.history.back();
+    });
 </script>
 {{end}}

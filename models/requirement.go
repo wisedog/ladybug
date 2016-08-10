@@ -3,10 +3,14 @@ package models
 import "errors"
 
 // Status of requirements
+// Draft, In Review, Rework, Finished, Not Testable, Deprecated
 const (
-	ReqStatusActivate = 1 + iota
-	ReqStatusInactivate
-	ReqStatusDraft
+	ReqStatusDraft = 1 + iota
+	ReqStatusInReview
+	ReqStatusRework
+	ReqStatusFinished
+	ReqStatusNotTestable
+	ReqStatusDeprecated
 )
 
 // Requirement Model
@@ -15,9 +19,21 @@ type Requirement struct {
 
 	Title       string
 	Description string
+
+	// ReqType is type of this requirement
+	// Requirement type may be one of below
+	// Use Case, Information, Feature, User Interface, Non Functional, Constraint, System Function...
+	ReqTypeID int
+	ReqType   ReqType
+
 	// Status of this requirement. Status may be one of below items
-	// Draft, In Review, Not Testable, Deprecated ....
-	Status   int
+	// Draft, In Review, Rework, Finished, Not Testable, Deprecated ....
+	// TODO make Status table, make users to add/modify items easily
+
+	Status int
+	// i18n message of status
+	StatusStr string `gorm:"-"`
+
 	Priority int
 
 	// Each requirements are belongs to section
@@ -28,11 +44,6 @@ type Requirement struct {
 
 	// Version or history of this Requirement
 	Version int
-
-	// ReqType is type of this requirement
-	// Requirement type may be one of below
-	// Use Case, Information, Feature, User Interface, Non Functional, Constraint, System Function...
-	ReqType int
 
 	// RelatedTestCase stores relationship between this requirement and related testcases
 	// The relationship has many to many
@@ -54,7 +65,7 @@ func (req *Requirement) Validate() (map[string]string, error) {
 		err = errors.New("Invalid section id")
 	}
 
-	if req.Status < ReqStatusActivate || req.Status > ReqStatusInactivate {
+	if req.Status < ReqStatusDraft || req.Status > ReqStatusDeprecated {
 		err = errors.New("Invalid requirement status")
 	}
 	return errorMap, err
