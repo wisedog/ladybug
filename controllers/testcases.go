@@ -443,5 +443,12 @@ func UnlinkRequirementRelation(c *interfacer.AppContext, w http.ResponseWriter, 
 		log.Error("TestCase", "type", "database", "msg ", err.Error)
 		return RenderJSONWithStatus(w, Resp{Msg: "Error while delete linking"}, http.StatusInternalServerError)
 	}
-	return RenderJSONWithStatus(w, Resp{Msg: "hi"}, http.StatusOK)
+
+	return RenderJSONWithStatus(w, Resp{Msg: "Success to unlink"}, http.StatusOK)
+}
+
+// LinkRequirementRelation links a relationship between Test Case and Requirement
+func LinkRequirementRelation(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+
+	return nil
 }

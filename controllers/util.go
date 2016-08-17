@@ -12,6 +12,11 @@ import (
 	log "gopkg.in/inconshreveable/log15.v2"
 )
 
+const (
+	logTypeErr = 1 + iota
+	logTypeInfo
+)
+
 // getPriorityI18n function returns localization string
 func getPriorityI18n(priority int) string {
 	str := "Unknown Status"
@@ -104,6 +109,25 @@ func Render2(c *interfacer.AppContext, w http.ResponseWriter, data interface{}, 
 
 // RenderJSONWithStatus renders JSON format with data with status specified
 func RenderJSONWithStatus(w http.ResponseWriter, data interface{}, statusCode int) error {
+	js, err := json.Marshal(data)
+	if err != nil {
+		log.Error("Builds", "msg", "Json Marshalling failed in ValidateTool")
+		return err
+	}
+
+	w.WriteHeader(statusCode)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+	return nil
+}
+
+func logAndRenderJSONWithStatus(w http.ResponseWriter, data interface{}, statusCode int,
+	logType int, module, msgType, msg string) error {
+	if logType == logTypeInfo {
+		log.Info(module, "type", msgType, "msg ", msg)
+	} else {
+		log.Error(module, "type", msgType, "msg ", msg)
+	}
 	js, err := json.Marshal(data)
 	if err != nil {
 		log.Error("Builds", "msg", "Json Marshalling failed in ValidateTool")

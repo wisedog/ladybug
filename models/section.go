@@ -12,10 +12,19 @@ type Section struct {
 	Title       string
 	Description string // may not used
 	Status      int    // may not use
+
+	// Indicates parents section ID
 	ParentsID   int
 	ProjectID   int
 	RootNode    bool
-	ForTestCase bool //TestCase or Specification
+	ForTestCase bool //Flag for TestCase or Requirement
+
+	// SpecialNode indicates 'Uncategorized' section or not.
+	// if this section is not 'Uncategorized' section, the test cases or requirements belongs to this
+	// section moves 'Uncategorized' section instead of deleting.
+	// if it is, the testcase belongs to 'Uncategorized' section may delete.
+	// Be sure that only two special node per a project for testcase, requirement
+	SpecialNode bool
 }
 
 // Validate check input value and return error map

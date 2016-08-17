@@ -176,7 +176,9 @@ func main() {
 	// section
 	section := project.PathPrefix("/{projectName}/section/").Subrouter()
 	section.HandleFunc("/testcase/{sectionID}", authHandler(ctx, controllers.GetAllTestCases)).Methods("GET")
-	section.HandleFunc("/add/{sectionID}", authHandler(ctx, controllers.SectionAdd)).Methods("GET")
+	section.HandleFunc("/add", authHandler(ctx, controllers.SectionAdd)).Methods("POST")
+	section.HandleFunc("/edit", authHandler(ctx, controllers.SectionEdit)).Methods("POST")
+	section.HandleFunc("/delete", authHandler(ctx, controllers.SectionDelete)).Methods("POST")
 
 	// test cases
 	testcase := project.PathPrefix("/{projectName}/case/").Subrouter()
