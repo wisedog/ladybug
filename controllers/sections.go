@@ -57,6 +57,17 @@ func SectionDelete(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
 	}
 
 	sectionIDStr := r.FormValue("section_id")
+	isRequirementStr := r.FormValue("is_requirement")
+	isRequirement := false
+	if isRequirementStr == "true" {
+		isRequirement = true
+	}
+	var targetModel interface{}
+	if isRequirement {
+		targetModel = &models.Requirement{}
+	} else {
+		targetModel = &models.TestCase{}
+	}
 
 	sectionID, err := strconv.Atoi(sectionIDStr)
 	if err != nil {
@@ -65,7 +76,7 @@ func SectionDelete(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
 	}
 	var prj models.Project
 	if err := c.Db.Where("name = ?", c.ProjectName).First(&prj); err.Error != nil {
-		log.Error("Section", "type", "app", "msg ", err.Error.Error())
+		log.Error("Section", "type", "app", "msg ", err.Error.Error(), "additional", "project is not found")
 		return RenderJSONWithStatus(w, Resp{Msg: err.Error.Error()}, http.StatusInternalServerError)
 	}
 
@@ -78,9 +89,21 @@ func SectionDelete(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
 	}
 
 	if sec.SpecialNode == true {
-		var testCasesToDelete []models.TestCase
-		if err := c.Db.Where("section_id = ?", sectionID).Find(&testCasesToDelete); err.Error != nil {
-			log.Error("Section", "type", "app", "msg ", err.Error.Error())
+		//var testCasesToDelete []models.TestCase
+		//var objectToDelete []interface{}
+		table := "test_cases"
+		if isRequirement {
+			table = "requirements"
+		}
+
+		// data structure for get section ID
+		type Result struct {
+			ID int
+		}
+
+		var result []Result
+		if err := c.Db.Table(table).Select("id").Where("section_id = ?", sectionID).Scan(&result); err.Error != nil {
+			log.Error("Section", "type", "app", "msg ", err.Error.Error(), "additional", "not found target section")
 			return RenderJSONWithStatus(w, Resp{Msg: err.Error.Error()}, http.StatusInternalServerError)
 		}
 
@@ -90,17 +113,23 @@ func SectionDelete(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
 			TestCaseID    int
 		}
 
-		var testCasesToDeleteIDs []int
+		var objectToDeleteIDs []int
 
-		for _, v := range testCasesToDelete {
-			testCasesToDeleteIDs = append(testCasesToDeleteIDs, v.ID)
+		for _, v := range result {
+			objectToDeleteIDs = append(objectToDeleteIDs, v.ID)
 		}
 
 		var p []testcasesReqs
+		var whereText string
+		if isRequirement {
+			whereText = "requirement_id in (?)"
+		} else {
+			whereText = "test_case_id in (?)"
+		}
 
 		if err := c.Db.Table("testcases_reqs").Select("requirement_id, test_case_id").
-			Where("test_case_id in (?)", testCasesToDeleteIDs).Scan(&p); err.Error != nil {
-			log.Error("Section", "type", "app", "msg ", err.Error.Error())
+			Where(whereText, objectToDeleteIDs).Scan(&p); err.Error != nil {
+			log.Error("Section", "type", "app", "msg", err.Error.Error(), "additional", "not found in join table")
 		}
 
 		var historyList []models.TcReqRelationHistory
@@ -119,7 +148,7 @@ func SectionDelete(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
 			c.Db.Create(&v)
 		}
 
-		if err := c.Db.Where("section_id = ?", sectionID).Delete(models.TestCase{}); err.Error != nil {
+		if err := c.Db.Where("section_id = ?", sectionID).Delete(targetModel); err.Error != nil {
 			log.Error("Section", "type", "app", "msg ", err.Error.Error())
 			return RenderJSONWithStatus(w, Resp{Msg: err.Error.Error()}, http.StatusInternalServerError)
 		}
@@ -156,11 +185,13 @@ func SectionDelete(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
 	// second, create 'Uncategorized' root section and special flag on
 	// Be sure that it is already there, load it
 	var uncategorizedSection models.Section
-	if err := c.Db.Where("project_id = ?", prj.ID).Where("special_node = ?", true).First(&uncategorizedSection); err.Error != nil {
+	if err := c.Db.Where("project_id = ?", prj.ID).Where("special_node = ?", true).
+		Where("for_test_case = ?", !isRequirement).
+		First(&uncategorizedSection); err.Error != nil {
 		if err.RecordNotFound() {
 			uncategorizedSection = models.Section{Seq: 1, Title: "Uncategorized", Status: 0, RootNode: true,
 				Prefix: prj.Prefix, ProjectID: prj.ID,
-				ForTestCase: true, SpecialNode: true}
+				ForTestCase: !isRequirement, SpecialNode: true}
 			c.Db.NewRecord(uncategorizedSection)
 			c.Db.Create(&uncategorizedSection)
 		} else {
@@ -171,8 +202,7 @@ func SectionDelete(c *interfacer.AppContext, w http.ResponseWriter, r *http.Requ
 
 	// third, find all testcases belong to the sections
 	// and then update all testcases' section_id to 'Uncategorized' section
-	//var moveTestCases []models.TestCase
-	if err := c.Db.Model(&models.TestCase{}).Where("section_id in (?)", targetIDs).Update("section_id", uncategorizedSection.ID); err.Error != nil {
+	if err := c.Db.Model(targetModel).Where("section_id in (?)", targetIDs).Update("section_id", uncategorizedSection.ID); err.Error != nil {
 		log.Error("Section", "type", "database", "msg ", err.Error.Error(), "additional", "update")
 		return RenderJSONWithStatus(w, Resp{Msg: err.Error.Error()}, http.StatusInternalServerError)
 	}
