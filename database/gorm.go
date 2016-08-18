@@ -28,6 +28,7 @@ func InitDB(conf *interfacer.AppConfig) (*gorm.DB, error) {
 		log.Info("Database", "msg", err.Error())
 		return Database, err
 	}
+	//defer Database.Close()
 
 	Database.AutoMigrate(&models.User{})
 	Database.AutoMigrate(&models.TestCase{})
@@ -133,14 +134,14 @@ func createDummy() {
 	Database.AutoMigrate(&models.Project{})
 
 	prj := models.Project{
-		Name:        "Koblentz",
+		Name:        "Sample Project",
 		Status:      1,
 		Description: "A sample project. If you are used to Ladybug, remove this project",
 		Prefix:      "TC",
 		Users:       []models.User{*demoUser, *demoUser1},
 	}
 	prj1 := models.Project{
-		Name:        "bremen",
+		Name:        "Another Sample Project",
 		Status:      1,
 		Description: "Second sample project. If you are used to Ladybug, remove this project",
 		Prefix:      "wise",
