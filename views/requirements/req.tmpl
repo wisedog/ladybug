@@ -1,6 +1,8 @@
 {{define "title"}}Requirements{{ end }}
 {{define "more_style"}}
 <link rel="stylesheet" href="/public/libs/jstree/dist/themes/default/style.min.css">
+<link href="/public/libs/pnotify/dist/pnotify.css" media="all" rel="stylesheet" type="text/css" />
+<link href="/public/libs/pnotify/dist/pnotify.brighttheme.css" media="all" rel="stylesheet" type="text/css" />
 {{end}}
 {{define "content"}}
 <div class="content-wrapper">
@@ -17,71 +19,108 @@
   </section>
 
   <!-- Main content -->
-<section class="content">
-  <form id="form_req_del" method="POST">
-  </form>
-  <div class="row">
-    <div class="col-md-12">
-      <!-- Button trigger modal -->
-      <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal">
-        <i class='fa fa-plus right7'></i>Root Section
-      </button>
-      <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#editSectionModal"><!-- TODO edit modal dialog -->
-        <i class='glyphicon glyphicon-edit right7'></i>Edit
-      </button>
-      <button class="btn btn-danger btn-xs" data-toggle="modal" data-target="#delConfirm">
-        <i class="glyphicon glyphicon-remove right7"></i>Delete
-      </button>
-    </div>
-
-
-    <!-- Modal -->
-    <div class="modal fade" id="addSectionModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title" id="myModalLabel">Add a section</h4>
-          </div>
-          <div class="modal-body">
-            <label>Title</label>
-          <input class="form-control" id="section-title">
-          </div>
-          <div class="modal-footer">
-            <button type="button" id="close-section-btn" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button type="button" id="add-section-btn" class="btn btn-primary">Save changes</button>
-          </div>
-        </div>
-        <!-- /.modal-content -->
+  <section class="content">
+    <div class="row">
+      <div class="col-md-12">
+        <!-- Button trigger modal -->
+        <button class="btn btn-primary btn-xs" id="add-root-section">
+          <i class='fa fa-plus right7'></i>Root Section
+        </button>
+        <button class="btn btn-primary btn-xs" id="edit-section">
+          <i class='glyphicon glyphicon-edit right7'></i>Edit
+        </button>
+        <button class="btn btn-danger btn-xs" id="del-section">
+          <i class="glyphicon glyphicon-remove right7"></i>Delete
+        </button>
       </div>
-      <!-- /.modal-dialog -->
-    </div>
-     <!-- /.modal -->
     </div><!-- .row -->
     <div class="row">
-     <div class="col-lg-3" >
-       <div id="testtree" class="top10" style="overflow:auto; border:1px solid silver; min-height:300px;">
-       </div>
-     </div>
-     <div class="col-lg-9 top10" >
-       <div id="tc_list">
-         Please select a section to show test cases.
-       </div>
-     </div>
+      <div class="col-lg-3" >
+        <div id="testtree" class="top10" style="overflow:auto; border:1px solid silver; min-height:300px;">
+        </div>
+      </div>
+      <div class="col-lg-9 top10" >
+        <div id="tc_list">
+          Please select a section to show test cases.
+        </div>
+      </div>
     </div><!-- .row -->
-
   </section>
 </div><!-- /.content-wrapper -->
 {{end}}
 {{define "more_scripts"}}
 
 <script src="/public/libs/jstree/dist/jstree.min.js"></script>
+<script type="text/javascript" src="/public/libs/pnotify/dist/pnotify.js"></script>
+<script type="text/javascript" src="/public/libs/pnotify/dist/pnotify.confirm.js"></script>
 
 <script>
-var ts_id = -1;
 var parent_id = -1;
 var node_id = -1;
-var from_subsection = false;
+
+
+function AddEditSection(isRoot, isEdit){
+  var titleStr;
+  var textStr;
+  var targetURL = "/project/{{.ProjectName}}/section/add";
+  if(isRoot){
+    titleStr = "Add a root section";
+    textStr = "Please describe name of the section";
+  }
+
+  if(isEdit){
+    titleStr = "Edit a section name";
+    textStr = "Please describe new name of the section";
+    targetURL = "/project/{{.ProjectName}}/section/edit";
+  }
+
+  var noti = new PNotify({
+      title: titleStr,
+      text: textStr,
+      icon: false,
+      type: 'info',
+      hide: false,
+      confirm: {
+          confirm: true,
+          prompt: true
+      },
+      buttons: {
+          closer: false,
+          sticker: false
+      },
+      history: {
+          history: false
+      },
+      addclass: 'stack-modal'
+  });
+
+  noti.get().on('pnotify.confirm', function(e, notice, val) {
+    var selectedNodeId = node_id;
+    if(isRoot == true){
+      selectedNodeId = "#";
+    }
+    var postData = {"parent_id" : selectedNodeId, "title": val, "is_test_case" : "false"}
+    $.post( targetURL, postData, function(data) {
+        var obj = jQuery.parseJSON(data);
+        new PNotify({
+            title: 'Success',
+            text: obj.msg,
+            type: 'success'
+        });
+        location.reload();
+    })
+    .fail(function(data) {
+      var obj = jQuery.parseJSON(data);
+      new PNotify({
+            title: 'Fail!',
+            text: obj.msg,
+            type: 'error'
+        });
+    });
+  }).on('pnotify.cancel', function(e, notice) {
+    // do nothing
+  });
+}
 
 $(document).ready(function() {
     $('#testtree').jstree({
@@ -174,51 +213,70 @@ $(document).ready(function() {
         }
     });
 
+    // handler for edit section button
+    $('#edit-section').click(function(){
+      AddEditSection(false, true);
+    });
+
     // handler for root section add button
-    $('#add-root-btn').click(function(){
-        $('#section-title').val('');
-      $(location).attr("href", "/project/{{.ProjectName}}/section/add?parent_id=0");
-        });
+    $('#add-root-section').click(function(){
+      AddEditSection(true, false);
+    });
 
     // handler for subsection add button
     $('body').on('click', '#subsection-btn', function(event){
-        $('#section-title').val('');
-        from_subsection = true;
+      AddEditSection(false, false);
+    });
+    // handler for delete section. Root section can not be deleted
+    $('body').on('click', '#del-section', function(){
+      var title = $('#section-title').val();
+      var noti = new PNotify({
+          title: 'Confirmation Needed',
+          text: 'Are you sure to delete?',
+          icon: 'glyphicon glyphicon-question-sign',
+          hide: false,
+          confirm: {
+              confirm: true
+          },
+          buttons: {
+              closer: false,
+              sticker: false
+          },
+          history: {
+              history: false
+          },
+          addclass: 'stack-modal'
+      });
+      
+      noti.get().on('pnotify.confirm', function() {
+        // POST JSON to delete
+        $.post( "/project/{{.ProjectName}}/section/delete", {"section_id" : node_id, "is_requirement" : "true"}, 
+          function(data) {
+            var obj = jQuery.parseJSON(data);
+            new PNotify({
+                title: 'Success',
+                text: obj.msg,
+                type: 'success'
+            });
+            // more clear way is refresh jstree only. but I don't find how to
+            /*var tree = $('#testtree').jstree(true);
+            tree.settings.core.data = obj.data;
+            tree.redraw();
+            */
+            location.reload();
+        })
+        .fail(function(data) {
+          var obj = jQuery.parseJSON(data);
+          new PNotify({
+                title: 'Fail!',
+                text: obj.msg,
+                type: 'error'
+            });
         });
-
-    // handler for modal-save button
-    $('body').on('click', '#add-section-btn', function(){
-        var title = $('#section-title').val();
-        var pid = 0;
-        if(parent_id == -1 || node_id == -1){
-            return;
-        }
-        if(from_subsection){
-            pid = node_id;
-        }
-        else{
-            pid = 0;
-        }
-
-        $.post('/project/{{.ProjectName}}/section/insert'
-          , {id: node_id, parent_id:pid, title:title})
-        .done(function(data){
-          console.log("Result : ", data);
-          //TODO check return code(status) and handle it! 
-
-          // initialize from flag
-          from_subsection = false;
-          // send an event(click) to close btn
-          $('#close-section-btn').trigger('click');
-
-          location.reload();
-          ///////
-          // TODO Make only jstree reload 
-          //$('#testtree').jstree(true).settings.core.data = { 'url': 'put/the/url/here.json' };
-          //$('#testtree').jstree(true).refresh();
-          });
-        });
-
+      }).on('pnotify.cancel', function() {
+      });
+    });
+  
 });
 </script>
 {{end}}

@@ -28,6 +28,7 @@ func InitDB(conf *interfacer.AppConfig) (*gorm.DB, error) {
 		log.Info("Database", "msg", err.Error())
 		return Database, err
 	}
+	//defer Database.Close()
 
 	Database.AutoMigrate(&models.User{})
 	Database.AutoMigrate(&models.TestCase{})
@@ -111,7 +112,7 @@ func createDummy() {
 	demoUser := &models.User{
 		Name: "Rey", Email: "demo@demo.com", Password: "demo",
 		HashedPassword: bcryptPassword, Language: "en", Region: "US",
-		LastLoginAt: time.Now(), Roles: models.RoleAdmin,
+		LastLoginAt: time.Now(), Role: models.RoleAdmin,
 		Photo: "rey_160x160", Location: "Jakku",
 		Notes: "I know all about waiting. For my family. They'll be back, one day.",
 	}
@@ -120,7 +121,7 @@ func createDummy() {
 
 	demoUser1 := &models.User{Name: "Poe Dameron", Email: "wisedog@demo.com", Password: "demo",
 		HashedPassword: bcryptPassword, Language: "en", Region: "US", LastLoginAt: time.Now(),
-		Roles: models.RoleManager, Photo: "poe_160x160",
+		Role: models.RoleManager, Photo: "poe_160x160",
 		Location: "D'Qar", Notes: "Red squad, blue squad, take my lead.",
 	}
 	Database.NewRecord(demoUser1)
@@ -133,14 +134,14 @@ func createDummy() {
 	Database.AutoMigrate(&models.Project{})
 
 	prj := models.Project{
-		Name:        "Koblentz",
+		Name:        "Sample Project",
 		Status:      1,
 		Description: "A sample project. If you are used to Ladybug, remove this project",
 		Prefix:      "TC",
 		Users:       []models.User{*demoUser, *demoUser1},
 	}
 	prj1 := models.Project{
-		Name:        "bremen",
+		Name:        "Another Sample Project",
 		Status:      1,
 		Description: "Second sample project. If you are used to Ladybug, remove this project",
 		Prefix:      "wise",
@@ -433,40 +434,3 @@ func createDummy() {
 		Database.Create(&t)
 	}
 }
-
-/*
-func (c *GormController) Begin() revel.Result {
-	txn := Database.Begin()
-	if txn.Error != nil {
-		panic(txn.Error)
-	}
-	c.Tx = txn
-	//revel.INFO.Println("c.Tx init", c.Tx)
-	return nil
-}
-
-func (c *GormController) Commit() revel.Result {
-	if c.Tx == nil {
-		return nil
-	}
-	c.Tx.Commit()
-	if err := c.Tx.Error; err != nil && err != sql.ErrTxDone {
-		panic(err)
-	}
-	c.Tx = nil
-	//revel.INFO.Println("c.Tx commited (nil)")
-	return nil
-}
-
-func (c *GormController) Rollback() revel.Result {
-	if c.Tx == nil {
-		return nil
-	}
-	c.Tx.Rollback()
-	if err := c.Tx.Error; err != nil && err != sql.ErrTxDone {
-		panic(err)
-	}
-	c.Tx = nil
-	return nil
-}
-*/

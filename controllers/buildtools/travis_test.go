@@ -23,11 +23,11 @@ func setup() {
 	if err != nil {
 		fmt.Println("Database initialization is failed.")
 	}
-	//defer Database.Close()
 }
 
 func tearDown() {
 	fmt.Println("Tear Down Testing for package buildtools...")
+	//Database.Close()
 }
 
 func TestMain(m *testing.M) {

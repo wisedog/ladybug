@@ -4,11 +4,12 @@ import (
 	"time"
 )
 
+// Constants for Role
 const (
-	RoleAdmin = 1 + iota
-	RoleManager
-	RoleUser
-	RoleGuest
+	RoleAdmin   = 1 + iota
+	RoleManager // Manager role for one or more projects
+	RoleUser    // Just a user
+	RoleGuest   // Not used now
 )
 
 // User is a model represents a user
@@ -25,7 +26,7 @@ type User struct {
 	Message        string
 	Location       string
 	Photo          string // TODO URL
-	Roles          int
+	Role           int
 	Notes          string
 	//TODO Roles          []Role
 	//TODO link of email, homepage, FB, TW, G+ ....

@@ -108,10 +108,12 @@
                 </li>
               </ul>
             </li>
+            {{if eq .User.Role 1}}
             <!-- Control Sidebar Toggle Button -->
             <li>
               <a href="#" ><i class="fa fa-gears"></i></a>
             </li>
+            {{end}}
           </ul>
         </div>
       </nav>
@@ -212,7 +214,16 @@
               <li><a href="#">Testcases </a></li>
               <li><a href="#">Test Execution</a></li>
             </ul>
-          </li>{{end}}
+          </li>
+          {{if or (eq .User.Role 1) (eq .User.Role 2) }}
+          <li {{if eq .Active_idx 8}}class="active"{{end}}>
+            <a href='/project/{{.ProjectName}}/setting'>
+              <i class="fa fa-gears"></i>
+              <span>Project Setting</span>
+            </a>
+          </li>
+          {{end}}
+          {{end}}
         </ul><!-- /.sidebar-menu -->        
         {{end}}
       </section>

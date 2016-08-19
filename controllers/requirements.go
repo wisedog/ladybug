@@ -375,8 +375,19 @@ func UnlinkTestcaseRelation(c *interfacer.AppContext, w http.ResponseWriter, r *
 	// Find related Test Cases with this requirement
 	//var reqs []models.Requirement
 	if err := c.Db.Model(&req).Association("RelatedTestCases").Delete(targetTestCase); err.Error != nil {
-		log.Error("Requirement", "type", "database", "msg ", err.Error)
+		log.Error("Requirement", "type", "database", "msg ", err.Error.Error())
 		return RenderJSONWithStatus(w, Resp{Msg: "Error while delete linking"}, http.StatusInternalServerError)
 	}
+
+	// TODO tc_req_relation
+	// TODO add to history
+
 	return RenderJSONWithStatus(w, Resp{Msg: "OK"}, http.StatusOK)
+}
+
+// LinkTestcaseRelation links a requirement and a related testcase
+// Return in JSON
+func LinkTestcaseRelation(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) error {
+	// add tc_req_relation
+	return nil
 }

@@ -1,5 +1,7 @@
 {{define "title"}}View Requirement{{ end }}
-{{define "more_style"}}{{end}}
+{{define "more_style"}}
+<link href="/public/libs/pnotify/dist/pnotify.css" media="all" rel="stylesheet" type="text/css" />
+{{end}}
 {{define "content"}}
 <div class="content-wrapper">
   <!-- Content header -->
@@ -94,6 +96,10 @@
                     </td>
                   </tr>
                   {{end}}
+                  <tr>
+                    <td colspan="6"><center><a href="#"><i class="fa fa-plus"></i> Relationship</a></center>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -116,16 +122,30 @@
 </div><!-- /.content-wrapper -->
 {{end}}
 {{define "more_scripts"}}
+<script type="text/javascript" src="/public/libs/pnotify/dist/pnotify.js"></script>
 <script>
-function unlink(testcase_id, req_id){
-  // Post  
-  $.post( "/project/{{.ProjectName}}/req/unlink", {"req_id" : req_id, "tc_id" : testcase_id}, 
-    function() {
-      $("#tr-" + testcase_id).fadeOut(300, function(){ $(this).remove();});
-  })
-  .fail(function() {
-    alert( "error" );
-  });
-} 
+  function unlink(testcase_id, req_id){
+    PNotify.prototype.options.styling = "bootstrap3";
+    PNotify.prototype.options.delay = 1500;
+    // Post  
+    $.post( "/project/{{.ProjectName}}/req/unlink", {"req_id" : req_id, "tc_id" : testcase_id}, 
+      function(data) {
+        $("#tr-" + testcase_id).fadeOut(300, function(){ $(this).remove();});
+        var obj = jQuery.parseJSON(data);
+        new PNotify({
+            title: 'Success',
+            text: obj.msg,
+            type: 'success'
+        });
+    })
+    .fail(function(data) {
+      var obj = jQuery.parseJSON(data);
+      new PNotify({
+            title: 'Fail!',
+            text: obj.msg,
+            type: 'error'
+        });
+    });
+  } 
 </script>
 {{end}}
