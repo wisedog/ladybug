@@ -1,49 +1,49 @@
 package errors
 
-import(
-  "net/http"
+import (
+	"net/http"
 
-  log "gopkg.in/inconshreveable/log15.v2"
+	log "gopkg.in/inconshreveable/log15.v2"
 )
 
 type HttpError struct {
-  Status      int
-  // Description of HttpError
-  Desc string
+	Status int
+	// Description of HttpError
+	Desc string
 }
 
 func (h HttpError) Error() string {
-  if h.Desc == "" {
-    return http.StatusText(h.Status)
-  }
-  return h.Desc
+	if h.Desc == "" {
+		return http.StatusText(h.Status)
+	}
+	return h.Desc
 }
 
 func HandleError(w http.ResponseWriter, r *http.Request, err error) {
-  if err == nil {
-    return
-  }
+	if err == nil {
+		return
+	}
 
-  if err, ok := err.(HttpError); ok {
-    log.Error("Error Status", "type" , err.Status)
-    http.Error(w, err.Error(), err.Status)
-    return
-  }
+	if err, ok := err.(HttpError); ok {
+		log.Error("Error Status", "type", err.Status)
+		http.Error(w, err.Error(), err.Status)
+		return
+	}
 
-  http.Error(w, "Sorry, an error occurred.", http.StatusInternalServerError)
+	http.Error(w, "Sorry, an error occurred.", http.StatusInternalServerError)
 
-  /*                                                                              
-  if err, ok := err.(validationFailure); ok {                                   
-          renderJSON(w, err, http.StatusBadRequest)                             
-          return                                                                
-  }                                                                             
-                                                                                
-  if isErrSqlNoRows(err) {                                                      
-          http.NotFound(w, r)                                                   
-          return                                                                
-  }                                                                             
-                                                                                
-  logError(err)                                                                 
-                                                                                
-  http.Error(w, "Sorry, an error occurred", http.StatusInternalServerError)*/
+	/*
+	  if err, ok := err.(validationFailure); ok {
+	          renderJSON(w, err, http.StatusBadRequest)
+	          return
+	  }
+
+	  if isErrSqlNoRows(err) {
+	          http.NotFound(w, r)
+	          return
+	  }
+
+	  logError(err)
+
+	  http.Error(w, "Sorry, an error occurred", http.StatusInternalServerError)*/
 }

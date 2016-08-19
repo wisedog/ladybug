@@ -27,25 +27,6 @@ func DesignIndex(c *interfacer.AppContext, w http.ResponseWriter, r *http.Reques
 		log.Error("TestDesign", "type", "database", "msg", err.Error.Error())
 		return errors.HttpError{Status: http.StatusInternalServerError, Desc: "Project is not found in TestDesign.Index"}
 	}
-	/*
-		var nodes []models.JSTreeNode
-
-		for _, n := range sections {
-			var nodeType string
-			var parent string
-			if n.RootNode == true {
-				nodeType = "root"
-				parent = "#"
-			} else {
-				nodeType = "default"
-				parent = strconv.Itoa(n.ParentsID)
-			}
-			childNode := models.JSTreeNode{Id: strconv.Itoa(n.ID), Text: n.Title, Type: nodeType, Parent: parent}
-			nodes = append(nodes, childNode)
-		}
-		treedataByte, _ := json.Marshal(nodes)
-		treedata := string(treedataByte)
-	*/
 	treedata := getJSTreeNodeData(sections)
 
 	items := map[string]interface{}{
@@ -96,10 +77,5 @@ func GetAllTestCases(c *interfacer.AppContext, w http.ResponseWriter, r *http.Re
 	if err != nil {
 		return errors.HttpError{Status: http.StatusInternalServerError, Desc: "Json Marshalling failed"}
 	}
-	// TODO define status and content struct and serialized
-	/*w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
-
-	return nil*/
 	return RenderJSONWithStatus(w, string(js), http.StatusOK)
 }
