@@ -1,6 +1,7 @@
 {{define "title"}}Test Execution{{ end }}
 {{define "more_style"}}
-<link rel="stylesheet" type="text/css" href="/public/libs/toastr/toastr.min.css">
+<link href="/public/libs/pnotify/dist/pnotify.css" media="all" rel="stylesheet" type="text/css" />
+<link href="/public/libs/pnotify/dist/pnotify.brighttheme.css" media="all" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" type="text/css" href="/public/libs/ladda/dist/ladda-themeless.min.css">
 {{end}}
 {{define "content"}}
@@ -102,29 +103,13 @@
 </div><!-- /.content-wrapper -->
 {{end}}
 {{define "more_scripts"}}
-<script src="/public/libs/toastr/toastr.min.js"> </script>
+<script type="text/javascript" src="/public/libs/pnotify/dist/pnotify.js"></script>
 <script src="/public/libs/ladda/dist/spin.min.js"></script>
 <script src="/public/libs/ladda/dist/ladda.min.js"></script>
 
 <script>
-toastr.options = {
-  "closeButton": false,
-  "debug": false,
-  "newestOnTop": false,
-  "progressBar": false,
-  "positionClass": "toast-top-center",
-  "preventDuplicates": true,
-  "onclick": null,
-  "showDuration": "300",
-  "hideDuration": "1000",
-  "timeOut": "3000",
-  "extendedTimeOut": "1000",
-  "showEasing": "swing",
-  "hideEasing": "linear",
-  "showMethod": "fadeIn",
-  "hideMethod": "fadeOut"
-}
-
+  PNotify.prototype.options.styling = "brighttheme";
+  PNotify.prototype.options.delay = 1500;
 function goNext(){
   $('.tab-item.active').next().children("a").trigger("click");
 }
@@ -233,9 +218,17 @@ $(document).ready(function(){
         $('#tabitem-' + id).addClass('tabitem-fail');
       }
       if(didPass){
-        toastr["success"]("The test case is passed!", "Pass");
+        new PNotify({
+          title: 'Success',
+          text: 'The test case is passed!',
+          type: 'success'
+        });
       }else{
-        toastr["error"]("The test case is failed!", "Fail");
+        new PNotify({
+          title: 'Fail',
+          text: 'The test case is failed!',
+          type: 'error'
+       });
       }
       
       goNext();
