@@ -83,7 +83,7 @@ func UserUpdateProfile(c *interfacer.AppContext, w http.ResponseWriter, r *http.
 
 	if c.User.ID != idInt {
 		// if user does not have the authorization to modify data, return unauth
-		if c.User.Roles != models.RoleAdmin {
+		if c.User.Role != models.RoleAdmin {
 			return errors.HttpError{Status: http.StatusUnauthorized, Desc: "Unauthorized update user's profile"}
 		}
 	}
