@@ -180,35 +180,41 @@ $(document).ready(function() {
             items.push("<thead><tr><th><input type='checkbox' id='select-all'></input>");
             items.push("</th><th>#</th><th>Title</th><th>Status</th><th>Priority</th><th>Category</th></tr></thead>");
             items.push("<tbody>");
-            $.each(data, function(key, val){
-              var alter = "";
+            var objList = jQuery.parseJSON(data);
+            if(objList.length == 0){
+              items.push("<tr><td colspan='6'></td></tr>");
+            }
+            else{
+              $.each(objList, function(key, val){
+                var alter = "";
 
-              // Render span element when already selected testcase is met
-              if(selected_item.indexOf('cb'+ val.ID) == -1){
-                // disable checkbox for inactive, close testcase
-                var disableflag = "";
-                var activeClass = "";
-                if(val.Status == 2 || val.Status == 3){
-                  disableflag = "disabled";
+                // Render span element when already selected testcase is met
+                if(selected_item.indexOf('cb'+ val.ID) == -1){
+                  // disable checkbox for inactive, close testcase
+                  var disableflag = "";
+                  var activeClass = "";
+                  if(val.Status == 2 || val.Status == 3){
+                    disableflag = "disabled";
+                  }
+                  alter = "<input type='checkbox' class='tc-cb' id='cb" + val.ID + "' + " + disableflag +"></input>";
                 }
-                alter = "<input type='checkbox' class='tc-cb' id='cb" + val.ID + "' + " + disableflag +"></input>";
-              }
-              else{
-                alter = "<span class='fa fa-check'></span>";
-              }
-                items.push("<tr>"+ 
-                  "<td>" + alter + "</td>" + 
-                  "<td>"+ val.ID + "</td>" + 
-                  "<td><a href='/project/{{.ProjectName}}/case/"+ val.ID + "'>" + 
-                     val.Title + "</a></td>" + 
-                  "<td>" + getStatusString(val.Status) + "</td>" + 
-                  "<td>" + getPriorityString(val.Priority) + "</td>" +
-                  "<td>" + val.Category.Name + "</td>" +
-                  "</tr>");
-                  
-            $('#tc_list').html(items.join(""));
-            });
-            items.push("</tbody></table></div>");
+                else{
+                  alter = "<span class='fa fa-check'></span>";
+                }
+                  items.push("<tr>"+ 
+                    "<td>" + alter + "</td>" + 
+                    "<td>"+ val.ID + "</td>" + 
+                    "<td><a href='/project/{{.ProjectName}}/case/"+ val.ID + "'>" + 
+                      val.Title + "</a></td>" + 
+                    "<td>" + getStatusString(val.Status) + "</td>" + 
+                    "<td>" + getPriorityString(val.Priority) + "</td>" +
+                    "<td>" + val.Category.Name + "</td>" +
+                    "</tr>");
+                    
+              $('#tc_list').html(items.join(""));
+              });
+              items.push("</tbody></table></div>");
+            }
           }
         }); // end of getJSON
     }); // end of testtree click event binding
