@@ -230,7 +230,6 @@ func Dashboard(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request)
 	currentCoverage, _ := getCurrentReqTestCaseCoverage(c, prj.ID)
 
 	periodCoverage, _ := getPeriodReqTestCaseCoverage(c, prj.ID, currentCoverage)
-	fmt.Println("AA", periodCoverage)
 
 	items := map[string]interface{}{
 		"Project":         prj,

@@ -61,7 +61,7 @@ func PlanAdd(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) e
 			nodeType = "default"
 			parent = strconv.Itoa(n.ParentsID)
 		}
-		childNode := models.JSTreeNode{Id: strconv.Itoa(n.ID), Text: n.Title, Type: nodeType, Parent: parent}
+		childNode := models.JSTreeNode{ID: strconv.Itoa(n.ID), Text: n.Title, Type: nodeType, Parent: parent}
 		nodes = append(nodes, childNode)
 	}
 	treedataByte, _ := json.Marshal(nodes)

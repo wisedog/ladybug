@@ -62,8 +62,8 @@ func (j Jenkins) AddJenkinsBuilds(url string, projectID int, db *gorm.DB) error 
 	job := models.Build{
 		Name:         name,
 		Description:  dat["description"].(string),
-		Project_id:   projectID,
-		BuildUrl:     dat["url"].(string),
+		ProjectID:    projectID,
+		BuildURL:     dat["url"].(string),
 		Status:       status,
 		ToolName:     "jenkins",
 		BuildItemNum: len(builds),
@@ -129,11 +129,11 @@ func (j Jenkins) AddJenkinsBuilds(url string, projectID int, db *gorm.DB) error 
 
 		elem := models.BuildItem{
 			BuildProjectID:  job.ID,
-			IdByTool:        idbytool,
+			IDByTool:        idbytool,
 			DisplayName:     displayname,
 			FullDisplayName: name + " " + displayname,
-			ItemUrl:         url,
-			ArtifactsUrl:    artifactsurl,
+			ItemURL:         url,
+			ArtifactsURL:    artifactsurl,
 			ArtifactsName:   artifactsname,
 			Result:          result,
 			Toolname:        "jenkins",

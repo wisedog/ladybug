@@ -141,7 +141,7 @@ func BuildsSaveProject(c *interfacer.AppContext, w http.ResponseWriter, r *http.
 		return errors.HttpError{Status: http.StatusInternalServerError, Desc: "Not found database select project"}
 	}
 
-	build.Project_id = prj.ID
+	build.ProjectID = prj.ID
 	build.ToolName = "manual"
 
 	c.Db.NewRecord(build)
@@ -238,7 +238,7 @@ func BuildsSaveItem(c *interfacer.AppContext, w http.ResponseWriter, r *http.Req
 	fullDisplayName := build.Name + " " + displayName
 
 	bi := models.BuildItem{Toolname: "manual", BuildProjectID: build.ID, BuildAt: time.Now(),
-		Seq: largest.Seq + 1, TimeStamp: 0, Status: 1, IdByTool: idByTool,
+		Seq: largest.Seq + 1, TimeStamp: 0, Status: 1, IDByTool: idByTool,
 		DisplayName: displayName, FullDisplayName: fullDisplayName,
 	}
 

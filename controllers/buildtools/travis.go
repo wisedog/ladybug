@@ -79,8 +79,8 @@ func (t Travis) AddTravisBuilds(url string, projectID int, db *gorm.DB) error {
 	job := models.Build{
 		Name:         repo.Repo.Slug,
 		Description:  repo.Repo.Description,
-		Project_id:   projectID,
-		BuildUrl:     url,
+		ProjectID:    projectID,
+		BuildURL:     url,
 		Status:       status,
 		ToolName:     "Travis",
 		BuildItemNum: len(buildsNum),
@@ -114,12 +114,12 @@ func (t Travis) AddTravisBuilds(url string, projectID int, db *gorm.DB) error {
 		displayName := "#" + b.Builds[0].Number
 		elem := models.BuildItem{
 			BuildProjectID:  job.ID,
-			IdByTool:        buildid,
-			IdByToolInt:     b.Builds[0].ID,
+			IDByTool:        buildid,
+			IDByToolInt:     b.Builds[0].ID,
 			DisplayName:     displayName,
 			FullDisplayName: job.Name + " " + displayName,
-			ItemUrl:         url + "/builds/" + buildid,
-			ArtifactsUrl:    "",
+			ItemURL:         url + "/builds/" + buildid,
+			ArtifactsURL:    "",
 			ArtifactsName:   "",
 			Result:          b.Builds[0].State,
 			Toolname:        "Travis",

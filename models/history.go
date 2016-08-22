@@ -30,7 +30,7 @@ type HistoryTestCaseUnit struct {
 type History struct {
 	BaseModel
 
-	ChangesJson string `sql:"size:1000"`
+	ChangesJSON string `sql:"size:1000"`
 	Changes     []HistoryTestCaseUnit
 	User        User
 	UserID      int

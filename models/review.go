@@ -1,14 +1,12 @@
 package models
 
-import (
-	"time"
-)
-
+// Review type
 const (
 	ReviewTestcase = 1 + iota
 	ReviewBug
 )
 
+// Review status
 const (
 	ReviewStatusReady = 1 + iota
 	ReviewStatusInProgress
@@ -16,8 +14,10 @@ const (
 	ReviewStatusDone
 )
 
+// Review represents review of a test case
 type Review struct {
-	ID          int
+	BaseModel
+
 	Status      int    // Ready,In progress, Reject, Done
 	Category    int    // from issue management system or inhouse testcase review
 	Comment     string `sql:"size:500;"` // description of the issue
@@ -26,8 +26,4 @@ type Review struct {
 	ToUserID    int
 	FromUser    User
 	FromUserID  int
-
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
 }

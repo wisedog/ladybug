@@ -71,7 +71,7 @@ func CaseView(c *interfacer.AppContext, w http.ResponseWriter, r *http.Request) 
 	// making status changement messages
 	for i := 0; i < len(histories); i++ {
 		var res []models.HistoryTestCaseUnit
-		json.Unmarshal([]byte(histories[i].ChangesJson), &res)
+		json.Unmarshal([]byte(histories[i].ChangesJSON), &res)
 
 		// make message
 		makeHistoryMessage(&res)
@@ -397,7 +397,7 @@ func findDiff(c *interfacer.AppContext, existCase, newCase *models.TestCase, not
 	}
 
 	result, _ := json.Marshal(changes)
-	his.ChangesJson = string(result)
+	his.ChangesJSON = string(result)
 
 	c.Db.NewRecord(his)
 	c.Db.Create(&his)
