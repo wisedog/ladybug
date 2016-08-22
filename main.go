@@ -172,6 +172,7 @@ func main() {
 	project.HandleFunc("/{projectName}/testplan", authHandler(ctx, controllers.PlanIndex)).Methods("GET")
 	project.HandleFunc("/{projectName}/exec", authHandler(ctx, controllers.ExecIndex)).Methods("GET")
 	project.HandleFunc("/{projectName}/milestone", authHandler(ctx, controllers.MilestoneIndex)).Methods("GET")
+	project.HandleFunc("/{projectName}/setting", authHandler(ctx, controllers.SettingGeneral)).Methods("GET")
 
 	// section
 	section := project.PathPrefix("/{projectName}/section/").Subrouter()
@@ -242,6 +243,16 @@ func main() {
 	milestone := project.PathPrefix("/{projectName}/milestone").Subrouter()
 	milestone.HandleFunc("/", authHandler(ctx, controllers.MilestoneIndex)).Methods("GET")
 	milestone.HandleFunc("/add", authHandler(ctx, controllers.MilestoneAdd)).Methods("GET")
+
+	// settings pages for superadmin, project manager
+	projectSetting := project.PathPrefix("/{projectName}/setting").Subrouter()
+	projectSetting.HandleFunc("/", authHandler(ctx, controllers.SettingGeneral)).Methods("GET")
+	projectSetting.HandleFunc("/general", authHandler(ctx, controllers.SettingGeneral)).Methods("GET")
+
+	// settings pages for super admin
+	r.HandleFunc("/admin", authHandler(ctx, controllers.AdminIndex)).Methods("GET")
+	admin := r.PathPrefix("/admin").Subrouter()
+	admin.HandleFunc("/", authHandler(ctx, controllers.AdminIndex)).Methods("GET")
 
 	r.PathPrefix("/public/").Handler(http.StripPrefix("/public/",
 		http.FileServer(http.Dir("public/"))))

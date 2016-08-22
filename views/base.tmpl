@@ -154,17 +154,25 @@
           <li class="header">Main Navigation</li>
           {{if .ShowUserMenu}}
           <li {{if eq .Active_idx 1}}class="active"{{end}}>
-            <a href='/project/'>
+            <a href='#'>
               <i class="fa fa-dashboard"></i>
               <span>Profile</span>
             </a>
           </li>
-          <li {{if eq .Active_idx 1}}class="active"{{end}}>
-            <a href='/project/'>
+          <li {{if eq .Active_idx 2}}class="active"{{end}}>
+            <a href='#'>
               <i class="fa fa-dashboard"></i>
               <span>Notification</span>
             </a>
           </li>
+          {{else if .ShowAdminSetting}}
+          <li {{if eq .Active_idx 1}}class="active"{{end}}>
+            <a href='/project/{{.ProjectName}}/setting/general'>
+              <i class="fa fa-dashboard"></i>
+              <span>General</span>
+            </a>
+          </li>
+
           {{else}}
           <li {{if eq .Active_idx 1}}class="active"{{end}}>
             <a href='/project/{{.ProjectName}}'>
@@ -234,7 +242,7 @@
   <footer class="main-footer">
     <!-- To the right -->
     <div class="pull-right hidden-xs">
-      Hello~
+      Contribution is always welcomed!
     </div>
     <!-- Default to the left -->
     <strong>Copyright &copy; 2016 <a href="https://github.com/wisedog/ladybug">Project Ladybug</a>.</strong> All rights reserved.

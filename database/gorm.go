@@ -102,6 +102,7 @@ func createDummy() {
 	Database.DropTable(&models.Milestone{})
 	Database.DropTable(&models.TcReqRelationHistory{})
 	Database.DropTable(&models.ReqType{})
+	Database.DropTable(&models.Role{})
 
 	// Create dummy users
 	Database.AutoMigrate(&models.User{})
@@ -112,20 +113,29 @@ func createDummy() {
 	demoUser := &models.User{
 		Name: "Rey", Email: "demo@demo.com", Password: "demo",
 		HashedPassword: bcryptPassword, Language: "en", Region: "US",
-		LastLoginAt: time.Now(), Role: models.RoleAdmin,
+		LastLoginAt: time.Now(), Role: models.RoleManager,
 		Photo: "rey_160x160", Location: "Jakku",
 		Notes: "I know all about waiting. For my family. They'll be back, one day.",
 	}
 	Database.NewRecord(demoUser) // => returns `true` if primary key is blank
 	Database.Create(&demoUser)
 
-	demoUser1 := &models.User{Name: "Poe Dameron", Email: "wisedog@demo.com", Password: "demo",
+	demoUser1 := &models.User{Name: "Poe Dameron", Email: "poe@demo.com", Password: "demo",
 		HashedPassword: bcryptPassword, Language: "en", Region: "US", LastLoginAt: time.Now(),
 		Role: models.RoleManager, Photo: "poe_160x160",
 		Location: "D'Qar", Notes: "Red squad, blue squad, take my lead.",
 	}
 	Database.NewRecord(demoUser1)
 	Database.Create(&demoUser1)
+
+	adminUser := &models.User{Name: "Darth Vader", Email: "vader@demo.com", Password: "demo",
+		HashedPassword: bcryptPassword, Language: "en", Region: "US", LastLoginAt: time.Now(),
+		Role: models.RoleAdmin, Photo: "vader_160x160",
+		Location: "Tatooine", Notes: "I'm your father",
+	}
+
+	Database.NewRecord(adminUser)
+	Database.Create(&adminUser)
 
 	//Database.Model(tab).AddUniqueIndex("idx_user__gmail", "gmail")
 	//Database.Model(tab).AddUniqueIndex("idx_user__pu_mail", "pu_mail")
@@ -235,7 +245,7 @@ func createDummy() {
 	b := []*models.Build{
 		&models.Build{Name: "Millenium Falcon",
 			Description: "Modeling files for Millenium Falcon",
-			Project_id:  prj.ID, ToolName: "manual",
+			ProjectID:   prj.ID, ToolName: "manual",
 		},
 	}
 
@@ -432,5 +442,19 @@ func createDummy() {
 	for _, t := range reqtypes {
 		Database.NewRecord(t)
 		Database.Create(&t)
+	}
+
+	Database.AutoMigrate(&models.Role{})
+	roles := []*models.Role{
+		&models.Role{ProjectID: prj.ID, UserID: demoUser.ID, UserRole: models.RoleManager},
+		&models.Role{ProjectID: prj.ID, UserID: demoUser1.ID, UserRole: models.RoleUser},
+		&models.Role{ProjectID: prj1.ID, UserID: demoUser1.ID, UserRole: models.RoleManager},
+		&models.Role{ProjectID: prj1.ID, UserID: demoUser.ID, UserRole: models.RoleUser},
+		&models.Role{ProjectID: 0, UserID: adminUser.ID, UserRole: models.RoleAdmin},
+	}
+
+	for _, v := range roles {
+		Database.NewRecord(v)
+		Database.Create(&v)
 	}
 }

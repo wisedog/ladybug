@@ -1,0 +1,87 @@
+{{define "title"}}Project Setting{{ end }}
+{{define "more_style"}}
+{{end}}
+{{define "content"}}
+<div class="content-wrapper">
+  <!-- Content header -->
+  <section class="content-header">
+	  <h1>
+	    Setting
+	    <small>manage your project</small>
+	  </h1>
+	  <ol class="breadcrumb">
+	    <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+	    <li class="active">Project Setting</li>
+	  </ol>
+	</section>
+  <!-- Main content -->
+  <section class="content">
+		<div class="row">
+			<div class="col-md-10">
+			<!-- Custom Tabs -->
+				<div class="nav-tabs-custom">
+					<ul class="nav nav-tabs">
+						<li class="active"><a href="#tab_1" data-toggle="tab">General</a></li>
+						<li><a href="#tab_2" data-toggle="tab">Access Management</a></li>
+						<li><a href="#tab_3" data-toggle="tab">Issue Tracker</a></li>
+						<li><a href="#tab_4" data-toggle="tab">Delete Project</a></li>
+					</ul>
+					<div class="tab-content">
+						<div class="tab-pane active" id="tab_1">
+							<div class="row top7 vertical-align">
+								<div class="col-md-2">
+									Project name
+								</div>
+								<div class="col-md-3">
+									<input class="form-control" value="{{.Project.Name}}" disabled></input>
+								</div>
+							</div><!-- .row-->
+							<div class="row top7">
+								<div class="col-md-2">
+									Description
+								</div>
+							</div><!-- .row -->
+							<div class="row">
+								<div class="col-md-8">
+									<textarea class="form-control" rows="4" id="description">{{.Project.Description}}</textarea>
+								</div>
+							</div><!-- .row -->
+							<div class="row top7 vertical-align">
+								<div class="col-md-2">
+									Public?
+								</div>
+								<div class="col-md-4">
+									<div class="checkbox">
+										<label>
+											<input type="checkbox">(Guest can view this project)
+										</label>
+									</div>
+								</div>
+							</div><!-- .row -->
+							<div class="row top17">
+								<div class="col-md-2">
+									<button id="save-general" class="btn btn-flat btn-primary btn-sm">Save</button>
+								</div>
+							</div><!-- .row -->
+						</div>
+						<!-- /.tab-pane -->
+						<div class="tab-pane" id="tab_2">
+							<strong>Not Implemented</strong>
+						</div>
+						<!-- /.tab-pane -->
+						<div class="tab-pane" id="tab_3">
+							<strong>Not Implemented</strong>
+						</div><!-- /.tab-pane -->
+						<div class="tab-pane" id="tab_4">
+							<strong>Not Implemented</strong>
+						</div><!-- /.tab-pane -->
+					</div><!-- /.tab-content -->
+				</div><!-- nav-tabs-custom -->
+			</div><!-- /.col -->
+		</div><!-- .row -->
+    
+  </section>
+</div><!-- /.content-wrapper -->
+{{end}}
+{{define "more_scripts"}}
+{{end}}
